@@ -1,10 +1,27 @@
+import { Navbar } from "@/components/landing/navbar";
+import { HeroSection } from "@/components/landing/hero-section";
+import { HowItWorksSection } from "@/components/landing/how-it-works-section";
+import { DifferenceSection } from "@/components/landing/difference-section";
+import { DualTabsSection } from "@/components/landing/dual-tabs-section";
+import { FollowUpSection } from "@/components/landing/follow-up-section";
+import { FaqSection } from "@/components/landing/faq-section";
+import { CtaSection } from "@/components/landing/cta-section";
+import { Footer } from "@/components/landing/footer";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-background text-foreground">
-      <h1 className="text-4xl font-bold tracking-tight">Adoptanet</h1>
-      <p className="mt-4 text-muted-foreground">
-        Plataforma web de adopción de animales rescatados en el Perú
-      </p>
-    </main>
+    <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-accent selection:text-accent-foreground">
+      <Navbar />
+      <main className="flex-1">
+        <HeroSection />
+        <HowItWorksSection />
+        <DifferenceSection />
+        <DualTabsSection />
+        <FollowUpSection />
+        <FaqSection />
+        <CtaSection />
+      </main>
+      <Footer />
+    </div>
   );
 }
