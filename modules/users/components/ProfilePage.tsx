@@ -22,6 +22,8 @@ export function ProfilePage() {
   const {
     user,
     role,
+    adopterStatus,
+    setAdopterStatusMode,
     isLoading,
     feedback,
     setMockRole,
@@ -42,7 +44,13 @@ export function ProfilePage() {
   return (
     <div className="w-full max-w-5xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
       {/* Dev Mode Switcher */}
-      <DevRoleSwitcher currentRole={role} onRoleChange={setMockRole} />
+      <DevRoleSwitcher
+        currentRole={role}
+        onRoleChange={setMockRole}
+        adopterStatus={adopterStatus}
+        onAdopterStatusChange={setAdopterStatusMode}
+      />
+
 
       {/* Global Feedback Banner */}
       {feedback.message && (

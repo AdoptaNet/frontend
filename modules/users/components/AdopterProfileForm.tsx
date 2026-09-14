@@ -10,6 +10,8 @@ import {
   Loader2,
   Phone,
   MapPin,
+  ArrowRight,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Card,
@@ -22,7 +24,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+
 import { OptionToggleGroup } from "./OptionToggleGroup";
 import type {
   AdopterProfile,
@@ -86,6 +90,13 @@ const PERU_DEPARTMENTS = [
   "Callao",
 ];
 
+const SECTIONS = [
+  { id: 1, label: "1. Vivienda", fullLabel: "Vivienda y Entorno", icon: Home },
+  { id: 2, label: "2. Convivencia", fullLabel: "Hogar y Convivencia", icon: Users },
+  { id: 3, label: "3. Rutina", fullLabel: "Rutina y Recursos", icon: Clock },
+  { id: 4, label: "4. Preferencias", fullLabel: "Preferencias de Mascota", icon: Sparkles },
+];
+
 interface AdopterProfileFormProps {
   profile: AdopterProfile | null | undefined;
   onSave: (dto: UpdateAdopterProfileDto) => Promise<void>;
@@ -97,6 +108,8 @@ export function AdopterProfileForm({
   onSave,
   isLoading = false,
 }: AdopterProfileFormProps) {
+  const isNewProfile = !profile;
+
   const [formData, setFormData] = useState<UpdateAdopterProfileDto>({
     department: profile?.department || "Lima",
     zoneType: profile?.zoneType || ZoneType.URBAN_QUIET,
@@ -137,7 +150,7 @@ export function AdopterProfileForm({
     followUpAcceptance:
       profile?.followUpAcceptance || FollowUpAcceptance.FULLY_ACCEPT,
     adopterAgeRange: profile?.adopterAgeRange || AdopterAgeRange.TWENTY_SIX_TO_35,
-    phoneNumber: profile?.phoneNumber || "+51 987 654 321",
+    phoneNumber: profile?.phoneNumber || "987 654 321",
   });
 
   const [activeSection, setActiveSection] = useState<number>(1);
@@ -160,31 +173,79 @@ export function AdopterProfileForm({
     }
   };
 
+  const progressPercentage = Math.round((activeSection / 4) * 100);
+
   return (
     <Card className="bg-white border-line shadow-sm">
-      <CardHeader className="pb-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-ambar-500" />
-              Preferencias de Adopción y Cuestionario ML
-            </CardTitle>
-            <CardDescription className="text-sm text-tinta-600 mt-1 max-w-2xl">
-              Estas 27 variables alimentan el sistema de recomendación para encontrar animales con los que tendrás mayor afinidad y convivencia exitosa.
-            </CardDescription>
+      <CardHeader className="pb-4 space-y-4">
+        {/* Banner de Invitación o Encabezado de Edición */}
+        {isNewProfile ? (
+          <div className="bg-gradient-to-br from-[#FAF9F6] via-[#EDF5F2] to-[#FDFBF7] border border-verde-200 rounded-2xl p-4 sm:p-5 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-ambar-700 bg-ambar-100 px-3 py-1 rounded-full">
+                Paso 1 para adoptar
+              </span>
+              <Badge variant="reason" className="text-[11px] font-semibold">
+                Cuestionario pendiente
+              </Badge>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-tinta-900 tracking-tight">
+              ¿Con qué perro o gato te llevarías mejor?
+            </h2>
+            <p className="text-xs sm:text-sm text-tinta-600 mt-1 max-w-2xl leading-relaxed">
+              Completa este cuestionario de 4 secciones (~3 min) para que nuestro recomendador con IA analice tu espacio y rutina, encontrando a tus mascotas más afines.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-ambar-500" />
+                Preferencias de Adopción y Cuestionario ML
+              </CardTitle>
+              <CardDescription className="text-sm text-tinta-600 mt-1 max-w-2xl">
+                Tus respuestas están activas. Puedes navegar libremente entre secciones para actualizar cualquier dato.
+              </CardDescription>
+            </div>
+            <Badge variant="disponible" className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold self-start sm:self-auto shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Cuestionario completado (100%)
+            </Badge>
+          </div>
+        )}
+
+        {/* Barra de Progreso Motivacional */}
+        <div className="w-full bg-superficie-2 border border-line rounded-xl p-3.5 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-verde-700 bg-verde-200/60 px-2 py-0.5 rounded">
+                Sección {activeSection} de 4
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-tinta-900">
+                {SECTIONS[activeSection - 1].fullLabel}
+              </span>
+            </div>
+            <span className="text-xs font-bold text-ambar-700">
+              {isNewProfile ? `${progressPercentage}% completado` : "100% configurado"}
+            </span>
+          </div>
+
+          <div className="w-full h-2.5 bg-line rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ease-out ${
+                isNewProfile ? "bg-ambar-500" : "bg-verde-700"
+              }`}
+              style={{ width: `${isNewProfile ? progressPercentage : 100}%` }}
+            />
           </div>
         </div>
 
         {/* Section Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-3 border-b border-line">
-          {[
-            { id: 1, label: "1. Vivienda y Ubicación", icon: Home },
-            { id: 2, label: "2. Hogar y Convivencia", icon: Users },
-            { id: 3, label: "3. Rutina y Recursos", icon: Clock },
-            { id: 4, label: "4. Preferencias de Mascota", icon: Sparkles },
-          ].map((sec) => {
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-b border-line">
+          {SECTIONS.map((sec) => {
             const Icon = sec.icon;
             const isActive = activeSection === sec.id;
+            const isCompleted = activeSection > sec.id || !isNewProfile;
             return (
               <button
                 key={sec.id}
@@ -196,14 +257,18 @@ export function AdopterProfileForm({
                     : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-tinta-400"}`} />
+                {isCompleted && !isActive ? (
+                  <CheckCircle2 className="w-4 h-4 text-verde-700 shrink-0" />
+                ) : (
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-tinta-400"}`} />
+                )}
                 <span>{sec.label}</span>
               </button>
-
             );
           })}
         </div>
       </CardHeader>
+
 
       <form onSubmit={handleSubmit}>
         <CardContent className="pt-6 space-y-7">
@@ -659,19 +724,22 @@ export function AdopterProfileForm({
                 ]}
               />
 
-              {/* Teléfono */}
+              {/* Teléfono sin +51 */}
               <div className="space-y-1.5 pt-2">
                 <Label htmlFor="phoneNumber" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
                   <Phone className="w-4 h-4 text-verde-700" />
-                  Teléfono / WhatsApp de contacto para adopciones
+                  Teléfono / Celular de contacto
                 </Label>
+                <p className="text-xs text-tinta-400">
+                  Número móvil de 9 dígitos (se asume Perú +51) para coordinaciones de adopción por WhatsApp.
+                </p>
                 <Input
                   id="phoneNumber"
                   type="tel"
                   value={formData.phoneNumber || ""}
                   onChange={(e) => updateField("phoneNumber", e.target.value)}
-                  placeholder="Ej. +51 987 654 321"
-                  className="h-11 border-line max-w-sm text-sm"
+                  placeholder="Ej. 987 654 321"
+                  className="h-11 border-line max-w-sm text-sm tracking-wide font-medium"
                 />
               </div>
             </div>
@@ -681,40 +749,63 @@ export function AdopterProfileForm({
         <Separator className="bg-line mt-4" />
 
         <CardFooter className="py-4 bg-superficie-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-tinta-600">
-            <CheckCircle2 className="w-4 h-4 text-verde-700" />
-            <span>Todos los cambios se guardan en tu perfil de adoptante</span>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            {activeSection < 4 && (
+          {/* Botón Anterior o aviso */}
+          <div>
+            {activeSection > 1 ? (
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setActiveSection((prev) => Math.min(4, prev + 1))}
-                className="text-xs h-10"
+                onClick={() => setActiveSection((prev) => Math.max(1, prev - 1))}
+                className="text-xs h-10 gap-1.5 cursor-pointer"
               >
-                Siguiente sección
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Sección anterior
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-tinta-600">
+                <CheckCircle2 className="w-4 h-4 text-verde-700 shrink-0" />
+                <span>Las respuestas se guardan en tu perfil de adoptante</span>
+              </div>
+            )}
+          </div>
+
+          {/* Botón Siguiente o Finalizar */}
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            {activeSection < 4 ? (
+              <Button
+                type="button"
+                onClick={() => setActiveSection((prev) => Math.min(4, prev + 1))}
+                className="bg-verde-700 hover:bg-verde-hover text-white font-medium text-xs sm:text-sm h-10 gap-1.5 cursor-pointer"
+              >
+                <span>Avanzar a {SECTIONS[activeSection].label}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                disabled={isLoading || isSaving}
+                className={`font-semibold min-w-[200px] h-10 shadow-xs cursor-pointer ${
+                  isNewProfile
+                    ? "bg-ambar-500 hover:bg-[#D89102] text-verde-900 font-bold"
+                    : "bg-verde-700 hover:bg-verde-hover text-white"
+                }`}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : isNewProfile ? (
+                  "¡Finalizar y Activar Recomendaciones! 🎉"
+                ) : (
+                  "Guardar preferencias"
+                )}
               </Button>
             )}
-
-            <Button
-              type="submit"
-              disabled={isLoading || isSaving}
-              className="bg-verde-700 hover:bg-verde-hover text-white font-medium min-w-[180px] h-10"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                "Guardar preferencias"
-              )}
-            </Button>
           </div>
         </CardFooter>
       </form>
     </Card>
   );
 }
+

@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import type { UserProfile, UserRole } from "../models/user.types";
 import type { UpdateAdopterProfileDto } from "../models/adopter-profile.types";
 import type { UpdateShelterProfileDto } from "../models/shelter-profile.types";
-import { mockAdopterUser, mockShelterUser } from "../mocks/mock-users";
+import { mockAdopterUser, mockIncompleteAdopterUser, mockShelterUser } from "../mocks/mock-users";
 
 export interface FeedbackState {
   type: "success" | "error" | "info" | null;
@@ -13,6 +13,7 @@ export interface FeedbackState {
 
 export function useProfile() {
   const [activeRole, setActiveRole] = useState<UserRole>("adopter");
+  const [adopterStatus, setAdopterStatus] = useState<"completed" | "incomplete">("completed");
   const [adopterData, setAdopterData] = useState<UserProfile>(mockAdopterUser);
   const [shelterData, setShelterData] = useState<UserProfile>(mockShelterUser);
   const [feedback, setFeedback] = useState<FeedbackState>({ type: null, message: null });
@@ -31,6 +32,18 @@ export function useProfile() {
     setActiveRole(role);
     showFeedback("info", `Cambiado a vista de prueba: ${role === "adopter" ? "Adoptante" : "Albergue"}`);
   }, [showFeedback]);
+
+  const setAdopterStatusMode = useCallback((status: "completed" | "incomplete") => {
+    setAdopterStatus(status);
+    if (status === "incomplete") {
+      setAdopterData(mockIncompleteAdopterUser);
+      showFeedback("info", "Modo simulación: Adoptante nuevo (cuestionario pendiente)");
+    } else {
+      setAdopterData(mockAdopterUser);
+      showFeedback("info", "Modo simulación: Adoptante existente (cuestionario completado)");
+    }
+  }, [showFeedback]);
+
 
   const updatePersonalData = useCallback(async (data: { fullName?: string }) => {
     setIsLoading(true);
@@ -98,13 +111,23 @@ export function useProfile() {
     setIsLoading(true);
     try {
       await new Promise((res) => setTimeout(res, 500));
-      setAdopterData((prev) => ({
-        ...prev,
-        adopterProfile: prev.adopterProfile
-          ? { ...prev.adopterProfile, ...dto, updatedAt: new Date().toISOString() }
-          : null,
-      }));
-      showFeedback("success", "Preferencias de adopción guardadas correctamente");
+      setAdopterData((prev) => {
+        const base = prev.adopterProfile ?? {
+          id: "adp_new_" + Date.now(),
+          userId: prev.id,
+          createdAt: new Date().toISOString(),
+        };
+        return {
+          ...prev,
+          adopterProfile: {
+            ...base,
+            ...dto,
+            updatedAt: new Date().toISOString(),
+          } as import("../models/adopter-profile.types").AdopterProfile,
+        };
+      });
+      setAdopterStatus("completed");
+      showFeedback("success", "¡Excelente! Tus preferencias de adopción fueron guardadas con éxito.");
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +152,8 @@ export function useProfile() {
   return {
     user: currentUser,
     role: activeRole,
+    adopterStatus,
+    setAdopterStatusMode,
     isLoading,
     feedback,
     setMockRole,
@@ -140,3 +165,4 @@ export function useProfile() {
     updateShelterProfile,
   };
 }
+

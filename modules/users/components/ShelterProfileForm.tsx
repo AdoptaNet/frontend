@@ -257,9 +257,9 @@ export function ShelterProfileForm({
                 type="tel"
                 value={formData.phoneNumber || ""}
                 onChange={(e) => updateField("phoneNumber", e.target.value)}
-                placeholder="+51 912 345 678"
+                placeholder="912 345 678"
                 disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm"
+                className="h-11 border-line text-sm tracking-wide"
               />
             </div>
 

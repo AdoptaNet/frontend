@@ -70,10 +70,21 @@ export const mockAdopterUser: UserProfile = {
     adoptionMotivation: AdoptionMotivation.COMPANIONSHIP,
     followUpAcceptance: FollowUpAcceptance.FULLY_ACCEPT,
     adopterAgeRange: AdopterAgeRange.TWENTY_SIX_TO_35,
-    phoneNumber: "+51 987 654 321",
+    phoneNumber: "987 654 321",
     createdAt: "2026-01-15T11:00:00Z",
     updatedAt: "2026-03-01T14:20:00Z",
   },
+  shelterProfile: null,
+};
+
+export const mockIncompleteAdopterUser: UserProfile = {
+  id: "usr_adopter_new",
+  email: "nuevo.adoptante@ejemplo.com",
+  fullName: "Valeria Mendoza",
+  avatarUrl: null,
+  role: "adopter",
+  createdAt: "2026-03-10T09:00:00Z",
+  adopterProfile: null,
   shelterProfile: null,
 };
 
@@ -92,7 +103,7 @@ export const mockShelterUser: UserProfile = {
     address: "Av. Las Palmeras 450",
     city: "Los Olivos",
     department: "Lima",
-    phoneNumber: "+51 912 345 678",
+    phoneNumber: "912 345 678",
     contactEmail: "adopciones@huellitasfelices.org",
     description:
       "Refugio sin fines de lucro dedicado al rescate, rehabilitación y adopción responsable de perros y gatos en situación de abandono en Lima Norte.",
@@ -106,3 +117,4 @@ export const mockShelterUser: UserProfile = {
     updatedAt: "2026-02-10T16:45:00Z",
   },
 };
+
