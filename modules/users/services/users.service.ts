@@ -31,15 +31,34 @@ export const usersService = {
     return httpClient.patch<UserProfile>(API_ROUTES.USERS.AVATAR, formData);
   },
 
-  async changePassword(dto: ChangePasswordDto): Promise<ChangePasswordResponse> {
-    return httpClient.patch<ChangePasswordResponse>(API_ROUTES.USERS.PASSWORD, dto);
+  async removeAvatar(): Promise<UserProfile> {
+    return httpClient.delete<UserProfile>(API_ROUTES.USERS.AVATAR);
   },
 
-  async updateAdopterProfile(dto: UpdateAdopterProfileDto): Promise<AdopterProfile> {
-    return httpClient.put<AdopterProfile>(API_ROUTES.USERS.ADOPTER_PROFILE, dto);
+  async changePassword(
+    dto: ChangePasswordDto,
+  ): Promise<ChangePasswordResponse> {
+    return httpClient.patch<ChangePasswordResponse>(
+      API_ROUTES.USERS.PASSWORD,
+      dto,
+    );
   },
 
-  async updateShelterProfile(dto: UpdateShelterProfileDto): Promise<ShelterProfile> {
-    return httpClient.put<ShelterProfile>(API_ROUTES.USERS.SHELTER_PROFILE, dto);
+  async updateAdopterProfile(
+    dto: UpdateAdopterProfileDto,
+  ): Promise<AdopterProfile> {
+    return httpClient.put<AdopterProfile>(
+      API_ROUTES.USERS.ADOPTER_PROFILE,
+      dto,
+    );
+  },
+
+  async updateShelterProfile(
+    dto: UpdateShelterProfileDto,
+  ): Promise<ShelterProfile> {
+    return httpClient.put<ShelterProfile>(
+      API_ROUTES.USERS.SHELTER_PROFILE,
+      dto,
+    );
   },
 };
