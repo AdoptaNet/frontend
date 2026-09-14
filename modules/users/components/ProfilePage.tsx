@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   User,
   Shield,
@@ -33,7 +34,22 @@ export function ProfilePage() {
     updateShelterProfile,
   } = useProfile();
 
-  const [activeTab, setActiveTab] = useState<string>("personal");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    return tabParam && ["personal", "security", "role-specific"].includes(tabParam)
+      ? tabParam
+      : "personal";
+  });
+  const [prevTabParam, setPrevTabParam] = useState(tabParam);
+
+  if (tabParam !== prevTabParam) {
+    setPrevTabParam(tabParam);
+    if (tabParam && ["personal", "security", "role-specific"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }
 
   const isPersonalActive = activeTab === "personal";
   const isSecurityActive = activeTab === "security";
