@@ -108,7 +108,9 @@ export function AdopterProfileForm({
   onSave,
   isLoading = false,
 }: AdopterProfileFormProps) {
-  const isNewProfile = !profile;
+  // El perfil se considera completado si ya tiene registradas las respuestas en la base de datos
+  const isProfileCompleted = Boolean(profile && profile.housingType);
+  const isNewProfile = !isProfileCompleted;
 
   const [formData, setFormData] = useState<UpdateAdopterProfileDto>({
     department: profile?.department || "Lima",

@@ -141,6 +141,9 @@ export function ProfilePage() {
                 >
                   <Sparkles className={`w-4 h-4 ${isRoleActive ? "text-white" : "text-ambar-500"}`} />
                   <span>Preferencias de adopción</span>
+                  {!user.adopterProfile?.housingType && (
+                    <span className="w-2 h-2 rounded-full bg-ambar-500 shrink-0" title="Cuestionario pendiente" />
+                  )}
                 </TabsTrigger>
               ) : (
                 <TabsTrigger
@@ -182,7 +185,7 @@ export function ProfilePage() {
         <TabsContent value="role-specific" className="mt-0 focus-visible:outline-none">
           {role === "adopter" ? (
             <AdopterProfileForm
-              key={user.adopterProfile?.id || "new-adopter"}
+              key={`${user.adopterProfile?.id}-${Boolean(user.adopterProfile?.housingType)}`}
               profile={user.adopterProfile}
               onSave={updateAdopterProfile}
               isLoading={isSaving}
