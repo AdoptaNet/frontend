@@ -40,7 +40,7 @@ export function HeroSection() {
 
             {/* CTAs */}
             <div className="mt-8 flex flex-col gap-3.5 sm:flex-row sm:items-center">
-              <Link href="/registro" className="w-full sm:w-auto">
+              <Link href="/register" className="w-full sm:w-auto">
                 <Button variant="accent" size="lg" className="w-full sm:w-auto">
                   <span>Conoce tu match</span>
                   <ArrowRight className="size-4.5" />
