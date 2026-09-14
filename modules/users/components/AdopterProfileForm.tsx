@@ -165,8 +165,31 @@ export function AdopterProfileForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value.replace(/\D/g, "");
+    if (raw.startsWith("51") && raw.length > 9) {
+      raw = raw.slice(2);
+    }
+    if (raw === "") {
+      updateField("phoneNumber", "");
+      return;
+    }
+    // Peruvian mobile numbers must start with 9
+    if (!raw.startsWith("9")) {
+      return;
+    }
+    // Maximum 9 digits
+    updateField("phoneNumber", raw.slice(0, 9));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Guard against accidental submissions before the final section
+    if (activeSection < 4) {
+      setActiveSection((prev) => Math.min(4, prev + 1));
+      return;
+    }
+
     setIsSaving(true);
     try {
       await onSave(formData);
@@ -252,7 +275,11 @@ export function AdopterProfileForm({
               <button
                 key={sec.id}
                 type="button"
-                onClick={() => setActiveSection(sec.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveSection(sec.id);
+                }}
                 className={`h-10 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
                   isActive
                     ? "bg-verde-700 text-white hover:bg-verde-hover hover:text-white shadow-xs"
@@ -726,22 +753,35 @@ export function AdopterProfileForm({
                 ]}
               />
 
-              {/* Teléfono sin +51 */}
+              {/* Teléfono sin +51 (Número móvil de Perú: inicia con 9, máx 9 dígitos) */}
               <div className="space-y-1.5 pt-2">
-                <Label htmlFor="phoneNumber" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
-                  <Phone className="w-4 h-4 text-verde-700" />
-                  Teléfono / Celular de contacto
-                </Label>
-                <p className="text-xs text-tinta-400">
-                  Número móvil de 9 dígitos (se asume Perú +51) para coordinaciones de adopción por WhatsApp.
+                <div className="flex items-center justify-between max-w-sm">
+                  <Label htmlFor="phoneNumber" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                    <Phone className="w-4 h-4 text-verde-700" />
+                    Teléfono / Celular de contacto
+                  </Label>
+                  <span
+                    className={`text-xs font-mono font-medium ${
+                      formData.phoneNumber?.length === 9
+                        ? "text-verde-700 font-bold"
+                        : "text-tinta-400"
+                    }`}
+                  >
+                    {formData.phoneNumber?.length || 0}/9 dígitos
+                  </span>
+                </div>
+                <p className="text-xs text-tinta-600">
+                  Número móvil peruano de 9 dígitos que debe iniciar con 9 (ej. 987654321).
                 </p>
                 <Input
                   id="phoneNumber"
                   type="tel"
+                  inputMode="numeric"
+                  maxLength={9}
                   value={formData.phoneNumber || ""}
-                  onChange={(e) => updateField("phoneNumber", e.target.value)}
-                  placeholder="Ej. 987 654 321"
-                  className="h-11 border-line max-w-sm text-sm tracking-wide font-medium"
+                  onChange={handlePhoneChange}
+                  placeholder="987654321"
+                  className="h-11 border-line max-w-sm text-sm tracking-widest font-mono font-medium"
                 />
               </div>
             </div>
@@ -757,7 +797,11 @@ export function AdopterProfileForm({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setActiveSection((prev) => Math.max(1, prev - 1))}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveSection((prev) => Math.max(1, prev - 1));
+                }}
                 className="text-xs h-10 gap-1.5 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -776,7 +820,11 @@ export function AdopterProfileForm({
             {activeSection < 4 ? (
               <Button
                 type="button"
-                onClick={() => setActiveSection((prev) => Math.min(4, prev + 1))}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveSection((prev) => Math.min(4, prev + 1));
+                }}
                 className="bg-verde-700 hover:bg-verde-hover text-white font-medium text-xs sm:text-sm h-10 gap-1.5 cursor-pointer"
               >
                 <span>Avanzar a {SECTIONS[activeSection].label}</span>

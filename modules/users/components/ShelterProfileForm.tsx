@@ -109,6 +109,23 @@ export function ShelterProfileForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value.replace(/\D/g, "");
+    if (raw.startsWith("51") && raw.length > 9) {
+      raw = raw.slice(2);
+    }
+    if (raw === "") {
+      updateField("phoneNumber", "");
+      return;
+    }
+    // Peruvian mobile numbers must start with 9
+    if (!raw.startsWith("9")) {
+      return;
+    }
+    // Maximum 9 digits
+    updateField("phoneNumber", raw.slice(0, 9));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -248,18 +265,31 @@ export function ShelterProfileForm({
           {/* Contacto Público: Teléfono, Email, Capacidad */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="shelterPhone" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
-                <Phone className="w-4 h-4 text-verde-700" />
-                Teléfono / WhatsApp de contacto
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="shelterPhone" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                  <Phone className="w-4 h-4 text-verde-700" />
+                  Teléfono / WhatsApp
+                </Label>
+                <span
+                  className={`text-xs font-mono font-medium ${
+                    formData.phoneNumber?.length === 9
+                      ? "text-verde-700 font-bold"
+                      : "text-tinta-400"
+                  }`}
+                >
+                  {formData.phoneNumber?.length || 0}/9 dígitos
+                </span>
+              </div>
               <Input
                 id="shelterPhone"
                 type="tel"
+                inputMode="numeric"
+                maxLength={9}
                 value={formData.phoneNumber || ""}
-                onChange={(e) => updateField("phoneNumber", e.target.value)}
-                placeholder="912 345 678"
+                onChange={handlePhoneChange}
+                placeholder="912345678"
                 disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm tracking-wide"
+                className="h-11 border-line text-sm tracking-widest font-mono font-medium"
               />
             </div>
 
