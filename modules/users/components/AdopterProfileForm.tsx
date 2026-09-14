@@ -150,7 +150,7 @@ export function AdopterProfileForm({
     followUpAcceptance:
       profile?.followUpAcceptance || FollowUpAcceptance.FULLY_ACCEPT,
     adopterAgeRange: profile?.adopterAgeRange || AdopterAgeRange.TWENTY_SIX_TO_35,
-    phoneNumber: profile?.phoneNumber || "987 654 321",
+    phoneNumber: profile?.phoneNumber || "",
   });
 
   const [activeSection, setActiveSection] = useState<number>(1);

@@ -9,9 +9,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  Loader2,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { DevRoleSwitcher } from "./DevRoleSwitcher";
 import { PersonalDataForm } from "./PersonalDataForm";
 import { SecurityForm } from "./SecurityForm";
 import { AdopterProfileForm } from "./AdopterProfileForm";
@@ -22,11 +22,9 @@ export function ProfilePage() {
   const {
     user,
     role,
-    adopterStatus,
-    setAdopterStatusMode,
-    isLoading,
+    isInitialLoading,
+    isSaving,
     feedback,
-    setMockRole,
     updatePersonalData,
     updateAvatar,
     removeAvatar,
@@ -41,15 +39,27 @@ export function ProfilePage() {
   const isSecurityActive = activeTab === "security";
   const isRoleActive = activeTab === "role-specific";
 
+  if (isInitialLoading && !user) {
+    return (
+      <div className="w-full max-w-5xl mx-auto py-24 px-4 sm:px-6 flex flex-col items-center justify-center gap-4 text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-verde-700" />
+        <p className="text-sm font-medium text-tinta-600">Cargando perfil...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="w-full max-w-5xl mx-auto py-24 px-4 sm:px-6 text-center">
+        <AlertCircle className="w-10 h-10 text-coral-600 mx-auto mb-3" />
+        <h2 className="text-lg font-bold text-tinta-900">No se pudo cargar la información del perfil</h2>
+        <p className="text-sm text-tinta-600 mt-1">Por favor verifica tu sesión e intenta recargar la página.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
-      {/* Dev Mode Switcher */}
-      <DevRoleSwitcher
-        currentRole={role}
-        onRoleChange={setMockRole}
-        adopterStatus={adopterStatus}
-        onAdopterStatusChange={setAdopterStatusMode}
-      />
 
 
       {/* Global Feedback Banner */}
@@ -151,11 +161,12 @@ export function ProfilePage() {
         {/* Tab 1: Datos Personales */}
         <TabsContent value="personal" className="mt-0 focus-visible:outline-none">
           <PersonalDataForm
+            key={user.id + (user.fullName ?? "")}
             user={user}
             onUpdatePersonalData={updatePersonalData}
             onUploadAvatar={updateAvatar}
             onRemoveAvatar={removeAvatar}
-            isLoading={isLoading}
+            isLoading={isSaving}
           />
         </TabsContent>
 
@@ -163,7 +174,7 @@ export function ProfilePage() {
         <TabsContent value="security" className="mt-0 focus-visible:outline-none">
           <SecurityForm
             onChangePassword={changePassword}
-            isLoading={isLoading}
+            isLoading={isSaving}
           />
         </TabsContent>
 
@@ -171,15 +182,17 @@ export function ProfilePage() {
         <TabsContent value="role-specific" className="mt-0 focus-visible:outline-none">
           {role === "adopter" ? (
             <AdopterProfileForm
+              key={user.adopterProfile?.id || "new-adopter"}
               profile={user.adopterProfile}
               onSave={updateAdopterProfile}
-              isLoading={isLoading}
+              isLoading={isSaving}
             />
           ) : (
             <ShelterProfileForm
+              key={user.shelterProfile?.id || "new-shelter"}
               profile={user.shelterProfile}
               onSave={updateShelterProfile}
-              isLoading={isLoading}
+              isLoading={isSaving}
             />
           )}
         </TabsContent>
