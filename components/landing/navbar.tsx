@@ -77,12 +77,12 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="hidden items-center gap-3 md:flex">
-          <Link href="/ingresar">
+          <Link href="/login">
             <Button variant="outline" size="sm">
               Ingresar
             </Button>
           </Link>
-          <Link href="/registro">
+          <Link href="/register">
             <Button variant="default" size="sm">
               Crear cuenta
             </Button>
@@ -138,12 +138,12 @@ export function Navbar() {
                 </button>
                 <hr className="my-2 border-border" />
                 <div className="flex flex-col gap-2.5">
-                  <Link href="/ingresar" onClick={() => setIsOpen(false)}>
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" className="w-full justify-center">
                       Ingresar
                     </Button>
                   </Link>
-                  <Link href="/registro" onClick={() => setIsOpen(false)}>
+                  <Link href="/register" onClick={() => setIsOpen(false)}>
                     <Button variant="default" className="w-full justify-center">
                       Crear cuenta
                     </Button>
