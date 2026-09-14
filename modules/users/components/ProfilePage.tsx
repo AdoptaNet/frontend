@@ -35,6 +35,10 @@ export function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState<string>("personal");
 
+  const isPersonalActive = activeTab === "personal";
+  const isSecurityActive = activeTab === "security";
+  const isRoleActive = activeTab === "role-specific";
+
   return (
     <div className="w-full max-w-5xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
       {/* Dev Mode Switcher */}
@@ -82,41 +86,59 @@ export function ProfilePage() {
         onValueChange={(val) => setActiveTab(val as string)}
         className="w-full space-y-6"
       >
-        <TabsList className="bg-superficie border border-line p-1 rounded-xl h-auto flex flex-wrap gap-1 shadow-2xs">
-          <TabsTrigger
-            value="personal"
-            className="flex items-center gap-2 h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold data-active:bg-verde-700 data-active:text-white cursor-pointer transition-all"
-          >
-            <User className="w-4 h-4" />
-            <span>Datos personales</span>
-          </TabsTrigger>
 
-          <TabsTrigger
-            value="security"
-            className="flex items-center gap-2 h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold data-active:bg-verde-700 data-active:text-white cursor-pointer transition-all"
-          >
-            <Shield className="w-4 h-4" />
-            <span>Seguridad</span>
-          </TabsTrigger>
+            <TabsList className="bg-superficie border border-line p-1 rounded-xl !h-auto min-h-[48px] w-full sm:w-auto flex flex-wrap items-center gap-1 shadow-2xs">
+              <TabsTrigger
+                value="personal"
+                className={`flex items-center gap-2 !h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  isPersonalActive
+                    ? "!bg-verde-700 !text-white hover:!bg-verde-hover hover:!text-white shadow-xs"
+                    : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
+                }`}
+              >
+                <User className={`w-4 h-4 ${isPersonalActive ? "text-white" : "text-tinta-400"}`} />
+                <span>Datos personales</span>
+              </TabsTrigger>
 
-          {role === "adopter" ? (
-            <TabsTrigger
-              value="role-specific"
-              className="flex items-center gap-2 h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold data-active:bg-verde-700 data-active:text-white cursor-pointer transition-all"
-            >
-              <Sparkles className="w-4 h-4 text-ambar-500 data-[state=active]:text-white" />
-              <span>Preferencias de adopción</span>
-            </TabsTrigger>
-          ) : (
-            <TabsTrigger
-              value="role-specific"
-              className="flex items-center gap-2 h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold data-active:bg-verde-700 data-active:text-white cursor-pointer transition-all"
-            >
-              <Building2 className="w-4 h-4" />
-              <span>Datos del albergue</span>
-            </TabsTrigger>
-          )}
-        </TabsList>
+              <TabsTrigger
+                value="security"
+                className={`flex items-center gap-2 !h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  isSecurityActive
+                    ? "!bg-verde-700 !text-white hover:!bg-verde-hover hover:!text-white shadow-xs"
+                    : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
+                }`}
+              >
+                <Shield className={`w-4 h-4 ${isSecurityActive ? "text-white" : "text-tinta-400"}`} />
+                <span>Seguridad</span>
+              </TabsTrigger>
+
+              {role === "adopter" ? (
+                <TabsTrigger
+                  value="role-specific"
+                  className={`flex items-center gap-2 !h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    isRoleActive
+                      ? "!bg-verde-700 !text-white hover:!bg-verde-hover hover:!text-white shadow-xs"
+                      : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
+                  }`}
+                >
+                  <Sparkles className={`w-4 h-4 ${isRoleActive ? "text-white" : "text-ambar-500"}`} />
+                  <span>Preferencias de adopción</span>
+                </TabsTrigger>
+              ) : (
+                <TabsTrigger
+                  value="role-specific"
+                  className={`flex items-center gap-2 !h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    isRoleActive
+                      ? "!bg-verde-700 !text-white hover:!bg-verde-hover hover:!text-white shadow-xs"
+                      : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
+                  }`}
+                >
+                  <Building2 className={`w-4 h-4 ${isRoleActive ? "text-white" : "text-tinta-400"}`} />
+                  <span>Datos del albergue</span>
+                </TabsTrigger>
+              )}
+            </TabsList>
+
 
         {/* Tab 1: Datos Personales */}
         <TabsContent value="personal" className="mt-0 focus-visible:outline-none">

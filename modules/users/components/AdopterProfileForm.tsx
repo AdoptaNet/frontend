@@ -190,15 +190,16 @@ export function AdopterProfileForm({
                 key={sec.id}
                 type="button"
                 onClick={() => setActiveSection(sec.id)}
-                className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
+                className={`h-10 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
                   isActive
-                    ? "bg-verde-700 text-white shadow-xs"
+                    ? "bg-verde-700 text-white hover:bg-verde-hover hover:text-white shadow-xs"
                     : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-tinta-400"}`} />
                 <span>{sec.label}</span>
               </button>
+
             );
           })}
         </div>

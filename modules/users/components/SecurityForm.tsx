@@ -58,7 +58,6 @@ export function SecurityForm({ onChangePassword, isLoading = false }: SecurityFo
   };
 
   const isLongEnough = newPassword.length >= 8;
-  const hasLettersAndNumbers = /[A-Za-z]/.test(newPassword) && /\d/.test(newPassword);
 
   return (
     <Card className="bg-white border-line shadow-sm">
@@ -175,7 +174,7 @@ export function SecurityForm({ onChangePassword, isLoading = false }: SecurityFo
           {/* Requisitos visuales */}
           <div className="p-3 bg-superficie-2 border border-line rounded-lg text-xs space-y-1.5">
             <span className="font-semibold text-tinta-600 block mb-1">
-              Requisitos mínimos de seguridad:
+              Requisito del sistema:
             </span>
             <div className="flex items-center gap-2">
               <CheckCircle2 className={`w-3.5 h-3.5 ${isLongEnough ? "text-verde-700" : "text-tinta-400"}`} />
@@ -183,14 +182,9 @@ export function SecurityForm({ onChangePassword, isLoading = false }: SecurityFo
                 Al menos 8 caracteres de longitud
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className={`w-3.5 h-3.5 ${hasLettersAndNumbers ? "text-verde-700" : "text-tinta-400"}`} />
-              <span className={hasLettersAndNumbers ? "text-verde-700 font-medium" : "text-tinta-600"}>
-                Contiene combinación de letras y números
-              </span>
-            </div>
           </div>
         </CardContent>
+
 
         <Separator className="bg-line mt-4" />
 
