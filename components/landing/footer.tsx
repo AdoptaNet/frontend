@@ -85,12 +85,12 @@ export function Footer() {
             </h4>
             <ul className="flex flex-col gap-2 text-xs">
               <li>
-                <Link href="/registro/rol" className="hover:text-foreground transition-colors">
+                <Link href="/register?role=shelter" className="hover:text-foreground transition-colors">
                   Registrar mi albergue
                 </Link>
               </li>
               <li>
-                <Link href="/ingresar" className="hover:text-foreground transition-colors">
+                <Link href="/login" className="hover:text-foreground transition-colors">
                   Panel de gestión
                 </Link>
               </li>

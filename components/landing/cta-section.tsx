@@ -24,7 +24,7 @@ export function CtaSection() {
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link href="/registro" className="w-full sm:w-auto">
+          <Link href="/register" className="w-full sm:w-auto">
             <Button
               variant="accent"
               size="lg"
@@ -34,7 +34,7 @@ export function CtaSection() {
               <ArrowRight className="size-4.5" />
             </Button>
           </Link>
-          <Link href="/registro/rol" className="w-full sm:w-auto">
+          <Link href="/register?role=shelter" className="w-full sm:w-auto">
             <Button
               variant="outline"
               size="lg"
