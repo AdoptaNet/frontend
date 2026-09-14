@@ -265,21 +265,10 @@ export function ShelterProfileForm({
           {/* Contacto Público: Teléfono, Email, Capacidad */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="shelterPhone" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
-                  <Phone className="w-4 h-4 text-verde-700" />
-                  Teléfono / WhatsApp
-                </Label>
-                <span
-                  className={`text-xs font-mono font-medium ${
-                    formData.phoneNumber?.length === 9
-                      ? "text-verde-700 font-bold"
-                      : "text-tinta-400"
-                  }`}
-                >
-                  {formData.phoneNumber?.length || 0}/9 dígitos
-                </span>
-              </div>
+              <Label htmlFor="shelterPhone" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                <Phone className="w-4 h-4 text-verde-700" />
+                Teléfono / WhatsApp
+              </Label>
               <Input
                 id="shelterPhone"
                 type="tel"
@@ -289,7 +278,7 @@ export function ShelterProfileForm({
                 onChange={handlePhoneChange}
                 placeholder="912345678"
                 disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm tracking-widest font-mono font-medium"
+                className="h-11 border-line text-sm tracking-wide font-medium"
               />
             </div>
 

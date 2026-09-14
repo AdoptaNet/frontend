@@ -753,26 +753,12 @@ export function AdopterProfileForm({
                 ]}
               />
 
-              {/* Teléfono sin +51 (Número móvil de Perú: inicia con 9, máx 9 dígitos) */}
+              {/* Teléfono de contacto */}
               <div className="space-y-1.5 pt-2">
-                <div className="flex items-center justify-between max-w-sm">
-                  <Label htmlFor="phoneNumber" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
-                    <Phone className="w-4 h-4 text-verde-700" />
-                    Teléfono / Celular de contacto
-                  </Label>
-                  <span
-                    className={`text-xs font-mono font-medium ${
-                      formData.phoneNumber?.length === 9
-                        ? "text-verde-700 font-bold"
-                        : "text-tinta-400"
-                    }`}
-                  >
-                    {formData.phoneNumber?.length || 0}/9 dígitos
-                  </span>
-                </div>
-                <p className="text-xs text-tinta-600">
-                  Número móvil peruano de 9 dígitos que debe iniciar con 9 (ej. 987654321).
-                </p>
+                <Label htmlFor="phoneNumber" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                  <Phone className="w-4 h-4 text-verde-700" />
+                  Teléfono / Celular de contacto
+                </Label>
                 <Input
                   id="phoneNumber"
                   type="tel"
@@ -781,7 +767,7 @@ export function AdopterProfileForm({
                   value={formData.phoneNumber || ""}
                   onChange={handlePhoneChange}
                   placeholder="987654321"
-                  className="h-11 border-line max-w-sm text-sm tracking-widest font-mono font-medium"
+                  className="h-11 border-line max-w-sm text-sm tracking-wide font-medium"
                 />
               </div>
             </div>
