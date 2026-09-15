@@ -137,6 +137,25 @@ export function LoginForm() {
             Crear cuenta
           </Link>
         </div>
+
+        {/* Legal notice for OAuth compliance */}
+        <p className="text-[11px] text-center text-muted-foreground leading-relaxed pt-0.5">
+          Al iniciar sesión, aceptas nuestras{" "}
+          <Link
+            href="/terms"
+            className="underline underline-offset-2 hover:text-foreground transition-colors"
+          >
+            Condiciones del Servicio
+          </Link>{" "}
+          y{" "}
+          <Link
+            href="/privacy"
+            className="underline underline-offset-2 hover:text-foreground transition-colors"
+          >
+            Política de Privacidad
+          </Link>
+          .
+        </p>
       </div>
     </AuthLayoutCard>
   );
