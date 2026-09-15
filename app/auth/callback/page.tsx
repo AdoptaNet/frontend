@@ -19,14 +19,15 @@ function CallbackHandler() {
     const accessToken = searchParams.get("accessToken");
     const refreshToken = searchParams.get("refreshToken");
 
-    if (!accessToken || !refreshToken) {
-      setError("No se recibieron los tokens de autenticación de Google.");
-      return;
-    }
-
     const processOAuth = async () => {
+      if (!accessToken || !refreshToken) {
+        setError("No se recibieron los tokens de autenticación de Google.");
+        return;
+      }
+
       try {
         setTokens({ accessToken, refreshToken });
+
 
         // Retrieve current user profile
         const user = await authService.getMe();

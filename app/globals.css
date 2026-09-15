@@ -21,6 +21,22 @@
   --color-ambar-500: var(--ambar-500);
   --color-ambar-100: var(--ambar-100);
 
+  --color-tinta-900: var(--tinta-900);
+  --color-tinta-600: var(--tinta-600);
+  --color-tinta-400: var(--tinta-400);
+
+  --color-azul-600: var(--azul-600);
+  --color-azul-100: var(--azul-100);
+  --color-coral-600: var(--coral-600);
+  --color-coral-100: var(--coral-100);
+
+  --color-superficie: #FFFFFF;
+  --color-superficie-2: #FAF9F6;
+  --color-fondo: #F5F3EE;
+  --color-atenuado: #EFEDE7;
+  --color-linea: #DEE4E1;
+  --color-anillo: #2E7D6E;
+
   --color-reason: var(--reason);
   --color-reason-foreground: var(--reason-foreground);
 
