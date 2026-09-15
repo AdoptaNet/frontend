@@ -18,6 +18,7 @@ function CallbackHandler() {
   useEffect(() => {
     const accessToken = searchParams.get("accessToken");
     const refreshToken = searchParams.get("refreshToken");
+    const isNewUser = searchParams.get("isNewUser") === "true";
 
     const processOAuth = async () => {
       if (!accessToken || !refreshToken) {
@@ -28,11 +29,15 @@ function CallbackHandler() {
       try {
         setTokens({ accessToken, refreshToken });
 
-
         // Retrieve current user profile
         const user = await authService.getMe();
         setUser(user);
-        router.replace("/home");
+
+        if (isNewUser || user.roleSelected === false) {
+          router.replace("/onboarding/role");
+        } else {
+          router.replace("/home");
+        }
       } catch (err) {
         setError(
           err instanceof Error

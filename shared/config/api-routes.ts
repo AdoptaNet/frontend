@@ -13,6 +13,7 @@ export const API_ROUTES = {
     PASSWORD: "/users/me/password",
     ADOPTER_PROFILE: "/users/me/adopter-profile",
     SHELTER_PROFILE: "/users/me/shelter-profile",
+    ROLE: "/users/me/role",
   },
 } as const;
 
