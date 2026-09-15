@@ -14,7 +14,15 @@ export function useLogin() {
   const searchParams = useSearchParams();
   const setAuth = useAuthStore((state) => state.setAuth);
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const oauthError = searchParams.get("error");
+  const initialOAuthMessage =
+    oauthError === "oauth_cancelled"
+      ? "Has cancelado el inicio de sesión con Google. Puedes intentar nuevamente cuando desees."
+      : null;
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    initialOAuthMessage
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormData>({

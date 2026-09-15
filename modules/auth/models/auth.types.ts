@@ -6,6 +6,7 @@ export interface User {
   fullName: string | null;
   avatarUrl: string | null;
   role: UserRole;
+  roleSelected?: boolean;
   createdAt: string;
   adopterProfile?: Record<string, unknown> | null;
   shelterProfile?: Record<string, unknown> | null;

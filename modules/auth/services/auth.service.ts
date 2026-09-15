@@ -5,6 +5,7 @@ import type {
   LoginDto,
   RegisterDto,
   User,
+  UserRole,
 } from "../models/auth.types";
 
 export const authService = {
@@ -55,5 +56,9 @@ export const authService = {
 
   getMe: async (): Promise<User> => {
     return httpClient.get<User>(API_ROUTES.USERS.ME);
+  },
+
+  selectRole: async (role: UserRole): Promise<AuthResponse> => {
+    return httpClient.patch<AuthResponse>(API_ROUTES.USERS.ROLE, { role });
   },
 };

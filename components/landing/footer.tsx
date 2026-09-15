@@ -114,19 +114,28 @@ export function Footer() {
             </h4>
             <ul className="flex flex-col gap-2 text-xs">
               <li>
-                <span className="hover:text-foreground cursor-pointer transition-colors">
+                <Link
+                  href="/terms"
+                  className="hover:text-foreground transition-colors"
+                >
                   Tenencia responsable (Ley 30407)
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="hover:text-foreground cursor-pointer transition-colors">
-                  Protección de datos del adoptante
-                </span>
+                <Link
+                  href="/privacy"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Protección de datos (Ley 29733)
+                </Link>
               </li>
               <li>
-                <span className="hover:text-foreground cursor-pointer transition-colors">
-                  Términos de adopción informada
-                </span>
+                <Link
+                  href="/terms"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Condiciones del servicio
+                </Link>
               </li>
               <li>
                 <span className="text-primary font-medium">
@@ -139,9 +148,21 @@ export function Footer() {
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col items-center justify-between gap-4 sm:flex-row text-xs">
           <p>© 2026 Adoptanet. Todos los derechos reservados.</p>
-          <p className="text-muted-foreground">
-            Conectando rescatados con hogares conscientes en todo el Perú.
-          </p>
+          <div className="flex items-center gap-4 text-xs">
+            <Link
+              href="/privacy"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Política de Privacidad
+            </Link>
+            <span className="text-border">·</span>
+            <Link
+              href="/terms"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Condiciones del Servicio
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
