@@ -241,8 +241,21 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
         <GoogleLoginButton text="Registrarse con Google" />
 
         <p className="text-[11px] text-center text-muted-foreground leading-relaxed pt-1">
-          Al registrarte, aceptas nuestros Términos de Servicio y Política de
-          Privacidad para el bienestar animal.
+          Al registrarte, aceptas nuestras{" "}
+          <Link
+            href="/terms"
+            className="font-medium text-foreground underline underline-offset-2 hover:text-primary transition-colors"
+          >
+            Condiciones del Servicio
+          </Link>{" "}
+          y{" "}
+          <Link
+            href="/privacy"
+            className="font-medium text-foreground underline underline-offset-2 hover:text-primary transition-colors"
+          >
+            Política de Privacidad
+          </Link>{" "}
+          para el bienestar animal.
         </p>
 
         {/* Bottom Switch to Login */}
