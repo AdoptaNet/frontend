@@ -15,5 +15,14 @@ export const API_ROUTES = {
     SHELTER_PROFILE: "/users/me/shelter-profile",
     ROLE: "/users/me/role",
   },
+  PETS: {
+    BASE: "/pets",
+    MY_PETS: "/pets/my-pets",
+    BY_ID: (id: string) => `/pets/${id}`,
+    STATUS: (id: string) => `/pets/${id}/status`,
+  },
+  MEDIA: {
+    UPLOAD: "/media/upload",
+    DELETE: "/media",
+  },
 } as const;
-
