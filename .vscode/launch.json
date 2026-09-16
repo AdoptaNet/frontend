@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Brave: Launch",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "runtimeExecutable": "/usr/bin/brave-browser",
+      "runtimeArgs": ["--new-window"],
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://_N_E/*": "${workspaceFolder}/*",
+        "webpack://next/*": "${workspaceFolder}/*"
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "Brave: Attach",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://_N_E/*": "${workspaceFolder}/*",
+        "webpack://next/*": "${workspaceFolder}/*"
+      },
+      "timeout": 30000
+    }
+  ]
+}
