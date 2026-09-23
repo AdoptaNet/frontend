@@ -8,10 +8,27 @@ import { GoogleLoginButton } from "./GoogleLoginButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Eye,
+  EyeOff,
+  Loader2,
+  Mail,
+} from "lucide-react";
 
 export function LoginForm() {
-  const { form, onSubmit, isLoading, errorMessage } = useLogin();
+  const {
+    form,
+    onSubmit,
+    isLoading,
+    errorMessage,
+    successMessage,
+    isUnverified,
+    resendCooldown,
+    handleResend,
+  } = useLogin();
   const [showPassword, setShowPassword] = React.useState(false);
 
   const {
@@ -26,14 +43,53 @@ export function LoginForm() {
       maxWidthClassName="max-w-xl"
     >
       <div className="space-y-5">
+        {/* Success Alert */}
+        {successMessage && (
+          <div
+            role="alert"
+            className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3.5 text-xs text-primary"
+          >
+            <CheckCircle2 className="size-4 shrink-0" />
+            <p className="font-medium leading-relaxed">{successMessage}</p>
+          </div>
+        )}
+
         {/* Backend Error Alert */}
         {errorMessage && (
           <div
             role="alert"
-            className="flex items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-3.5 text-xs text-destructive"
+            className="flex flex-col gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3.5 text-xs text-destructive"
           >
-            <AlertCircle className="size-4 shrink-0 mt-0.5" />
-            <p className="font-medium leading-relaxed">{errorMessage}</p>
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="size-4 shrink-0 mt-0.5" />
+              <p className="font-medium leading-relaxed">{errorMessage}</p>
+            </div>
+
+            {/* Si el correo no está verificado, ofrecer reenvío de activación inmediato */}
+            {isUnverified && (
+              <div className="pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResend}
+                  disabled={isLoading || resendCooldown > 0}
+                  className="w-full text-xs h-8 cursor-pointer"
+                >
+                  {resendCooldown > 0 ? (
+                    <>
+                      <Clock className="size-3 mr-1.5 animate-pulse" />
+                      <span>Reenviar enlace en {resendCooldown}s</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="size-3 mr-1.5" />
+                      <span>Reenviar enlace de activación</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
@@ -102,7 +158,7 @@ export function LoginForm() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full font-semibold mt-2"
+            className="w-full font-semibold mt-2 cursor-pointer"
             size="default"
           >
             {isLoading ? (
@@ -111,7 +167,7 @@ export function LoginForm() {
                 <span>Iniciando sesión...</span>
               </>
             ) : (
-              <span>Ingresar</span>
+              <span>Iniciar sesión</span>
             )}
           </Button>
         </form>
@@ -125,16 +181,16 @@ export function LoginForm() {
         </div>
 
         {/* Google OAuth Button at the bottom */}
-        <GoogleLoginButton text="Continuar con Google" />
+        <GoogleLoginButton text="Iniciar sesión con Google" />
 
         {/* Bottom Switch to Register */}
         <div className="pt-1 text-center text-xs text-muted-foreground">
-          ¿Aún no tienes una cuenta?{" "}
+          ¿No tienes una cuenta?{" "}
           <Link
             href="/register"
             className="font-semibold text-primary underline-offset-4 hover:underline"
           >
-            Crear cuenta
+            Regístrate aquí
           </Link>
         </div>
       </div>

@@ -18,12 +18,22 @@ export function Navbar() {
 
   const handleNavClick = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
+    const el = document.getElementById(id);
+    if (!el) {
+      window.location.href = `/#${id}`;
+      return;
+    }
     scrollToSection(id);
   };
 
   const handleMobileNavClick = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     setIsOpen(false);
+    const el = document.getElementById(id);
+    if (!el) {
+      window.location.href = `/#${id}`;
+      return;
+    }
     scrollToSection(id);
   };
 

@@ -130,7 +130,37 @@ export function ShelterProfileForm({
     e.preventDefault();
     setIsSaving(true);
     try {
-      await onSave(formData);
+      const cleanPayload: UpdateShelterProfileDto = {
+        organizationName: formData.organizationName?.trim() || null,
+        description: formData.description?.trim() || null,
+        address: formData.address?.trim() || null,
+        city: formData.city?.trim() || null,
+        department: formData.department?.trim() || "Lima",
+        phoneNumber: formData.phoneNumber?.trim() || null,
+        contactEmail: formData.contactEmail?.trim() || null,
+        rescueCapacity:
+          formData.rescueCapacity !== undefined &&
+          formData.rescueCapacity !== null &&
+          formData.rescueCapacity !== ("" as unknown as number)
+            ? Number(formData.rescueCapacity)
+            : null,
+        facebookUrl: formData.facebookUrl?.trim() || null,
+        instagramUrl: formData.instagramUrl?.trim() || null,
+        latitude:
+          formData.latitude !== undefined &&
+          formData.latitude !== null &&
+          formData.latitude !== ("" as unknown as number)
+            ? Number(formData.latitude)
+            : null,
+        longitude:
+          formData.longitude !== undefined &&
+          formData.longitude !== null &&
+          formData.longitude !== ("" as unknown as number)
+            ? Number(formData.longitude)
+            : null,
+      };
+
+      await onSave(cleanPayload);
     } finally {
       setIsSaving(false);
     }

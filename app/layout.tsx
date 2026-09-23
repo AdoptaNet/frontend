@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   title: `${appName} — Adopción responsable con razones reales`,
   description:
     "Plataforma web de adopción de animales rescatados en el Perú con sistema de recomendación explicable. Conoce a tu compañero ideal según tu estilo de vida.",
+  verification: {
+    google: "1jsDb7660y7OB1rCoiefV6sJQRhw7A5G9Cy-1aPG6Zw",
+  },
 };
 
 export default function RootLayout({
