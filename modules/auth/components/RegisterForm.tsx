@@ -22,10 +22,10 @@ import {
   RefreshCw,
   X,
 } from "lucide-react";
-import type { UserRole } from "../models/auth.types";
+import type { RegisterRole } from "../models/auth.types";
 
 interface RegisterFormProps {
-  initialRole?: UserRole;
+  initialRole?: RegisterRole;
 }
 
 export function RegisterForm({ initialRole }: RegisterFormProps) {

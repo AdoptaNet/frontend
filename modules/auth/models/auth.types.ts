@@ -1,4 +1,5 @@
-export type UserRole = "adopter" | "shelter";
+export type UserRole = "adopter" | "shelter" | "admin";
+export type RegisterRole = "adopter" | "shelter";
 
 export interface User {
   id: string;

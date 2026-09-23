@@ -10,6 +10,9 @@ import {
   AlertTriangle,
   Loader2,
   Users,
+  Crosshair,
+  ExternalLink,
+  Navigation,
 } from "lucide-react";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -74,6 +77,34 @@ const PERU_DEPARTMENTS = [
   "Callao",
 ];
 
+const DEPARTMENT_COORDS: Record<string, { lat: number; lng: number }> = {
+  Lima: { lat: -12.0464, lng: -77.0428 },
+  Callao: { lat: -12.0565, lng: -77.1181 },
+  Arequipa: { lat: -16.409, lng: -71.5375 },
+  Cusco: { lat: -13.5319, lng: -71.9675 },
+  "La Libertad": { lat: -8.1118, lng: -79.0287 },
+  Piura: { lat: -5.1945, lng: -80.6328 },
+  Lambayeque: { lat: -6.7714, lng: -79.8409 },
+  Áncash: { lat: -9.5278, lng: -77.5278 },
+  Junín: { lat: -12.0651, lng: -75.2049 },
+  Ica: { lat: -14.0678, lng: -75.7286 },
+  "San Martín": { lat: -6.4854, lng: -76.3686 },
+  Cajamarca: { lat: -7.1638, lng: -78.5003 },
+  Loreto: { lat: -3.7491, lng: -73.2538 },
+  Ucayali: { lat: -8.3791, lng: -74.5539 },
+  Tacna: { lat: -18.0146, lng: -70.2536 },
+  Huánuco: { lat: -9.9306, lng: -76.2422 },
+  Ayacucho: { lat: -13.1588, lng: -74.2239 },
+  Puno: { lat: -15.8422, lng: -70.0199 },
+  Moquegua: { lat: -17.1983, lng: -70.9357 },
+  Tumbes: { lat: -3.5669, lng: -80.4515 },
+  Amazonas: { lat: -6.2308, lng: -77.87 },
+  Apurímac: { lat: -13.6339, lng: -72.8814 },
+  Huancavelica: { lat: -12.7864, lng: -74.9757 },
+  "Madre de Dios": { lat: -12.5933, lng: -69.1891 },
+  Pasco: { lat: -10.6835, lng: -76.2561 },
+};
+
 interface ShelterProfileFormProps {
   profile: ShelterProfile | null | undefined;
   onSave: (dto: UpdateShelterProfileDto) => Promise<void>;
@@ -101,6 +132,8 @@ export function ShelterProfileForm({
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   const updateField = <K extends keyof UpdateShelterProfileDto>(
     field: K,
@@ -109,19 +142,51 @@ export function ShelterProfileForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleDepartmentChange = (dep: string) => {
+    updateField("department", dep);
+    const coords = DEPARTMENT_COORDS[dep];
+    if (coords) {
+      updateField("latitude", coords.lat);
+      updateField("longitude", coords.lng);
+    }
+  };
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("La geolocalización no es compatible con tu navegador.");
+      return;
+    }
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        updateField("latitude", Number(pos.coords.latitude.toFixed(6)));
+        updateField("longitude", Number(pos.coords.longitude.toFixed(6)));
+        setIsDetectingLocation(false);
+      },
+      (err) => {
+        console.warn("Error obtaining GPS coordinates:", err);
+        setIsDetectingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let raw = e.target.value.replace(/\D/g, "");
     if (raw.startsWith("51") && raw.length > 9) {
       raw = raw.slice(2);
     }
     if (raw === "") {
+      setPhoneError(null);
       updateField("phoneNumber", "");
       return;
     }
     // Peruvian mobile numbers must start with 9
     if (!raw.startsWith("9")) {
+      setPhoneError("El teléfono móvil peruano debe iniciar con 9");
       return;
     }
+    setPhoneError(null);
     // Maximum 9 digits
     updateField("phoneNumber", raw.slice(0, 9));
   };
@@ -189,12 +254,12 @@ export function ShelterProfileForm({
             {isVerified ? (
               <>
                 <ShieldCheck className="w-3.5 h-3.5" />
-                Albergue Verificado
+                Verificado por AdoptaNet
               </>
             ) : (
               <>
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Verificación Pendiente
+                Pendiente de verificación
               </>
             )}
           </Badge>
@@ -278,7 +343,7 @@ export function ShelterProfileForm({
               <select
                 id="shelterDepartment"
                 value={formData.department || "Lima"}
-                onChange={(e) => updateField("department", e.target.value)}
+                onChange={(e) => handleDepartmentChange(e.target.value)}
                 className="w-full h-11 px-3 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo"
               >
                 {PERU_DEPARTMENTS.map((dep) => (
@@ -290,6 +355,101 @@ export function ShelterProfileForm({
             </div>
           </div>
 
+          {/* Selector de Ubicación Interactivo y Coordenadas GPS (US-07) */}
+          <div className="space-y-3 bg-superficie-2 border border-line rounded-xl p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-sm font-semibold text-tinta-900 flex items-center gap-2">
+                  <Navigation className="w-4 h-4 text-verde-700" />
+                  Ubicación en el Mapa y Coordenadas GPS
+                </h4>
+                <p className="text-xs text-tinta-600">
+                  Permite a los adoptantes ubicar tu albergue y calcular distancias en las búsquedas geográficas.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDetectLocation}
+                disabled={isDetectingLocation || isLoading || isSaving}
+                className="text-xs h-9 gap-1.5 shrink-0 bg-white"
+              >
+                {isDetectingLocation ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-verde-700" />
+                ) : (
+                  <Crosshair className="w-3.5 h-3.5 text-verde-700" />
+                )}
+                <span>{isDetectingLocation ? "Detectando..." : "Detectar mi GPS"}</span>
+              </Button>
+            </div>
+
+            {/* Inputs de Latitud y Longitud */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="latitude" className="text-xs font-semibold text-tinta-700">
+                  Latitud (°N/S)
+                </Label>
+                <Input
+                  id="latitude"
+                  type="number"
+                  step="0.000001"
+                  value={formData.latitude ?? ""}
+                  onChange={(e) => updateField("latitude", parseFloat(e.target.value) || null)}
+                  placeholder="-12.0464"
+                  disabled={isLoading || isSaving}
+                  className="h-10 bg-white border-line text-sm font-mono"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="longitude" className="text-xs font-semibold text-tinta-700">
+                  Longitud (°E/W)
+                </Label>
+                <Input
+                  id="longitude"
+                  type="number"
+                  step="0.000001"
+                  value={formData.longitude ?? ""}
+                  onChange={(e) => updateField("longitude", parseFloat(e.target.value) || null)}
+                  placeholder="-77.0428"
+                  disabled={isLoading || isSaving}
+                  className="h-10 bg-white border-line text-sm font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Vista Previa del Mapa con Pin Interactivo */}
+            <div className="relative rounded-lg overflow-hidden border border-line bg-white h-52 sm:h-60 shadow-xs">
+              <iframe
+                title="Mapa interactivo del albergue"
+                className="w-full h-full border-0 pointer-events-none"
+                loading="lazy"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${(formData.longitude ?? -77.0428) - 0.008}%2C${(formData.latitude ?? -12.0464) - 0.008}%2C${(formData.longitude ?? -77.0428) + 0.008}%2C${(formData.latitude ?? -12.0464) + 0.008}&layer=mapnik&marker=${formData.latitude ?? -12.0464}%2C${formData.longitude ?? -77.0428}`}
+              />
+
+              <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-md text-[11px] font-mono text-tinta-800 border border-line shadow-xs flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-verde-700" />
+                <span>
+                  {(formData.latitude ?? -12.0464).toFixed(4)}, {(formData.longitude ?? -77.0428).toFixed(4)}
+                </span>
+              </div>
+
+              <div className="absolute bottom-2 left-2">
+                <a
+                  href={`https://www.google.com/maps?q=${formData.latitude ?? -12.0464},${formData.longitude ?? -77.0428}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 bg-white/90 hover:bg-white text-tinta-700 text-xs px-2.5 py-1 rounded-md border border-line shadow-xs transition-colors"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Abrir en Google Maps
+                </a>
+              </div>
+            </div>
+          </div>
+
           <Separator className="bg-line" />
 
           {/* Contacto Público: Teléfono, Email, Capacidad */}
@@ -297,7 +457,7 @@ export function ShelterProfileForm({
             <div className="space-y-1.5">
               <Label htmlFor="shelterPhone" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
                 <Phone className="w-4 h-4 text-verde-700" />
-                Teléfono / WhatsApp
+                Teléfono / WhatsApp (+51)
               </Label>
               <Input
                 id="shelterPhone"
@@ -308,8 +468,13 @@ export function ShelterProfileForm({
                 onChange={handlePhoneChange}
                 placeholder="912345678"
                 disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm tracking-wide font-medium"
+                className={`h-11 border-line text-sm tracking-wide font-medium ${
+                  phoneError ? "border-rojo-500 focus-visible:ring-rojo-500" : ""
+                }`}
               />
+              {phoneError && (
+                <p className="text-xs text-rojo-600 font-medium">{phoneError}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
