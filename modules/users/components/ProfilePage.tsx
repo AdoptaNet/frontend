@@ -192,6 +192,7 @@ export function ProfilePage() {
         {/* Tab 2: Seguridad */}
         <TabsContent value="security" className="mt-0 focus-visible:outline-none">
           <SecurityForm
+            user={user}
             onChangePassword={changePassword}
             isLoading={isSaving}
           />
