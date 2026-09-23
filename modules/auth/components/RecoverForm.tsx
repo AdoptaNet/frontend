@@ -3,19 +3,37 @@
 import * as React from "react";
 import Link from "next/link";
 import { AuthLayoutCard } from "./AuthLayoutCard";
+import { authService } from "../services/auth.service";
+import { ApiError } from "@/shared/services/http-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 
 export function RecoverForm() {
   const [submitted, setSubmitted] = React.useState(false);
   const [email, setEmail] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email) return;
+
+    setErrorMessage(null);
+    setIsLoading(true);
+
+    try {
+      await authService.forgotPassword(email);
       setSubmitted(true);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("No se pudo conectar con el servidor. Revisa tu conexión.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -36,7 +54,8 @@ export function RecoverForm() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             Si existe una cuenta asociada a{" "}
             <strong className="text-foreground">{email}</strong>, recibirás un
-            enlace para restablecer tu contraseña en los próximos minutos.
+            enlace para restablecer tu contraseña con una vigencia de{" "}
+            <strong>30 minutos</strong>.
           </p>
           <div className="pt-4">
             <Link href="/login">
@@ -48,6 +67,16 @@ export function RecoverForm() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
+          {errorMessage && (
+            <div
+              role="alert"
+              className="flex items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-3.5 text-xs text-destructive"
+            >
+              <AlertCircle className="size-4 shrink-0 mt-0.5" />
+              <p className="font-medium leading-relaxed">{errorMessage}</p>
+            </div>
+          )}
+
           <div className="space-y-2.5">
             <Label htmlFor="recover-email">Correo electrónico registrado</Label>
             <Input
@@ -55,13 +84,25 @@ export function RecoverForm() {
               type="email"
               placeholder="tu@correo.com"
               required
+              disabled={isLoading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          <Button type="submit" className="w-full font-semibold">
-            Enviar enlace de recuperación
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full font-semibold cursor-pointer"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="size-4 animate-spin mr-2" />
+                <span>Enviando enlace...</span>
+              </>
+            ) : (
+              <span>Enviar enlace de recuperación</span>
+            )}
           </Button>
 
           <div className="pt-2 text-center">
