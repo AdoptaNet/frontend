@@ -31,4 +31,9 @@ export const API_ROUTES = {
     UPLOAD: "/media/upload",
     DELETE: "/media",
   },
+  SHELTERS: {
+    BY_ID: (id: string) => `/shelters/${id}`,
+    VERIFY: (id: string) => `/shelters/${id}/verify`,
+    ADMIN_VERIFY: (id: string) => `/admin/shelters/${id}/verify`,
+  },
 } as const;

@@ -7,13 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { authService } from "../services/auth.service";
 import { registerSchema, type RegisterFormData } from "../schemas/auth.schemas";
 import { ApiError } from "@/shared/services/http-client";
-import type { UserRole } from "../models/auth.types";
+import type { RegisterRole } from "../models/auth.types";
 
-export function useRegister(initialRole?: UserRole) {
+export function useRegister(initialRole?: RegisterRole) {
   const searchParams = useSearchParams();
 
-  const queryRole = (searchParams.get("role") || searchParams.get("rol")) as UserRole | null;
-  const effectiveRole: UserRole =
+  const queryRole = searchParams.get("role") || searchParams.get("rol");
+  const effectiveRole: RegisterRole =
     initialRole || (queryRole === "shelter" ? "shelter" : "adopter");
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

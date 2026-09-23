@@ -13,6 +13,7 @@ import type {
 import type {
   ShelterProfile,
   UpdateShelterProfileDto,
+  PublicShelter,
 } from "../models/shelter-profile.types";
 
 export const usersService = {
@@ -59,6 +60,20 @@ export const usersService = {
     return httpClient.put<ShelterProfile>(
       API_ROUTES.USERS.SHELTER_PROFILE,
       dto,
+    );
+  },
+
+  async getPublicShelter(id: string): Promise<PublicShelter> {
+    return httpClient.get<PublicShelter>(API_ROUTES.SHELTERS.BY_ID(id));
+  },
+
+  async verifyShelter(
+    id: string,
+    isVerified: boolean,
+  ): Promise<{ success?: boolean; isVerified: boolean; id: string }> {
+    return httpClient.patch<{ success?: boolean; isVerified: boolean; id: string }>(
+      API_ROUTES.SHELTERS.VERIFY(id),
+      { isVerified },
     );
   },
 };

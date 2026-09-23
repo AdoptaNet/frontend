@@ -109,11 +109,14 @@ export function AdopterProfileForm({
   isLoading = false,
 }: AdopterProfileFormProps) {
   // El perfil se considera completado si ya tiene registradas las respuestas en la base de datos
-  const isProfileCompleted = Boolean(profile && profile.housingType);
+  const isProfileCompleted = Boolean(
+    profile?.isSurveyCompleted ?? profile?.housingType,
+  );
   const isNewProfile = !isProfileCompleted;
 
   const [formData, setFormData] = useState<UpdateAdopterProfileDto>({
     department: profile?.department || "Lima",
+    city: profile?.city || "",
     zoneType: profile?.zoneType || ZoneType.URBAN_QUIET,
     housingType: profile?.housingType || HousingType.APARTMENT,
     outdoorSpace: profile?.outdoorSpace || OutdoorSpace.BALCONY,
@@ -311,24 +314,41 @@ export function AdopterProfileForm({
                 </h3>
               </div>
 
-              {/* Departamento */}
-              <div className="space-y-1.5">
-                <Label htmlFor="department" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-verde-700" />
-                  Departamento del Perú
-                </Label>
-                <select
-                  id="department"
-                  value={formData.department || "Lima"}
-                  onChange={(e) => updateField("department", e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo"
-                >
-                  {PERU_DEPARTMENTS.map((dep) => (
-                    <option key={dep} value={dep}>
-                      {dep}
-                    </option>
-                  ))}
-                </select>
+              {/* Ubicación: Departamento y Ciudad/Distrito */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="department" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-verde-700" />
+                    Departamento del Perú
+                  </Label>
+                  <select
+                    id="department"
+                    value={formData.department || "Lima"}
+                    onChange={(e) => updateField("department", e.target.value)}
+                    className="w-full h-11 px-3.5 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo"
+                  >
+                    {PERU_DEPARTMENTS.map((dep) => (
+                      <option key={dep} value={dep}>
+                        {dep}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="city" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                    <Home className="w-4 h-4 text-verde-700" />
+                    Distrito o Ciudad
+                  </Label>
+                  <Input
+                    id="city"
+                    type="text"
+                    value={formData.city || ""}
+                    onChange={(e) => updateField("city", e.target.value)}
+                    placeholder="Ej. Miraflores, Yanahuara, etc."
+                    className="h-11 border-line text-sm"
+                  />
+                </div>
               </div>
 
               {/* Tipo de Zona */}
