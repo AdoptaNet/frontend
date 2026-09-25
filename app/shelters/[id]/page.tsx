@@ -27,6 +27,8 @@ import { Separator } from "@/components/ui/separator";
 import { usersService } from "@/modules/users/services/users.service";
 import type { PublicShelter } from "@/modules/users/models/shelter-profile.types";
 import type { Pet } from "@/modules/pets/models/pet.types";
+import { PublicPetCard } from "@/modules/pets/components/catalog/PublicPetCard";
+import { InteractiveLocationMap } from "@/shared/components/map/InteractiveLocationMap";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -361,25 +363,18 @@ export default function PublicShelterPage() {
                 <MapPin className="w-4 h-4 text-verde-700" />
                 Ubicación del albergue
               </h3>
-              <a
-                href={`https://www.google.com/maps?q=${shelter.latitude},${shelter.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-verde-700 hover:underline inline-flex items-center gap-1 font-medium"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Ver en Google Maps
-              </a>
+              <span className="text-xs text-tinta-500 font-medium">
+                {shelter.city}{shelter.department && shelter.department !== shelter.city ? `, ${shelter.department}` : ""}
+              </span>
             </div>
 
-            <div className="rounded-xl overflow-hidden border border-line bg-superficie-2 h-56 sm:h-64 relative">
-              <iframe
-                title={`Ubicación de ${shelter.organizationName}`}
-                className="w-full h-full border-0"
-                loading="lazy"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${shelter.longitude - 0.008}%2C${shelter.latitude - 0.008}%2C${shelter.longitude + 0.008}%2C${shelter.latitude + 0.008}&layer=mapnik&marker=${shelter.latitude}%2C${shelter.longitude}`}
-              />
-            </div>
+            <InteractiveLocationMap
+              latitude={shelter.latitude}
+              longitude={shelter.longitude}
+              readOnly={true}
+              shelterName={shelter.organizationName}
+              className="h-80 sm:h-[400px]"
+            />
           </section>
         )}
 
@@ -427,70 +422,9 @@ export default function PublicShelterPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {shelter.availablePets.map((pet) => {
-                const primaryPhoto =
-                  pet.photos?.find((p) => p.isPrimary) || pet.photos?.[0];
-                const years = Math.floor(pet.ageMonths / 12);
-                const months = pet.ageMonths % 12;
-                const ageText =
-                  years > 0
-                    ? `${years} ${years === 1 ? "año" : "años"}`
-                    : `${months} ${months === 1 ? "mes" : "meses"}`;
-
-                return (
-                  <Link
-                    key={pet.id}
-                    href={`/pets/${pet.id}`}
-                    className="group bg-white rounded-2xl border border-line shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Pet Photo */}
-                      <div className="relative aspect-4/3 w-full bg-superficie-2 overflow-hidden">
-                        {primaryPhoto ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={primaryPhoto.url}
-                            alt={pet.name}
-                            className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-tinta-300">
-                            <PawPrint className="w-10 h-10 stroke-1" />
-                          </div>
-                        )}
-
-                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                          <span className="bg-white/90 backdrop-blur-xs text-tinta-800 text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-2xs">
-                            {pet.species === "dog" ? "Perro" : "Gato"}
-                          </span>
-                        </div>
-
-                        <div className="absolute top-2.5 right-2.5">
-                          <Badge variant="disponible" className="text-[11px]">
-                            Disponible
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Pet Details */}
-                      <div className="p-4 space-y-1.5">
-                        <h3 className="font-heading font-bold text-base text-tinta-900 group-hover:text-verde-700 transition-colors">
-                          {pet.name}
-                        </h3>
-                        <p className="text-xs text-tinta-500">
-                          {pet.breed || "Mestizo"} · {ageText}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="px-4 pb-4 pt-1">
-                      <div className="w-full h-9 rounded-lg bg-superficie-2 group-hover:bg-verde-100 group-hover:text-verde-800 text-tinta-700 text-xs font-semibold flex items-center justify-center transition-colors">
-                        Ver ficha de adopción
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {shelter.availablePets.map((pet) => (
+                <PublicPetCard key={pet.id} pet={pet} />
+              ))}
             </div>
           )}
         </section>

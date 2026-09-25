@@ -6,11 +6,20 @@ import type {
   UpdatePetDto,
   UpdatePetStatusDto,
   QueryShelterPetsParams,
+  QueryPublicPetsParams,
   PaginatedPetsResponse,
   UploadMediaResponse,
 } from "../models/pet.types";
 
 export const petsService = {
+  async getPublicPets(
+    params?: QueryPublicPetsParams,
+  ): Promise<PaginatedPetsResponse> {
+    return httpClient.get<PaginatedPetsResponse>(API_ROUTES.PETS.BASE, {
+      params: params as Record<string, string | number | boolean | undefined>,
+    });
+  },
+
   async getMyPets(
     params?: QueryShelterPetsParams,
   ): Promise<PaginatedPetsResponse> {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Edit3, Trash2, PawPrint, Zap, Volume2 } from "lucide-react";
+import { Edit3, Trash2, PawPrint, Zap, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Pet, PetStatus } from "../../models/pet.types";
 import { PetStatusSelect } from "./PetStatusSelect";
 import { getAgeCategoryLabel } from "../../models/pet-form.schemas";
@@ -18,12 +18,25 @@ export function ShelterPetCard({
   onChangeStatus,
   onDeleteRequest,
 }: ShelterPetCardProps) {
-  const primaryPhoto =
-    pet.photos.find((p) => p.isPrimary) || pet.photos[0];
-
-  const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(
-    primaryPhoto?.url || null,
+  const photos = pet.photos || [];
+  const primaryIndex = photos.findIndex((p) => p.isPrimary);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(
+    primaryIndex >= 0 ? primaryIndex : 0,
   );
+  const currentPhoto = photos[activePhotoIndex] || pet.photos[0];
+  const activePhotoUrl = currentPhoto?.url || null;
+
+  const handlePrevPhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActivePhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+  };
+
+  const handleNextPhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActivePhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+  };
 
   const ageInfo = getAgeCategoryLabel(pet.ageMonths);
   const years = Math.floor(pet.ageMonths / 12);
@@ -40,15 +53,15 @@ export function ShelterPetCard({
   };
 
   return (
-    <div className="group bg-white rounded-2xl border border-line shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between">
-      {/* Photo with Carousel preview */}
-      <div className="relative aspect-4/3 w-full bg-superficie-2 overflow-hidden">
+    <div className="group bg-white rounded-2xl border border-line shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between select-none">
+      {/* Photo with Carousel preview - Vertical 4:5 aspect ratio */}
+      <div className="relative aspect-[4/5] w-full bg-superficie-2 overflow-hidden">
         {activePhotoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={activePhotoUrl}
             alt={pet.name}
-            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-tinta-300 gap-2">
@@ -58,7 +71,7 @@ export function ShelterPetCard({
         )}
 
         {/* Species & Gender Badge (Top Left) */}
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-20">
           <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold">
             {pet.species === "dog" ? "Perro 🐕" : "Gato 🐈"}
           </span>
@@ -68,28 +81,58 @@ export function ShelterPetCard({
         </div>
 
         {/* Status Dropdown (Top Right) */}
-        <div className="absolute top-2.5 right-2.5">
+        <div className="absolute top-2.5 right-2.5 z-20">
           <PetStatusSelect
             currentStatus={pet.status}
             onChangeStatus={(st) => onChangeStatus(pet.id, st)}
           />
         </div>
 
+        {/* Lateral navigation buttons (if > 1 photo) */}
+        {photos.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={handlePrevPhoto}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-tinta-800 flex items-center justify-center shadow-md transition-all opacity-90 sm:opacity-0 sm:group-hover:opacity-100 z-20 cursor-pointer hover:scale-110 active:scale-95"
+              title="Foto anterior"
+              aria-label="Foto anterior"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNextPhoto}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-tinta-800 flex items-center justify-center shadow-md transition-all opacity-90 sm:opacity-0 sm:group-hover:opacity-100 z-20 cursor-pointer hover:scale-110 active:scale-95"
+              title="Foto siguiente"
+              aria-label="Foto siguiente"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </>
+        )}
+
         {/* Multiple Photos Indicator / Thumbnail Switcher */}
-        {pet.photos.length > 1 && (
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-center gap-1.5 bg-black/30 backdrop-blur-xs py-1 px-2 rounded-full max-w-fit mx-auto">
-            {pet.photos.map((ph, idx) => (
-              <button
-                key={ph.publicId || idx}
-                type="button"
-                onClick={() => setActivePhotoUrl(ph.url)}
-                className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
-                  activePhotoUrl === ph.url
-                    ? "bg-white scale-125"
-                    : "bg-white/50 hover:bg-white/80"
-                }`}
-              />
-            ))}
+        {photos.length > 1 && (
+          <div className="absolute bottom-2.5 left-2 right-2 flex items-center justify-center gap-1.5 z-20">
+            <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-xs py-1 px-2 rounded-full max-w-fit mx-auto">
+              {photos.map((ph, idx) => (
+                <button
+                  key={ph.publicId || idx}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActivePhotoIndex(idx);
+                  }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${
+                    activePhotoIndex === idx
+                      ? "bg-white scale-125"
+                      : "bg-white/50 hover:bg-white/80"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

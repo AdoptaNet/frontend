@@ -144,7 +144,7 @@ export function PetPhotoUploader({
             <span className="text-coral-600">*</span>
           </label>
           <p className="text-xs text-tinta-600">
-            Mínimo 1 foto, máximo 6. Selecciona la estrella para definir la foto
+            Mínimo 3 fotos, máximo 6. Selecciona la estrella para definir la foto
             de portada.
           </p>
         </div>
