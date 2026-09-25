@@ -1,28 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authService } from "../services/auth.service";
-import { useAuthStore } from "../store/auth.store";
 import { registerSchema, type RegisterFormData } from "../schemas/auth.schemas";
 import { ApiError } from "@/shared/services/http-client";
-import type { UserRole } from "../models/auth.types";
+import type { RegisterRole } from "../models/auth.types";
 
-export function useRegister(initialRole?: UserRole) {
-  const router = useRouter();
+export function useRegister(initialRole?: RegisterRole) {
   const searchParams = useSearchParams();
-  const setAuth = useAuthStore((state) => state.setAuth);
 
-  const queryRole = (searchParams.get("role") || searchParams.get("rol")) as UserRole | null;
-  const effectiveRole: UserRole =
+  const queryRole = searchParams.get("role") || searchParams.get("rol");
+  const effectiveRole: RegisterRole =
     initialRole || (queryRole === "shelter" ? "shelter" : "adopter");
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  // Rate limiting local timer for resend
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -59,8 +62,9 @@ export function useRegister(initialRole?: UserRole) {
         avatarFile
       );
 
-      setAuth(response);
-      router.push("/home");
+      setIsRegistered(true);
+      setRegisteredEmail(response.email || values.email);
+      setSuccessMessage(response.message);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.statusCode === 409 || err.errorName?.includes("AlreadyInUse")) {
@@ -76,13 +80,48 @@ export function useRegister(initialRole?: UserRole) {
     }
   };
 
+  const handleResend = async () => {
+    if (!registeredEmail || resendCooldown > 0) return;
+    setErrorMessage(null);
+    setIsLoading(true);
+
+    try {
+      const res = await authService.resendVerification(registeredEmail);
+      setSuccessMessage(res.message);
+      // Start 2-minute cooldown
+      setResendCooldown(120);
+      const interval = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("Error al reenviar el correo de verificación.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     form,
     onSubmit: form.handleSubmit(onSubmit),
     isLoading,
     errorMessage,
+    successMessage,
+    isRegistered,
+    registeredEmail,
+    resendCooldown,
     avatarPreview,
     handleAvatarChange,
+    handleResend,
     setErrorMessage,
   };
 }

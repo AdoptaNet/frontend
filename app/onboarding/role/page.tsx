@@ -9,14 +9,14 @@ import { RoleSelector } from "@/modules/auth/components/RoleSelector";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { authService } from "@/modules/auth/services/auth.service";
-import type { UserRole } from "@/modules/auth/models/auth.types";
+import type { RegisterRole } from "@/modules/auth/models/auth.types";
 import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import { ApiError } from "@/shared/services/http-client";
 
 function RoleOnboardingContent() {
   const router = useRouter();
   const { user, setAuth, isHydrated } = useAuthStore();
-  const [selectedRole, setSelectedRole] = useState<UserRole>("adopter");
+  const [selectedRole, setSelectedRole] = useState<RegisterRole>("adopter");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

@@ -3,11 +3,11 @@
 import * as React from "react";
 import { Heart, Home, CheckCircle2 } from "lucide-react";
 import { cn } from "cn";
-import type { UserRole } from "../models/auth.types";
+import type { RegisterRole } from "../models/auth.types";
 
 interface RoleSelectorProps {
-  value: UserRole;
-  onChange: (role: UserRole) => void;
+  value: RegisterRole;
+  onChange: (role: RegisterRole) => void;
   className?: string;
 }
 
