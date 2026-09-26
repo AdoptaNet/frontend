@@ -22,6 +22,7 @@ export interface PetShelter {
   department: string | null;
   contactEmail: string | null;
   phoneNumber: string | null;
+  isVerified?: boolean;
 }
 
 export interface Pet {
@@ -89,6 +90,18 @@ export interface UpdatePetStatusDto {
 
 export interface QueryShelterPetsParams {
   status?: PetStatus;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface QueryPublicPetsParams {
+  species?: PetSpecies;
+  size?: PetSize;
+  ageCategory?: PetAgeCategory;
+  gender?: PetGender;
+  city?: string;
+  department?: string;
   search?: string;
   page?: number;
   limit?: number;

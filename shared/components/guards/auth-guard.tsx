@@ -13,13 +13,27 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const pathname = usePathname();
   const { isAuthenticated, isHydrated } = useAuthStore();
 
+  const isPublicRoute =
+    pathname === "/pets" ||
+    (pathname.startsWith("/pets/") &&
+      !pathname.endsWith("/new") &&
+      !pathname.endsWith("/edit"));
+
   useEffect(() => {
-    if (isHydrated && !isAuthenticated) {
+    if (isHydrated && !isAuthenticated && !isPublicRoute) {
       router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
-  }, [isAuthenticated, isHydrated, router, pathname]);
+  }, [isAuthenticated, isHydrated, router, pathname, isPublicRoute]);
 
-  if (!isHydrated || !isAuthenticated) {
+  if (!isHydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="size-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && !isPublicRoute) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="size-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />

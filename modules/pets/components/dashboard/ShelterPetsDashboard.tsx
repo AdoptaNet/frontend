@@ -215,6 +215,7 @@ export function ShelterPetsDashboard() {
         isOpen={!!petToDelete}
         onClose={() => setPetToDelete(null)}
         onConfirm={deletePet}
+        onPause={(petId) => changePetStatus(petId, "hidden")}
       />
     </div>
   );
