@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   Search,
@@ -18,14 +18,35 @@ import {
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { authService } from "@/modules/auth/services/auth.service";
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user, logout: storeLogout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // ignore
+    }
+    storeLogout();
+    if (
+      pathname === "/pets" ||
+      (pathname.startsWith("/pets/") &&
+        !pathname.endsWith("/new") &&
+        !pathname.endsWith("/edit"))
+    ) {
+      router.refresh();
+    } else {
+      router.push("/login");
+    }
+  };
 
   const isShelter = user?.role === "shelter";
 
@@ -156,21 +177,22 @@ export function AppShell({ children }: AppShellProps) {
 
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={handleLogout}
                   title="Cerrar sesión"
-                  className="hidden md:flex p-2 rounded-lg text-tinta-400 hover:text-coral-600 hover:bg-coral-100/50 transition-colors cursor-pointer"
+                  aria-label="Cerrar sesión"
+                  className="flex p-2 rounded-lg text-tinta-400 hover:text-coral-600 hover:bg-coral-100/50 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Link
                   href={`/login?redirect=${encodeURIComponent(pathname)}`}
                   className={buttonVariants({
                     variant: "ghost",
                     className:
-                      "h-9 text-xs font-semibold text-tinta-700 hover:text-verde-700",
+                      "h-8 sm:h-9 px-2.5 sm:px-3 text-xs font-semibold text-tinta-700 hover:text-verde-700",
                   })}
                 >
                   Iniciar sesión
@@ -179,7 +201,7 @@ export function AppShell({ children }: AppShellProps) {
                   href="/register"
                   className={buttonVariants({
                     className:
-                      "h-9 px-3.5 text-xs font-semibold bg-verde-700 hover:bg-verde-800 text-white shadow-2xs",
+                      "h-8 sm:h-9 px-2.5 sm:px-3.5 text-xs font-semibold bg-verde-700 hover:bg-verde-800 text-white shadow-2xs",
                   })}
                 >
                   Registrarse

@@ -13,14 +13,22 @@ export interface FeedbackState {
 }
 
 export function useProfile() {
-  const { user: authUser, setUser: setAuthUser } = useAuthStore();
+  const {
+    user: authUser,
+    setUser: setAuthUser,
+    isAuthenticated,
+    isHydrated,
+  } = useAuthStore();
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [internalLoading, setInternalLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>({
     type: null,
     message: null,
   });
+
+  const isInitialLoading =
+    isHydrated && !isAuthenticated ? false : internalLoading;
 
   const showFeedback = useCallback(
     (type: FeedbackState["type"], message: string) => {
@@ -35,7 +43,11 @@ export function useProfile() {
   );
 
   const refetchProfile = useCallback(async () => {
-    setIsInitialLoading(true);
+    if (!isAuthenticated) {
+      setInternalLoading(false);
+      return;
+    }
+    setInternalLoading(true);
     try {
       const data = await usersService.getMyProfile();
       setUser(data);
@@ -54,11 +66,13 @@ export function useProfile() {
           : "Error al cargar la información del perfil";
       showFeedback("error", message);
     } finally {
-      setIsInitialLoading(false);
+      setInternalLoading(false);
     }
-  }, [setAuthUser, showFeedback]);
+  }, [isAuthenticated, setAuthUser, showFeedback]);
 
   useEffect(() => {
+    if (!isHydrated || !isAuthenticated) return;
+
     let isCancelled = false;
 
     usersService
@@ -87,14 +101,14 @@ export function useProfile() {
       })
       .finally(() => {
         if (!isCancelled) {
-          setIsInitialLoading(false);
+          setInternalLoading(false);
         }
       });
 
     return () => {
       isCancelled = true;
     };
-  }, [setAuthUser, showFeedback]);
+  }, [isAuthenticated, isHydrated, setAuthUser, showFeedback]);
 
   const updatePersonalData = useCallback(
     async (data: { fullName?: string }) => {

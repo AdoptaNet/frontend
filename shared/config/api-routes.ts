@@ -14,8 +14,7 @@ export const API_ROUTES = {
   USERS: {
     ME: "/users/me",
     AVATAR: "/users/me/avatar",
-    PASSWORD: "/users/change-password",
-    PASSWORD_LEGACY: "/users/me/password",
+    PASSWORD: "/users/me/password",
     ADOPTER_PROFILE: "/users/me/adopter-profile",
     SHELTER_PROFILE: "/users/me/shelter-profile",
     ROLE: "/users/select-role",
