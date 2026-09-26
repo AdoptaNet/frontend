@@ -205,10 +205,17 @@ export function useProfile() {
         setUser((prev) =>
           prev ? { ...prev, adopterProfile: updatedProfile } : prev,
         );
-        showFeedback(
-          "success",
-          "Preferencias de adopción guardadas exitosamente",
-        );
+        if (updatedProfile.isSurveyCompleted) {
+          showFeedback(
+            "success",
+            "¡Cuestionario completado al 100%! Recomendaciones y afinidad ML activadas 🎉",
+          );
+        } else {
+          showFeedback(
+            "success",
+            "Preferencias de adopción guardadas exitosamente",
+          );
+        }
       } catch (err: unknown) {
         const message =
           err instanceof Error

@@ -1,4 +1,5 @@
-export type UserRole = "adopter" | "shelter";
+export type UserRole = "adopter" | "shelter" | "admin";
+export type RegisterRole = "adopter" | "shelter";
 
 export interface User {
   id: string;
@@ -7,6 +8,8 @@ export interface User {
   avatarUrl: string | null;
   role: UserRole;
   roleSelected?: boolean;
+  hasPassword?: boolean;
+  isEmailVerified?: boolean;
   createdAt: string;
   adopterProfile?: Record<string, unknown> | null;
   shelterProfile?: Record<string, unknown> | null;
@@ -23,6 +26,12 @@ export interface AuthResponse {
   refreshToken: string;
 }
 
+export interface RegisterResponse {
+  message: string;
+  email: string;
+  role: string;
+}
+
 export interface LoginDto {
   email: string;
   password: string;
@@ -33,6 +42,28 @@ export interface RegisterDto {
   password: string;
   fullName?: string;
   role?: UserRole;
+}
+
+export interface VerifyEmailDto {
+  token: string;
+}
+
+export interface ResendVerificationDto {
+  email: string;
+}
+
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  newPassword: string;
+}
+
+export interface DeleteAccountDto {
+  password?: string;
+  confirmation?: string;
 }
 
 export interface ApiErrorResponse {

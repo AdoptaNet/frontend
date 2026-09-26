@@ -189,6 +189,7 @@ export enum AdopterAgeRange {
 export interface AdopterProfile {
   id: string;
   userId: string;
+  city: string | null;
   department: string | null;
   zoneType: ZoneType | null;
   housingType: HousingType | null;
@@ -221,6 +222,8 @@ export interface AdopterProfile {
   followUpAcceptance: FollowUpAcceptance | null;
   adopterAgeRange: AdopterAgeRange | null;
   phoneNumber: string | null;
+  isSurveyCompleted?: boolean;
+  compatibilityData?: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 }

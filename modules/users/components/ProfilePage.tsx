@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   User,
   Shield,
@@ -11,7 +12,9 @@ import {
   AlertCircle,
   Info,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PersonalDataForm } from "./PersonalDataForm";
 import { SecurityForm } from "./SecurityForm";
@@ -103,7 +106,7 @@ export function ProfilePage() {
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-line pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-line pb-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-tinta-900">
             Mi Perfil y Ajustes
@@ -112,6 +115,22 @@ export function ProfilePage() {
             Administra tus datos de cuenta, seguridad y configuración personalizada en AdoptaNet.
           </p>
         </div>
+
+        {role === "shelter" && user.id && (
+          <Link
+            href={`/shelters/${user.id}`}
+            target="_blank"
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className:
+                "text-xs h-9 border-line gap-1.5 self-start sm:self-auto shrink-0",
+            })}
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-verde-700" />
+            <span>Ver mi ficha pública</span>
+          </Link>
+        )}
       </div>
 
       {/* Tabs Layout */}
@@ -157,9 +176,13 @@ export function ProfilePage() {
                 >
                   <Sparkles className={`w-4 h-4 ${isRoleActive ? "text-white" : "text-ambar-500"}`} />
                   <span>Preferencias de adopción</span>
-                  {!user.adopterProfile?.housingType && (
-                    <span className="w-2 h-2 rounded-full bg-ambar-500 shrink-0" title="Cuestionario pendiente" />
-                  )}
+                  {!user.adopterProfile?.isSurveyCompleted &&
+                    !user.adopterProfile?.housingType && (
+                      <span
+                        className="w-2 h-2 rounded-full bg-ambar-500 shrink-0"
+                        title="Cuestionario pendiente"
+                      />
+                    )}
                 </TabsTrigger>
               ) : (
                 <TabsTrigger
@@ -192,6 +215,7 @@ export function ProfilePage() {
         {/* Tab 2: Seguridad */}
         <TabsContent value="security" className="mt-0 focus-visible:outline-none">
           <SecurityForm
+            user={user}
             onChangePassword={changePassword}
             isLoading={isSaving}
           />

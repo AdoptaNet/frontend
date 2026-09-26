@@ -10,6 +10,9 @@ import {
   AlertTriangle,
   Loader2,
   Users,
+  Crosshair,
+  ExternalLink,
+  Navigation,
 } from "lucide-react";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -41,6 +44,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { InteractiveLocationMap } from "@/shared/components/map/InteractiveLocationMap";
 import type {
   ShelterProfile,
   UpdateShelterProfileDto,
@@ -74,6 +78,34 @@ const PERU_DEPARTMENTS = [
   "Callao",
 ];
 
+const DEPARTMENT_COORDS: Record<string, { lat: number; lng: number }> = {
+  Lima: { lat: -12.0464, lng: -77.0428 },
+  Callao: { lat: -12.0565, lng: -77.1181 },
+  Arequipa: { lat: -16.409, lng: -71.5375 },
+  Cusco: { lat: -13.5319, lng: -71.9675 },
+  "La Libertad": { lat: -8.1118, lng: -79.0287 },
+  Piura: { lat: -5.1945, lng: -80.6328 },
+  Lambayeque: { lat: -6.7714, lng: -79.8409 },
+  Áncash: { lat: -9.5278, lng: -77.5278 },
+  Junín: { lat: -12.0651, lng: -75.2049 },
+  Ica: { lat: -14.0678, lng: -75.7286 },
+  "San Martín": { lat: -6.4854, lng: -76.3686 },
+  Cajamarca: { lat: -7.1638, lng: -78.5003 },
+  Loreto: { lat: -3.7491, lng: -73.2538 },
+  Ucayali: { lat: -8.3791, lng: -74.5539 },
+  Tacna: { lat: -18.0146, lng: -70.2536 },
+  Huánuco: { lat: -9.9306, lng: -76.2422 },
+  Ayacucho: { lat: -13.1588, lng: -74.2239 },
+  Puno: { lat: -15.8422, lng: -70.0199 },
+  Moquegua: { lat: -17.1983, lng: -70.9357 },
+  Tumbes: { lat: -3.5669, lng: -80.4515 },
+  Amazonas: { lat: -6.2308, lng: -77.87 },
+  Apurímac: { lat: -13.6339, lng: -72.8814 },
+  Huancavelica: { lat: -12.7864, lng: -74.9757 },
+  "Madre de Dios": { lat: -12.5933, lng: -69.1891 },
+  Pasco: { lat: -10.6835, lng: -76.2561 },
+};
+
 interface ShelterProfileFormProps {
   profile: ShelterProfile | null | undefined;
   onSave: (dto: UpdateShelterProfileDto) => Promise<void>;
@@ -101,6 +133,8 @@ export function ShelterProfileForm({
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   const updateField = <K extends keyof UpdateShelterProfileDto>(
     field: K,
@@ -109,19 +143,51 @@ export function ShelterProfileForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleDepartmentChange = (dep: string) => {
+    updateField("department", dep);
+    const coords = DEPARTMENT_COORDS[dep];
+    if (coords) {
+      updateField("latitude", coords.lat);
+      updateField("longitude", coords.lng);
+    }
+  };
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("La geolocalización no es compatible con tu navegador.");
+      return;
+    }
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        updateField("latitude", Number(pos.coords.latitude.toFixed(6)));
+        updateField("longitude", Number(pos.coords.longitude.toFixed(6)));
+        setIsDetectingLocation(false);
+      },
+      (err) => {
+        console.warn("Error obtaining GPS coordinates:", err);
+        setIsDetectingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let raw = e.target.value.replace(/\D/g, "");
     if (raw.startsWith("51") && raw.length > 9) {
       raw = raw.slice(2);
     }
     if (raw === "") {
+      setPhoneError(null);
       updateField("phoneNumber", "");
       return;
     }
     // Peruvian mobile numbers must start with 9
     if (!raw.startsWith("9")) {
+      setPhoneError("El teléfono móvil peruano debe iniciar con 9");
       return;
     }
+    setPhoneError(null);
     // Maximum 9 digits
     updateField("phoneNumber", raw.slice(0, 9));
   };
@@ -189,12 +255,12 @@ export function ShelterProfileForm({
             {isVerified ? (
               <>
                 <ShieldCheck className="w-3.5 h-3.5" />
-                Albergue Verificado
+                Verificado por AdoptaNet
               </>
             ) : (
               <>
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Verificación Pendiente
+                Pendiente de verificación
               </>
             )}
           </Badge>
@@ -278,7 +344,7 @@ export function ShelterProfileForm({
               <select
                 id="shelterDepartment"
                 value={formData.department || "Lima"}
-                onChange={(e) => updateField("department", e.target.value)}
+                onChange={(e) => handleDepartmentChange(e.target.value)}
                 className="w-full h-11 px-3 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo"
               >
                 {PERU_DEPARTMENTS.map((dep) => (
@@ -290,6 +356,62 @@ export function ShelterProfileForm({
             </div>
           </div>
 
+          {/* Selector de Ubicación Interactivo y Coordenadas GPS (US-07) */}
+          <div className="space-y-3 bg-superficie-2 border border-line rounded-xl p-4">
+            {/* Cabecera de Ubicación con Botón Detectar mi ubicación */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h4 className="text-sm font-semibold text-tinta-900 flex items-center gap-2">
+                  <Navigation className="w-4 h-4 text-verde-700" />
+                  Ubicación del Albergue en el Mapa
+                </h4>
+                <p className="text-xs text-tinta-600 mt-0.5">
+                  Haz clic en el mapa o arrastra el marcador para fijar la ubicación exacta. Permite a los adoptantes ubicarte y calcular distancias.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDetectLocation}
+                disabled={isDetectingLocation || isLoading || isSaving}
+                className="text-xs h-9 gap-1.5 shrink-0 bg-white"
+              >
+                {isDetectingLocation ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-verde-700" />
+                ) : (
+                  <Crosshair className="w-3.5 h-3.5 text-verde-700" />
+                )}
+                <span>{isDetectingLocation ? "Detectando ubicación..." : "Detectar mi ubicación"}</span>
+              </Button>
+            </div>
+
+            {/* Mapa Interactivo con Selección Directa por Clic o Arrastre (Más alto: h-80 sm:h-[420px]) */}
+            <div className="space-y-2">
+              <InteractiveLocationMap
+                latitude={formData.latitude}
+                longitude={formData.longitude}
+                onChange={({ latitude, longitude }) => {
+                  updateField("latitude", latitude);
+                  updateField("longitude", longitude);
+                }}
+                shelterName={formData.organizationName || "Tu albergue"}
+                className="h-80 sm:h-[420px]"
+              />
+
+              <div className="flex items-center justify-between text-xs text-tinta-500 px-1 pt-0.5">
+                <span className="inline-flex items-center gap-1.5 text-verde-700 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-verde-600 animate-pulse" />
+                  Ubicación fijada en el mapa
+                </span>
+                <span className="text-tinta-400 hidden sm:inline">
+                  Toca o haz clic sobre cualquier punto para mover el pin
+                </span>
+              </div>
+            </div>
+          </div>
+
           <Separator className="bg-line" />
 
           {/* Contacto Público: Teléfono, Email, Capacidad */}
@@ -297,7 +419,7 @@ export function ShelterProfileForm({
             <div className="space-y-1.5">
               <Label htmlFor="shelterPhone" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
                 <Phone className="w-4 h-4 text-verde-700" />
-                Teléfono / WhatsApp
+                Teléfono / WhatsApp (+51)
               </Label>
               <Input
                 id="shelterPhone"
@@ -308,8 +430,13 @@ export function ShelterProfileForm({
                 onChange={handlePhoneChange}
                 placeholder="912345678"
                 disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm tracking-wide font-medium"
+                className={`h-11 border-line text-sm tracking-wide font-medium ${
+                  phoneError ? "border-rojo-500 focus-visible:ring-rojo-500" : ""
+                }`}
               />
+              {phoneError && (
+                <p className="text-xs text-rojo-600 font-medium">{phoneError}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">

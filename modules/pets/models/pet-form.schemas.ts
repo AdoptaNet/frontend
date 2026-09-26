@@ -39,9 +39,9 @@ export const step1BasicInfoSchema = z.object({
     .min(0, "La edad en meses no puede ser negativa"),
   photos: z
     .array(petPhotoItemSchema, {
-      required_error: "Debes subir al menos 1 fotografía",
+      required_error: "Debes subir entre 3 y 6 fotografías",
     })
-    .min(1, "Debes subir al menos 1 fotografía")
+    .min(3, "Debes subir al menos 3 fotografías")
     .max(6, "Puedes subir como máximo 6 fotografías")
     .refine(
       (photos) => photos.filter((p) => p.isPrimary).length === 1,
