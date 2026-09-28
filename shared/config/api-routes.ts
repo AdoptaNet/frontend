@@ -35,4 +35,12 @@ export const API_ROUTES = {
     VERIFY: (id: string) => `/shelters/${id}/verify`,
     ADMIN_VERIFY: (id: string) => `/admin/shelters/${id}/verify`,
   },
+  ADOPTIONS: {
+    BASE: "/adoptions",
+    MY_REQUESTS: "/adoptions/my-requests",
+    SHELTER: "/adoptions/shelter",
+    BY_ID: (id: string) => `/adoptions/${id}`,
+    CANCEL: (id: string) => `/adoptions/${id}/cancel`,
+    REVIEW: (id: string) => `/adoptions/${id}/review`,
+  },
 } as const;

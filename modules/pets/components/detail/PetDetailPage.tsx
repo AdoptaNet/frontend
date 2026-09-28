@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Calendar,
   Heart,
   MapPin,
   PawPrint,
@@ -29,10 +28,10 @@ import {
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { usePetDetail } from "../../hooks/usePetDetail";
 import { useProfile } from "@/modules/users/hooks/useProfile";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { ApplyAdoptionModal } from "@/modules/adoptions/components/ApplyAdoptionModal";
 
 interface PetDetailPageProps {
   petId: string;
@@ -49,6 +48,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [showShelterNoticeModal, setShowShelterNoticeModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -127,6 +127,10 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   const isShelterUser = role === "shelter";
 
   const handleApplyClick = () => {
+    if (pet.status !== 'available') {
+      return;
+    }
+
     if (!user) {
       setShowAuthModal(true);
       return;
@@ -143,8 +147,8 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
       return;
     }
 
-    // Redirige al flujo de postulación formal (Épica 5 / US-15)
-    router.push(`/pets/${pet.id}/apply`);
+    // Abre el flujo de postulación formal (Épica 5 / US-15)
+    setShowApplyModal(true);
   };
 
   const nextPhoto = () => {
@@ -367,13 +371,22 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              className="w-full h-12 bg-verde-700 hover:bg-verde-800 text-white font-bold text-sm sm:text-base gap-2 rounded-xl shadow-sm cursor-pointer"
+              disabled={pet.status !== "available"}
+              className="w-full h-12 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-bold text-sm sm:text-base gap-2 rounded-xl shadow-sm cursor-pointer disabled:cursor-not-allowed"
             >
               <Heart className="w-5 h-5 fill-current" />
-              <span>Postular a Adopción</span>
+              <span>
+                {pet.status === "available"
+                  ? "Postular a Adopción"
+                  : pet.status === "adopted"
+                  ? "Mascota Ya Adoptada"
+                  : "No disponible para postular"}
+              </span>
             </Button>
             <p className="text-[11px] text-center text-tinta-500">
-              El proceso incluye evaluación de compatibilidad de hogar y seguimiento responsable.
+              {pet.status === "available"
+                ? "El proceso incluye evaluación de compatibilidad de hogar y seguimiento responsable."
+                : "Esta mascota ya cuenta con un hogar formalizado o no admite nuevas solicitudes."}
             </p>
           </div>
         </div>
@@ -664,10 +677,11 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              className="h-10 bg-verde-700 hover:bg-verde-800 text-white font-semibold text-xs sm:text-sm gap-2 shadow-xs cursor-pointer"
+              disabled={pet.status !== "available"}
+              className="h-10 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-semibold text-xs sm:text-sm gap-2 shadow-xs cursor-pointer disabled:cursor-not-allowed"
             >
               <Heart className="w-4 h-4 fill-current" />
-              <span>Postular</span>
+              <span>{pet.status === "available" ? "Postular" : "No disponible"}</span>
             </Button>
           </div>
         </div>
@@ -790,6 +804,20 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
           </div>
         </div>
       )}
+
+      {/* ---------- MODAL 4: FORMULARIO DE POSTULACIÓN FORMAL (ÉPICA 5 / US-15) ---------- */}
+      <ApplyAdoptionModal
+        isOpen={showApplyModal}
+        onClose={() => setShowApplyModal(false)}
+        pet={{
+          id: pet.id,
+          name: pet.name,
+          species: pet.species,
+          breed: pet.breed,
+          primaryPhotoUrl: pet.photos?.[0]?.url,
+          status: pet.status,
+        }}
+      />
     </div>
   );
 }
