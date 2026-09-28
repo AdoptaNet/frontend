@@ -1,16 +1,10 @@
-import { PlaceholderPage } from "@/shared/components/PlaceholderPage";
-import { FileText } from "lucide-react";
+import { ApplicationsView } from "@/modules/adoptions/components/ApplicationsView";
 
 export const metadata = {
-  title: "Solicitudes — AdoptaNet",
+  title: "Bandeja de Solicitudes — AdoptaNet",
+  description: "Administra y haz seguimiento a las solicitudes y expedientes de adopción.",
 };
 
-export default function Page() {
-  return (
-    <PlaceholderPage
-      title="Bandeja de Solicitudes"
-      description="Haz seguimiento a tus solicitudes de adopción enviadas o administra las solicitudes entrantes que reciben tus animales rescatados."
-      icon={<FileText className="w-8 h-8" />}
-    />
-  );
+export default function ApplicationsPage() {
+  return <ApplicationsView />;
 }
