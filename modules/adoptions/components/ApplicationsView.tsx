@@ -204,7 +204,7 @@ export function ApplicationsView() {
           <Button
             type="button"
             variant="outline"
-            onClick={fetchAdoptions}
+            onClick={handleRefresh}
             className="h-8 text-xs border-coral-300 text-coral-800 hover:bg-coral-100"
           >
             Reintentar
