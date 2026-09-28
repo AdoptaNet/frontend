@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   User,
@@ -13,6 +13,7 @@ import {
   Info,
   Loader2,
   ExternalLink,
+  LogOut,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -21,8 +22,12 @@ import { SecurityForm } from "./SecurityForm";
 import { AdopterProfileForm } from "./AdopterProfileForm";
 import { ShelterProfileForm } from "./ShelterProfileForm";
 import { useProfile } from "../hooks/useProfile";
+import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { authService } from "@/modules/auth/services/auth.service";
 
 export function ProfilePage() {
+  const router = useRouter();
+  const { logout } = useAuthStore();
   const {
     user,
     role,
@@ -53,6 +58,16 @@ export function ProfilePage() {
       setActiveTab(tabParam);
     }
   }
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // ignore
+    }
+    logout();
+    router.push("/login");
+  };
 
   const isPersonalActive = activeTab === "personal";
   const isSecurityActive = activeTab === "security";
@@ -116,21 +131,34 @@ export function ProfilePage() {
           </p>
         </div>
 
-        {role === "shelter" && user.id && (
-          <Link
-            href={`/shelters/${user.id}`}
-            target="_blank"
-            className={buttonVariants({
-              variant: "outline",
-              size: "sm",
-              className:
-                "text-xs h-9 border-line gap-1.5 self-start sm:self-auto shrink-0",
-            })}
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 flex-wrap">
+          {role === "shelter" && user.id && (
+            <Link
+              href={`/shelters/${user.id}`}
+              target="_blank"
+              className={buttonVariants({
+                variant: "outline",
+                size: "sm",
+                className:
+                  "text-xs h-9 border-line gap-1.5",
+              })}
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-verde-700" />
+              <span>Ver mi ficha pública</span>
+            </Link>
+          )}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="text-xs h-9 border-coral-200 text-coral-600 hover:bg-coral-50 hover:text-coral-700 gap-1.5 cursor-pointer"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-verde-700" />
-            <span>Ver mi ficha pública</span>
-          </Link>
-        )}
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Cerrar sesión</span>
+          </Button>
+        </div>
       </div>
 
       {/* Tabs Layout */}

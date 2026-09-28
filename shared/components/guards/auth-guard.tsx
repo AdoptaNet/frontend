@@ -25,6 +25,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [isAuthenticated, isHydrated, router, pathname, isPublicRoute]);
 
+  if (isPublicRoute) {
+    return <>{children}</>;
+  }
+
   if (!isHydrated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -33,7 +37,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!isAuthenticated && !isPublicRoute) {
+  if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="size-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />

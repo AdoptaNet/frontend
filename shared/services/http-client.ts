@@ -88,6 +88,32 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
+function isPublicUrl(path: string): boolean {
+  if (!path) return false;
+  const cleanPath = path.split("?")[0].split("#")[0];
+  if (
+    cleanPath === "/" ||
+    cleanPath === "/pets" ||
+    (cleanPath.startsWith("/pets/") &&
+      !cleanPath.endsWith("/new") &&
+      !cleanPath.endsWith("/edit")) ||
+    cleanPath.startsWith("/shelters/") ||
+    cleanPath.startsWith("/login") ||
+    cleanPath.startsWith("/register") ||
+    cleanPath.startsWith("/recover") ||
+    cleanPath.startsWith("/reset-password") ||
+    cleanPath.startsWith("/verify-email") ||
+    cleanPath.startsWith("/terms") ||
+    cleanPath.startsWith("/privacy") ||
+    cleanPath.startsWith("/terminos-de-servicio") ||
+    cleanPath.startsWith("/condiciones-del-servicio") ||
+    cleanPath.startsWith("/politica-de-privacidad")
+  ) {
+    return true;
+  }
+  return false;
+}
+
 async function executeFetch<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { body, params, skipAuth = false, headers: customHeaders, ...restOptions } = options;
 
@@ -153,7 +179,7 @@ async function executeFetch<T>(endpoint: string, options: RequestOptions = {}): 
     if (!refreshToken) {
       isRefreshing = false;
       clearStoredAuth();
-      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+      if (typeof window !== "undefined" && !isPublicUrl(window.location.pathname)) {
         window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
       }
       throw new ApiError(401, "Sesión no válida o expirada", "Unauthorized");
@@ -191,7 +217,7 @@ async function executeFetch<T>(endpoint: string, options: RequestOptions = {}): 
       processQueue(refreshErr, null);
       isRefreshing = false;
       clearStoredAuth();
-      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+      if (typeof window !== "undefined" && !isPublicUrl(window.location.pathname)) {
         window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
       }
       throw new ApiError(401, "La sesión ha expirado. Por favor, ingresa nuevamente.", "SessionExpired");
