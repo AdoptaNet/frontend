@@ -14,6 +14,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useModal } from '@/shared/hooks/useModal';
 import { adoptionsService } from '../services/adoptions.service';
 
 interface ApplyAdoptionModalProps {
@@ -42,6 +43,9 @@ export function ApplyAdoptionModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
+
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  useModal({ isOpen, onClose, preventClose: isSubmitting, modalRef });
 
   if (!isOpen) return null;
 
@@ -81,12 +85,23 @@ export function ApplyAdoptionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+    >
       <div className="fixed inset-0" onClick={isSubmitting ? undefined : onClose} />
 
-      <div className="relative w-full max-w-lg bg-white rounded-2xl border border-line shadow-2xl z-10 overflow-hidden animate-in zoom-in-95 duration-150">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Postular a Adopción"
+        data-lenis-prevent
+        className="relative w-full max-w-lg bg-white rounded-2xl border border-line shadow-2xl z-10 overflow-hidden flex flex-col max-h-[85vh] h-full sm:h-auto min-h-0 overscroll-contain outline-none animate-in zoom-in-95 duration-150"
+      >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-superficie-1">
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-line bg-superficie-1">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-verde-50 border border-verde-200 text-verde-700 flex items-center justify-center">
               <Heart className="w-4 h-4 fill-current" />
@@ -112,7 +127,11 @@ export function ApplyAdoptionModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 max-h-[80vh] overflow-y-auto space-y-5">
+        <div
+          data-lenis-prevent
+          tabIndex={0}
+          className="p-6 overflow-y-auto overscroll-contain space-y-5 flex-1 min-h-0 focus:outline-none"
+        >
           {isSubmittedSuccess ? (
             <div className="py-6 text-center space-y-4">
               <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto">
@@ -178,14 +197,13 @@ export function ApplyAdoptionModal({
                 </div>
               </div>
 
-              {/* Snapshot Notice (US-15 Escenario 1) */}
               <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl space-y-1 text-xs text-amber-900">
                 <div className="flex items-center gap-1.5 font-semibold text-amber-950">
                   <Info className="w-4 h-4 shrink-0 text-amber-700" />
-                  <span>Copia inmutable de compatibilidad (Snapshot)</span>
+                  <span>Información de tu hogar adjunta</span>
                 </div>
                 <p className="text-amber-800 leading-relaxed text-[11px]">
-                  Al enviar la postulación, se adjuntará una fotografía fija de tus 33 respuestas actuales (tipo de vivienda, integrantes del hogar, presupuesto y rutina).
+                  Al enviar la postulación, el albergue recibirá las condiciones actuales de tu hogar (tipo de vivienda, familia, presupuesto y rutina) registradas en tu perfil.
                 </p>
                 <div className="pt-0.5">
                   <Link
@@ -266,7 +284,7 @@ export function ApplyAdoptionModal({
               )}
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
+              <div className="shrink-0 flex items-center justify-end gap-2 pt-2 border-t border-line">
                 <Button
                   type="button"
                   variant="outline"

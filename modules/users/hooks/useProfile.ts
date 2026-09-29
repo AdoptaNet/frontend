@@ -222,7 +222,7 @@ export function useProfile() {
         if (updatedProfile.isSurveyCompleted) {
           showFeedback(
             "success",
-            "¡Cuestionario completado al 100%! Recomendaciones y afinidad ML activadas 🎉",
+            "¡Cuestionario completado al 100%! Tus recomendaciones personalizadas están activas 🎉",
           );
         } else {
           showFeedback(

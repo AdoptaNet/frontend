@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { AlertTriangle, ShieldAlert, Loader2, AlertCircle, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/shared/hooks/useModal";
 import type { Pet } from "../../models/pet.types";
 
 interface DeletePetModalProps {
@@ -23,6 +24,9 @@ export function DeletePetModal({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPausing, setIsPausing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  useModal({ isOpen, onClose, preventClose: isDeleting || isPausing, modalRef });
 
   if (!isOpen || !pet) return null;
 
@@ -64,12 +68,23 @@ export function DeletePetModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+    >
       <div
         className="fixed inset-0"
         onClick={() => !isDeleting && !isPausing && onClose()}
       />
-      <div className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 animate-in zoom-in-95 duration-150">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Gestión de mascota"
+        data-lenis-prevent
+        className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 overscroll-contain outline-none animate-in zoom-in-95 duration-150"
+      >
         {isBlocked ? (
           <>
             <div className="w-12 h-12 rounded-full bg-ambar-50 border border-ambar-200 text-ambar-700 flex items-center justify-center mx-auto">

@@ -15,6 +15,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useModal } from '@/shared/hooks/useModal';
 import { AdoptionStatusBadge } from './AdoptionStatusBadge';
 import type { AdoptionRequest } from '../models/adoption.types';
 import { ADOPTION_REJECTION_REASONS } from '../models/adoption.types';
@@ -34,6 +35,9 @@ export function AdoptionApplicantDossierModal({
   onOpenReview,
   isShelterView = false,
 }: AdoptionApplicantDossierModalProps) {
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  useModal({ isOpen, onClose, modalRef });
+
   if (!isOpen || !adoption) return null;
 
   const snapshot = adoption.adopterSnapshot || {};
@@ -47,12 +51,23 @@ export function AdoptionApplicantDossierModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+    >
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl border border-line shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Expediente de ${adoption.adopter?.fullName || 'Adoptante'}`}
+        data-lenis-prevent
+        className="relative w-full max-w-2xl bg-white rounded-2xl border border-line shadow-2xl z-10 overflow-hidden flex flex-col max-h-[85vh] h-full sm:h-auto min-h-0 overscroll-contain outline-none animate-in zoom-in-95 duration-150"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-superficie-1">
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-line bg-superficie-1">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-verde-50 border border-verde-200 text-verde-700 flex items-center justify-center font-bold font-heading text-lg">
               {adoption.adopter?.fullName ? adoption.adopter.fullName.charAt(0).toUpperCase() : 'A'}
@@ -85,7 +100,11 @@ export function AdoptionApplicantDossierModal({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs sm:text-sm">
+        <div
+          data-lenis-prevent
+          tabIndex={0}
+          className="p-6 overflow-y-auto overscroll-contain space-y-6 flex-1 min-h-0 text-xs sm:text-sm focus:outline-none"
+        >
           {/* Status & Outcome Banner */}
           {adoption.status === 'rejected' && (
             <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2 text-rose-900">
@@ -179,10 +198,10 @@ export function AdoptionApplicantDossierModal({
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-line pb-2">
               <h3 className="text-xs font-bold text-tinta-900 uppercase tracking-wider">
-                Expediente de Compatibilidad (Snapshot Congelado)
+                Expediente del Postulante
               </h3>
               <span className="text-[10px] text-tinta-500">
-                Congelado:{' '}
+                Registrado:{' '}
                 {snapshot.snapshotTimestamp
                   ? new Date(snapshot.snapshotTimestamp).toLocaleString('es-PE')
                   : 'N/A'}
@@ -312,7 +331,7 @@ export function AdoptionApplicantDossierModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-line bg-superficie-1 flex items-center justify-between gap-3">
+        <div className="shrink-0 p-4 border-t border-line bg-superficie-1 flex items-center justify-between gap-3">
           <Button
             type="button"
             variant="outline"

@@ -108,7 +108,7 @@ export function QuestionnaireReminderCard({ user }: QuestionnaireReminderCardPro
           Activa tus recomendaciones
         </CardTitle>
         <p className="text-xs text-tinta-600 mt-1 leading-relaxed">
-          Cuéntanos sobre tu tipo de vivienda, horarios y preferencias para que nuestro algoritmo te sugiera el compañero ideal.
+          Cuéntanos sobre tu tipo de vivienda, horarios y preferencias para recomendarte al compañero ideal para tu hogar.
         </p>
       </CardHeader>
 

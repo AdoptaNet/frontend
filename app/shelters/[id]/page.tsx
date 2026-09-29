@@ -19,17 +19,24 @@ import {
   Loader2,
   Heart,
   Share2,
+  HelpCircle,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { usersService } from "@/modules/users/services/users.service";
 import type { PublicShelter } from "@/modules/users/models/shelter-profile.types";
 import type { Pet } from "@/modules/pets/models/pet.types";
 import { PublicPetCard } from "@/modules/pets/components/catalog/PublicPetCard";
 import { InteractiveLocationMap } from "@/shared/components/map/InteractiveLocationMap";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { VerificationInfoModal } from "@/modules/users/components/VerificationInfoModal";
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -68,6 +75,10 @@ export default function PublicShelterPage() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const isAdmin = currentUser?.role === "admin";
+  const isOwner = Boolean(
+    currentUser?.id && shelter?.userId && currentUser.id === shelter.userId,
+  );
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   useEffect(() => {
     if (!shelterId) return;
@@ -197,23 +208,44 @@ export default function PublicShelterPage() {
             </Button>
 
             {isAdmin && (
-              <Button
-                variant={shelter.isVerified ? "destructive" : "default"}
-                size="sm"
-                onClick={handleToggleVerification}
-                disabled={isVerifying}
-                className="text-xs h-9 gap-1.5"
-              >
-                {isVerifying ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                )}
-                <span>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant={shelter.isVerified ? "destructive" : "default"}
+                    size="sm"
+                    onClick={handleToggleVerification}
+                    disabled={isVerifying}
+                    className="text-xs h-9 gap-1.5 cursor-pointer"
+                  >
+                    {isVerifying ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                    )}
+                    <span>
+                      {shelter.isVerified
+                        ? "Revocar Verificación"
+                        : "Verificar Albergue (Admin)"}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-xs p-3">
                   {shelter.isVerified
-                    ? "Revocar Verificación"
-                    : "Verificar Albergue (Admin)"}
-                </span>
+                    ? "Como administrador, haz clic para revocar la acreditación oficial de este albergue."
+                    : "Como administrador, haz clic para otorgar la acreditación oficial a este albergue."}
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {isOwner && !shelter.isVerified && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsInfoModalOpen(true)}
+                className="text-xs h-9 gap-1.5 border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 cursor-pointer"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
+                <span>¿Cómo verificarse?</span>
               </Button>
             )}
           </div>
@@ -246,15 +278,41 @@ export default function PublicShelterPage() {
                   {shelter.organizationName}
                 </h1>
 
-                {/* CA-08.4: Badge oficial de albergue verificado */}
-                {shelter.isVerified && (
-                  <Badge
-                    variant="disponible"
-                    className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 border-emerald-300"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    Albergue Verificado por AdoptaNet
-                  </Badge>
+                {/* CA-08.4: Badge oficial de albergue verificado / en proceso */}
+                {shelter.isVerified ? (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <span className="inline-flex cursor-help">
+                        <Badge
+                          variant="disponible"
+                          className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 border-emerald-300"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          Albergue Verificado por AdoptaNet
+                        </Badge>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-xs p-3">
+                      Organización auditada y acreditada formalmente por el equipo de administración de AdoptaNet tras corroborar su labor e instalaciones.
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <span className="inline-flex cursor-help">
+                        <Badge
+                          variant="reason"
+                          className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-800 border-amber-300"
+                        >
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                          Albergue no verificado
+                        </Badge>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-xs p-3">
+                      Este albergue está registrado en la plataforma, pero aún no cuenta con la acreditación administrativa oficial de AdoptaNet.
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
 
@@ -429,6 +487,13 @@ export default function PublicShelterPage() {
           )}
         </section>
       </main>
+
+      <VerificationInfoModal
+        isOpen={isInfoModalOpen}
+        onClose={() => setIsInfoModalOpen(false)}
+        organizationName={shelter.organizationName}
+        isVerified={shelter.isVerified}
+      />
     </div>
   );
 }

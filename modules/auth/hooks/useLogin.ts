@@ -66,7 +66,7 @@ export function useLogin() {
             "Correo o contraseña incorrectos. Por favor, verifica tus datos."
           );
         } else if (err.statusCode === 403) {
-          // US-01 Escenario 4: Bloqueo de inicio de sesión para cuenta no verificada
+          // Bloqueo de inicio de sesión para cuenta no verificada
           setIsUnverified(true);
           setUnverifiedEmail(values.email);
           setErrorMessage(

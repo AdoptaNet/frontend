@@ -67,7 +67,7 @@ export function RegisterForm({ initialRole }: RegisterFormProps) {
     }
   };
 
-  // Pantalla de Confirmación de Correo (US-01 Escenario 1 y 3)
+  // Pantalla de Confirmación de Correo
   if (isRegistered) {
     return (
       <AuthLayoutCard

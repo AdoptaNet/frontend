@@ -229,7 +229,7 @@ export function AdopterProfileForm({
             <div>
               <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-ambar-500" />
-                Preferencias de Adopción y Cuestionario ML
+                Preferencias de Adopción y Compatibilidad
               </CardTitle>
               <CardDescription className="text-sm text-tinta-600 mt-1 max-w-2xl">
                 Tus respuestas están activas. Puedes navegar libremente entre secciones para actualizar cualquier dato.
