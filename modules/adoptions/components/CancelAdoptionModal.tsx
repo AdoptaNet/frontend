@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Ban, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useModal } from '@/shared/hooks/useModal';
 import { adoptionsService } from '../services/adoptions.service';
 import type { AdoptionRequest } from '../models/adoption.types';
 
@@ -21,6 +22,9 @@ export function CancelAdoptionModal({
 }: CancelAdoptionModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  useModal({ isOpen, onClose, preventClose: isSubmitting, modalRef });
 
   if (!isOpen || !adoption) return null;
 
@@ -45,10 +49,21 @@ export function CancelAdoptionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+    >
       <div className="fixed inset-0" onClick={isSubmitting ? undefined : onClose} />
 
-      <div className="relative w-full max-w-md bg-white rounded-2xl border border-line shadow-2xl z-10 p-6 space-y-4 animate-in zoom-in-95 duration-150 text-center">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Desistir de la postulación"
+        data-lenis-prevent
+        className="relative w-full max-w-md bg-white rounded-2xl border border-line shadow-2xl z-10 p-6 space-y-4 overscroll-contain outline-none animate-in zoom-in-95 duration-150 text-center"
+      >
         <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center mx-auto">
           <Ban className="w-6 h-6" />
         </div>

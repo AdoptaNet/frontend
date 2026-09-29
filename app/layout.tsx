@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, Plus_Jakarta_Sans } from "next/font/google";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -39,7 +40,9 @@ export default function RootLayout({
       className={`${archivo.variable} ${plusJakarta.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground selection:bg-accent selection:text-accent-foreground">
-        <SmoothScroll>{children}</SmoothScroll>
+        <TooltipProvider>
+          <SmoothScroll>{children}</SmoothScroll>
+        </TooltipProvider>
       </body>
     </html>
   );

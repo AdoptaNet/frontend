@@ -11,6 +11,7 @@ import {
   FileCheck2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useModal } from '@/shared/hooks/useModal';
 import { adoptionsService } from '../services/adoptions.service';
 import type {
   AdoptionRequest,
@@ -39,6 +40,9 @@ export function ReviewAdoptionModal({
   const [reviewNotes, setReviewNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  useModal({ isOpen, onClose, preventClose: isSubmitting, modalRef });
 
   if (!isOpen || !adoption) return null;
 
@@ -81,12 +85,23 @@ export function ReviewAdoptionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+    >
       <div className="fixed inset-0" onClick={isSubmitting ? undefined : onClose} />
 
-      <div className="relative w-full max-w-lg bg-white rounded-2xl border border-line shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Dictaminar Solicitud"
+        data-lenis-prevent
+        className="relative w-full max-w-lg bg-white rounded-2xl border border-line shadow-2xl z-10 overflow-hidden flex flex-col max-h-[85vh] h-full sm:h-auto min-h-0 overscroll-contain outline-none animate-in zoom-in-95 duration-150"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-superficie-1">
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-line bg-superficie-1">
           <div>
             <h2 className="text-base font-bold text-tinta-900 font-heading">
               Dictaminar Solicitud
@@ -108,7 +123,12 @@ export function ReviewAdoptionModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
+        <form
+          data-lenis-prevent
+          tabIndex={0}
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto overscroll-contain space-y-5 flex-1 min-h-0 focus:outline-none"
+        >
           {/* Action Decision Selector */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-tinta-900 block">
@@ -163,10 +183,10 @@ export function ReviewAdoptionModal({
                 <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
                 <div className="space-y-1">
                   <p className="font-semibold text-amber-950">
-                    Aprobación Atómica y Concurrente (US-16 Escenario 2)
+                    Confirmación de Adopción
                   </p>
                   <p className="text-amber-800 text-[11px] leading-relaxed">
-                    Al confirmar la aprobación, <strong>{adoption.pet?.name}</strong> pasará automáticamente al estado <strong>adoptado</strong> y todas las demás solicitudes activas para este animal serán desestimadas con motivo tipificado y notificación automática.
+                    Al confirmar la aprobación, <strong>{adoption.pet?.name}</strong> pasará automáticamente al estado <strong>adoptado</strong> y todas las demás solicitudes en curso para esta mascota se cerrarán con una notificación respetuosa de agradecimiento.
                   </p>
                 </div>
               </div>
@@ -212,7 +232,7 @@ export function ReviewAdoptionModal({
             <div className="space-y-4 animate-in fade-in duration-150">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-tinta-900 block">
-                  Motivo obligatorio del catálogo tipificado (US-16 Escenario 3):
+                  Motivo de la decisión:
                 </label>
                 <select
                   value={rejectionReason}
@@ -250,7 +270,7 @@ export function ReviewAdoptionModal({
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
+          <div className="shrink-0 flex items-center justify-end gap-2 pt-2 border-t border-line">
             <Button
               type="button"
               variant="outline"
