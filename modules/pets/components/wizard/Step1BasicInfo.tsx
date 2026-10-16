@@ -100,7 +100,11 @@ export function Step1BasicInfo({
     setAnalysisSuccess(false);
 
     try {
-      let filesToAnalyze = rawFiles;
+      let filesToAnalyze = photos.map((p) => p.file).filter(Boolean) as File[];
+
+      if (filesToAnalyze.length === 0 && rawFiles.length > 0) {
+        filesToAnalyze = rawFiles;
+      }
 
       // Si no tenemos los objetos File en memoria (ej. foto existente en Cloudinary), descargamos la foto principal
       if (filesToAnalyze.length === 0 && photos.length > 0) {
@@ -427,42 +431,95 @@ export function Step1BasicInfo({
         </div>
       </div>
 
-      {/* 5. SECCIÓN: EDAD EN MESES */}
+      {/* 5. SECCIÓN: EDAD (Años y Meses sincronizados) */}
       <div className="p-4 rounded-xl bg-superficie-2 border border-line space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold text-tinta-900">
+            Edad de la mascota <span className="text-coral-600">*</span>
+          </Label>
+          <span className="text-xs text-tinta-600 font-medium">
+            {typeof ageMonths === "number" && !isNaN(ageMonths)
+              ? `Total: ${ageMonths} ${ageMonths === 1 ? "mes" : "meses"}`
+              : "Ingresa años o meses"}
+          </span>
+        </div>
+
+        <input type="hidden" {...register("ageMonths", { valueAsNumber: true })} />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+          {/* Años */}
           <div className="space-y-1.5">
-            <Label htmlFor="pet-age-months" className="text-sm font-semibold text-tinta-900">
-              Edad en meses <span className="text-coral-600">*</span>
-            </Label>
+            <label htmlFor="pet-age-years" className="text-xs font-semibold text-tinta-700">
+              Años
+            </label>
             <Input
-              id="pet-age-months"
+              id="pet-age-years"
               type="number"
               min={0}
               step={1}
-              placeholder="Ej. 12 para 1 año, 24 para 2 años"
+              placeholder="0"
               disabled={disabled}
+              value={typeof ageMonths === "number" && !isNaN(ageMonths) ? Math.floor(ageMonths / 12) : ""}
+              onChange={(e) => {
+                const rawYears = e.target.value;
+                const years = rawYears === "" ? 0 : parseInt(rawYears, 10) || 0;
+                const currentMonths = typeof ageMonths === "number" && !isNaN(ageMonths) ? ageMonths % 12 : 0;
+                if (rawYears === "" && currentMonths === 0) {
+                  setValue("ageMonths", undefined as any, { shouldValidate: true, shouldDirty: true });
+                } else {
+                  setValue("ageMonths", Math.max(0, years * 12 + currentMonths), {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }
+              }}
               onKeyDown={(e) => {
                 if (["e", "E", "+", "-", "."].includes(e.key)) {
                   e.preventDefault();
                 }
               }}
-              {...register("ageMonths", {
-                setValueAs: (v) =>
-                  v === "" || v === null || v === undefined || isNaN(Number(v))
-                    ? undefined
-                    : Number(v),
-              })}
             />
-            {errors.ageMonths && (
-              <p className="text-xs text-coral-600">
-                {errors.ageMonths.message}
-              </p>
-            )}
           </div>
 
+          {/* Meses */}
           <div className="space-y-1.5">
-            <span className="text-xs font-medium text-tinta-600">
-              Categoría de edad
+            <label htmlFor="pet-age-months-input" className="text-xs font-semibold text-tinta-700">
+              Meses
+            </label>
+            <Input
+              id="pet-age-months-input"
+              type="number"
+              min={0}
+              max={11}
+              step={1}
+              placeholder="0"
+              disabled={disabled}
+              value={typeof ageMonths === "number" && !isNaN(ageMonths) ? ageMonths % 12 : ""}
+              onChange={(e) => {
+                const rawMonths = e.target.value;
+                const months = rawMonths === "" ? 0 : parseInt(rawMonths, 10) || 0;
+                const currentYears = typeof ageMonths === "number" && !isNaN(ageMonths) ? Math.floor(ageMonths / 12) : 0;
+                if (rawMonths === "" && currentYears === 0) {
+                  setValue("ageMonths", undefined as any, { shouldValidate: true, shouldDirty: true });
+                } else {
+                  setValue("ageMonths", Math.max(0, currentYears * 12 + months), {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }
+              }}
+              onKeyDown={(e) => {
+                if (["e", "E", "+", "-", "."].includes(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+            />
+          </div>
+
+          {/* Categoría de Edad calculada */}
+          <div className="space-y-1.5 pb-1">
+            <span className="text-xs font-semibold text-tinta-700 block">
+              Etapa de vida
             </span>
             <div>
               <span
@@ -473,6 +530,12 @@ export function Step1BasicInfo({
             </div>
           </div>
         </div>
+
+        {errors.ageMonths && (
+          <p className="text-xs text-coral-600">
+            {errors.ageMonths.message}
+          </p>
+        )}
       </div>
     </div>
   );

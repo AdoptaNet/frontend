@@ -10,7 +10,8 @@ export type PetStatus = "draft" | "available" | "in_process" | "adopted" | "hidd
 export interface PetPhotoItem {
   id?: string;
   url: string;
-  publicId: string;
+  publicId?: string;
+  file?: File;
   isPrimary: boolean;
   order?: number;
 }

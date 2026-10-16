@@ -123,10 +123,38 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
     setSubmitError(null);
 
     try {
+      // Subir a Cloudinary únicamente las fotos locales pendientes
+      const processedPhotos = await Promise.all(
+        data.photos.map(async (photo, idx) => {
+          if (photo.file) {
+            const uploadRes = await petsService.uploadPhoto(photo.file);
+            return {
+              id: photo.id,
+              url: uploadRes.url,
+              publicId: uploadRes.publicId,
+              isPrimary: photo.isPrimary,
+              order: idx,
+            };
+          }
+          return {
+            id: photo.id,
+            url: photo.url,
+            publicId: photo.publicId || "",
+            isPrimary: photo.isPrimary,
+            order: idx,
+          };
+        }),
+      );
+
+      const finalData: CompletePetFormData = {
+        ...data,
+        photos: processedPhotos,
+      };
+
       if (isEditMode && initialPet?.id) {
-        await petsService.updatePet(initialPet.id, data);
+        await petsService.updatePet(initialPet.id, finalData);
       } else {
-        await petsService.createPet(data);
+        await petsService.createPet(finalData);
       }
 
       router.push("/pets");

@@ -49,7 +49,7 @@ export function PetPhotoUploader({
     onChange(reordered);
   };
 
-  const handleFilesSelected = async (files: FileList | null) => {
+  const handleFilesSelected = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploadError(null);
 
@@ -61,24 +61,22 @@ export function PetPhotoUploader({
 
     const selectedFiles = Array.from(files).slice(0, availableSlots);
     onFilesSelected?.(selectedFiles);
-    setUploadingCount(selectedFiles.length);
 
     try {
-      const uploadPromises = selectedFiles.map(async (file) => {
+      const newPhotos: PetPhotoItem[] = selectedFiles.map((file) => {
         if (file.size > 5 * 1024 * 1024) {
           throw new Error(`"${file.name}" supera el límite de 5 MB.`);
         }
-        const res = await petsService.uploadPhoto(file);
+        const previewUrl = URL.createObjectURL(file);
         return {
-          url: res.url,
-          publicId: res.publicId,
+          url: previewUrl,
+          publicId: `temp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          file,
           isPrimary: false,
         };
       });
 
-      const uploadedPhotos = await Promise.all(uploadPromises);
-
-      const updated = [...photos, ...uploadedPhotos];
+      const updated = [...photos, ...newPhotos];
       // Si ninguna está marcada como portada, marcar la primera
       if (!updated.some((p) => p.isPrimary) && updated.length > 0) {
         updated[0].isPrimary = true;
@@ -94,10 +92,9 @@ export function PetPhotoUploader({
       const msg =
         err instanceof Error
           ? err.message
-          : "Error al subir una o más fotografías. Intenta de nuevo.";
+          : "Error al agregar una o más fotografías. Intenta de nuevo.";
       setUploadError(msg);
     } finally {
-      setUploadingCount(0);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -129,8 +126,13 @@ export function PetPhotoUploader({
 
     onChange(reordered);
 
-    // Eliminar de Cloudinary en segundo plano (Opción 1.A)
-    if (photoToRemove.publicId) {
+    // Si era una foto local con ObjectURL, liberar memoria
+    if (photoToRemove?.url?.startsWith("blob:")) {
+      URL.revokeObjectURL(photoToRemove.url);
+    }
+
+    // Si ya estaba persistida en Cloudinary (modo edición), eliminarla en segundo plano
+    if (photoToRemove?.publicId && !photoToRemove.publicId.startsWith("temp-")) {
       try {
         await petsService.deletePhoto(photoToRemove.publicId);
       } catch (err) {
