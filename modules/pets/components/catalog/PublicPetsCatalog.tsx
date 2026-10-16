@@ -312,8 +312,8 @@ export function PublicPetsCatalog() {
               </div>
             )}
             <div>
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-verde-600 text-white text-[11px] font-semibold">
-                <Camera className="w-3 h-3" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-verde-900 text-white text-xs font-bold shadow-xs">
+                <Camera className="w-3.5 h-3.5 text-verde-200 shrink-0" />
                 <span>Búsqueda por foto activa</span>
               </div>
               <h3 className="text-sm sm:text-base font-bold text-tinta-900 mt-1 font-heading">
