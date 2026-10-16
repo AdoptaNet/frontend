@@ -8,8 +8,6 @@ import {
   Sparkles,
   Loader2,
   AlertCircle,
-  Dog,
-  Cat,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/shared/hooks/useModal";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { ImagePlus, Loader2, AlertCircle } from "lucide-react";
+import { ImagePlus, AlertCircle } from "lucide-react";
 import { petsService } from "../../services/pets.service";
 import type { PetPhotoItem } from "../../models/pet.types";
 import { PetPhotoThumbnail } from "./PetPhotoThumbnail";
@@ -24,7 +24,6 @@ export function PetPhotoUploader({
   isAnalyzing = false,
 }: PetPhotoUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingCount, setUploadingCount] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -180,7 +179,7 @@ export function PetPhotoUploader({
               setDraggedIndex(null);
             }}
             isDragging={draggedIndex === index}
-            disabled={disabled || uploadingCount > 0 || isAnalyzing}
+            disabled={disabled || isAnalyzing}
           />
         ))}
 
@@ -189,26 +188,15 @@ export function PetPhotoUploader({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled || uploadingCount > 0 || isAnalyzing}
+            disabled={disabled || isAnalyzing}
             className="aspect-square rounded-xl border-2 border-dashed border-line hover:border-verde-600 hover:bg-verde-50/40 text-tinta-600 hover:text-verde-700 flex flex-col items-center justify-center gap-1.5 p-3 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group shadow-2xs"
           >
-            {uploadingCount > 0 ? (
-              <>
-                <Loader2 className="w-6 h-6 animate-spin text-verde-700" />
-                <span className="text-[11px] font-medium text-verde-700 text-center">
-                  Subiendo ({uploadingCount})...
-                </span>
-              </>
-            ) : (
-              <>
-                <div className="p-2 rounded-lg bg-superficie-2 group-hover:bg-verde-100 text-tinta-500 group-hover:text-verde-700 transition-colors">
-                  <ImagePlus className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-semibold text-center leading-tight">
-                  Agregar foto
-                </span>
-              </>
-            )}
+            <div className="p-2 rounded-lg bg-superficie-2 group-hover:bg-verde-100 text-tinta-500 group-hover:text-verde-700 transition-colors">
+              <ImagePlus className="w-5 h-5" />
+            </div>
+            <span className="text-[11px] font-semibold text-center leading-tight">
+              Agregar foto
+            </span>
           </button>
         )}
       </div>
@@ -221,7 +209,7 @@ export function PetPhotoUploader({
         accept="image/png, image/jpeg, image/webp"
         className="hidden"
         onChange={(e) => handleFilesSelected(e.target.files)}
-        disabled={disabled || uploadingCount > 0}
+        disabled={disabled || isAnalyzing}
       />
 
       {/* Upload Error Banner */}

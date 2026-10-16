@@ -11,9 +11,7 @@ import {
   Loader2,
   Users,
   Crosshair,
-  ExternalLink,
   Navigation,
-  HelpCircle,
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
