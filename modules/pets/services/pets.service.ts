@@ -87,6 +87,7 @@ export const petsService = {
       formData,
       {
         params: options as Record<string, string | number | boolean | undefined>,
+        skipAuth: true,
       },
     );
   },

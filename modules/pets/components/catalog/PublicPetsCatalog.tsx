@@ -13,16 +13,19 @@ import {
   MapPin,
   X,
   ArrowDown,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePublicPets } from "../../hooks/usePublicPets";
 import { PublicPetCard } from "./PublicPetCard";
+import { VisualSearchModal } from "./VisualSearchModal";
 import type {
   PetSpecies,
   PetSize,
   PetAgeCategory,
   PetGender,
+  SimilarPetResponse,
 } from "../../models/pet.types";
 
 export function PublicPetsCatalog() {
@@ -55,9 +58,31 @@ export function PublicPetsCatalog() {
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchInput, setSearchInput] = useState(search);
+  const [isVisualSearchOpen, setIsVisualSearchOpen] = useState(false);
+  const [visualSearchResults, setVisualSearchResults] = useState<SimilarPetResponse[] | null>(null);
+  const [visualSearchPhotoUrl, setVisualSearchPhotoUrl] = useState<string | null>(null);
+
+  const handleSearchResults = (results: SimilarPetResponse[], photoUrl: string) => {
+    if (visualSearchPhotoUrl && visualSearchPhotoUrl !== photoUrl) {
+      URL.revokeObjectURL(visualSearchPhotoUrl);
+    }
+    setVisualSearchResults(results);
+    setVisualSearchPhotoUrl(photoUrl);
+  };
+
+  const handleClearVisualSearch = () => {
+    if (visualSearchPhotoUrl) {
+      URL.revokeObjectURL(visualSearchPhotoUrl);
+    }
+    setVisualSearchResults(null);
+    setVisualSearchPhotoUrl(null);
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (visualSearchResults !== null) {
+      handleClearVisualSearch();
+    }
     setSearch(searchInput);
   };
 
@@ -106,9 +131,14 @@ export function PublicPetsCatalog() {
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setSpecies(tab.id as PetSpecies | "all")}
+                onClick={() => {
+                  if (visualSearchResults !== null) {
+                    handleClearVisualSearch();
+                  }
+                  setSpecies(tab.id as PetSpecies | "all");
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  species === tab.id
+                  species === tab.id && visualSearchResults === null
                     ? "bg-white text-verde-800 shadow-2xs"
                     : "text-tinta-600 hover:text-tinta-900"
                 }`}
@@ -118,8 +148,8 @@ export function PublicPetsCatalog() {
             ))}
           </div>
 
-          {/* Search Bar & Advanced Toggle */}
-          <div className="flex items-center gap-2 flex-1 max-w-md">
+          {/* Search Bar & Actions */}
+          <div className="flex items-center gap-2 flex-1 max-w-lg">
             <form onSubmit={handleSearchSubmit} className="relative flex-1">
               <Search className="w-4 h-4 text-tinta-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
@@ -146,8 +176,23 @@ export function PublicPetsCatalog() {
             <Button
               type="button"
               variant="outline"
+              onClick={() => setIsVisualSearchOpen(true)}
+              className={`h-10 px-3 sm:px-3.5 rounded-xl border-line text-xs font-semibold gap-1.5 cursor-pointer transition-all ${
+                visualSearchResults !== null
+                  ? "bg-verde-50 border-verde-300 text-verde-800 shadow-2xs"
+                  : "bg-white text-tinta-700 hover:bg-superficie-2 hover:border-verde-300"
+              }`}
+              title="Buscar mascotas parecidas subiendo una foto"
+            >
+              <Camera className="w-3.5 h-3.5 text-verde-700" />
+              <span className="hidden sm:inline">Buscar por foto</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className={`h-10 px-3.5 rounded-xl border-line text-xs font-semibold gap-1.5 cursor-pointer ${
+              className={`h-10 px-3 sm:px-3.5 rounded-xl border-line text-xs font-semibold gap-1.5 cursor-pointer ${
                 showAdvancedFilters || hasActiveFilters
                   ? "bg-verde-50 border-verde-300 text-verde-800"
                   : "bg-white text-tinta-700 hover:bg-superficie-2"
@@ -252,10 +297,68 @@ export function PublicPetsCatalog() {
         )}
       </div>
 
+      {/* Visual Search Active Banner */}
+      {visualSearchResults !== null && (
+        <div className="bg-gradient-to-r from-verde-50 via-verde-50/70 to-white border border-verde-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-3.5">
+            {visualSearchPhotoUrl && (
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden border-2 border-white shadow-xs shrink-0 bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={visualSearchPhotoUrl}
+                  alt="Foto buscada"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <div>
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-verde-600 text-white text-[11px] font-semibold">
+                <Camera className="w-3 h-3" />
+                <span>Búsqueda por foto activa</span>
+              </div>
+              <h3 className="text-sm sm:text-base font-bold text-tinta-900 mt-1 font-heading">
+                {visualSearchResults.length > 0
+                  ? `Mostrando ${visualSearchResults.length} mascotas por parecido visual`
+                  : "No encontramos mascotas parecidas a esta fotografía"}
+              </h3>
+              <p className="text-xs text-tinta-600">
+                Ordenadas de mayor a menor coincidencia física y color
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsVisualSearchOpen(true)}
+              className="flex-1 sm:flex-none h-8.5 px-3 rounded-xl border-verde-300 bg-white hover:bg-verde-50 text-verde-800 text-xs font-semibold gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Camera className="w-3.5 h-3.5 text-verde-700" />
+              <span>Cambiar foto</span>
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleClearVisualSearch}
+              className="flex-1 sm:flex-none h-8.5 px-3 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-xs font-semibold gap-1.5 cursor-pointer shadow-xs"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Ver catálogo completo</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Results Count & Ordering Label */}
       <div className="flex items-center justify-between text-xs text-tinta-600 px-1">
         <span>
-          {isLoading ? (
+          {visualSearchResults !== null ? (
+            <>
+              Mostrando <strong className="text-tinta-900">{visualSearchResults.length}</strong> resultados por coincidencia
+            </>
+          ) : isLoading ? (
             "Buscando mascotas disponibles..."
           ) : (
             <>
@@ -265,12 +368,71 @@ export function PublicPetsCatalog() {
           )}
         </span>
         <span className="text-tinta-400 hidden sm:inline">
-          Ordenadas por fecha reciente
+          {visualSearchResults !== null
+            ? "Ordenadas por porcentaje de coincidencia"
+            : "Ordenadas por fecha reciente"}
         </span>
       </div>
 
       {/* Main Content Area */}
-      {isLoading ? (
+      {visualSearchResults !== null ? (
+        visualSearchResults.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-line p-12 text-center shadow-xs space-y-4 max-w-lg mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-superficie-2 text-verde-700 flex items-center justify-center mx-auto">
+              <Camera className="w-7 h-7" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-heading font-extrabold text-lg text-tinta-900">
+                No encontramos mascotas similares
+              </h3>
+              <p className="text-xs sm:text-sm text-tinta-600 leading-relaxed">
+                No se encontraron mascotas en adopción con rasgos físicos cercanos a la imagen. Puedes intentar con otra foto con mejor iluminación o explorar el catálogo.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2.5 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsVisualSearchOpen(true)}
+                className="h-9 px-4 text-xs font-semibold border-verde-300 text-verde-800 hover:bg-verde-50 gap-1.5 cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Intentar con otra foto</span>
+              </Button>
+              <Button
+                type="button"
+                onClick={handleClearVisualSearch}
+                className="h-9 px-4 text-xs font-semibold bg-verde-700 hover:bg-verde-800 text-white gap-1.5 cursor-pointer shadow-xs"
+              >
+                <span>Ver catálogo completo</span>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {visualSearchResults.map((item) => (
+                <PublicPetCard
+                  key={item.pet.id}
+                  pet={item.pet}
+                  similarityPercentage={item.similarityPercentage}
+                />
+              ))}
+            </div>
+
+            <div className="flex justify-center pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClearVisualSearch}
+                className="h-9 px-5 rounded-xl border border-line hover:border-verde-400 bg-white text-xs font-semibold text-tinta-700 hover:text-verde-800 cursor-pointer shadow-2xs"
+              >
+                <span>Volver al catálogo completo de adopciones</span>
+              </Button>
+            </div>
+          </div>
+        )
+      ) : isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -409,6 +571,13 @@ export function PublicPetsCatalog() {
           )}
         </div>
       )}
+
+      {/* Visual Search Modal */}
+      <VisualSearchModal
+        isOpen={isVisualSearchOpen}
+        onClose={() => setIsVisualSearchOpen(false)}
+        onSearchResults={handleSearchResults}
+      />
     </div>
   );
 }

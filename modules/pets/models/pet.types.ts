@@ -123,7 +123,7 @@ export interface AnalyzePetPhotosResponse {
 
 export interface SimilarPetResponse {
   pet: Pet;
-  distance: number;
+  similarityScore?: number;
   similarityPercentage: number;
 }
 
