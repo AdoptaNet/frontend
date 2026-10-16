@@ -131,7 +131,7 @@ export function Step3Personality({ form, disabled }: Step3PersonalityProps) {
                 {[
                   { value: true, label: "Sí, tolera bien" },
                   { value: false, label: "No recomendado" },
-                  { value: null, label: "No evaluado aún" },
+                  { value: null, label: "En evaluación / No lo sé" },
                 ].map((item) => (
                   <button
                     key={String(item.value)}
@@ -165,7 +165,7 @@ export function Step3Personality({ form, disabled }: Step3PersonalityProps) {
                 {[
                   { value: true, label: "Sí, sociable" },
                   { value: false, label: "No tolera perros" },
-                  { value: null, label: "No evaluado aún" },
+                  { value: null, label: "En evaluación / No lo sé" },
                 ].map((item) => (
                   <button
                     key={String(item.value)}
@@ -199,7 +199,7 @@ export function Step3Personality({ form, disabled }: Step3PersonalityProps) {
                 {[
                   { value: true, label: "Sí, respetuoso" },
                   { value: false, label: "No tolera gatos" },
-                  { value: null, label: "No evaluado aún" },
+                  { value: null, label: "En evaluación / No lo sé" },
                 ].map((item) => (
                   <button
                     key={String(item.value)}

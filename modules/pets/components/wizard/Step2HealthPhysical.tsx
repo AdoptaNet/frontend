@@ -2,17 +2,23 @@
 
 import React from "react";
 import { UseFormReturn, Controller } from "react-hook-form";
-import { ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CompletePetFormData } from "../../models/pet-form.schemas";
+import type { AnalyzePetPhotosResponse } from "../../models/pet.types";
 
 interface Step2HealthPhysicalProps {
   form: UseFormReturn<CompletePetFormData>;
   disabled?: boolean;
+  analysisResult?: AnalyzePetPhotosResponse | null;
 }
 
-export function Step2HealthPhysical({ form, disabled }: Step2HealthPhysicalProps) {
+export function Step2HealthPhysical({
+  form,
+  disabled,
+  analysisResult,
+}: Step2HealthPhysicalProps) {
   const {
     register,
     control,
@@ -23,9 +29,16 @@ export function Step2HealthPhysical({ form, disabled }: Step2HealthPhysicalProps
     <div className="space-y-6">
       {/* Tamaño */}
       <div className="space-y-2">
-        <Label className="text-sm font-semibold text-tinta-900">
-          Tamaño aproximado <span className="text-coral-600">*</span>
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold text-tinta-900">
+            Tamaño aproximado <span className="text-coral-600">*</span>
+          </Label>
+          {analysisResult?.size?.autocompleted && (
+            <span className="text-[11px] font-semibold text-verde-700 bg-verde-50 border border-verde-200 px-2 py-0.5 rounded-full">
+              Sugerido por IA
+            </span>
+          )}
+        </div>
         <Controller
           name="size"
           control={control}
@@ -61,9 +74,16 @@ export function Step2HealthPhysical({ form, disabled }: Step2HealthPhysicalProps
 
       {/* Longitud del pelaje */}
       <div className="space-y-2">
-        <Label className="text-sm font-semibold text-tinta-900">
-          Longitud del pelaje
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold text-tinta-900">
+            Longitud del pelaje
+          </Label>
+          {analysisResult?.fur?.autocompleted && (
+            <span className="text-[11px] font-semibold text-verde-700 bg-verde-50 border border-verde-200 px-2 py-0.5 rounded-full">
+              Sugerido por IA
+            </span>
+          )}
+        </div>
         <Controller
           name="furLength"
           control={control}

@@ -13,6 +13,7 @@ import {
   Crosshair,
   ExternalLink,
   Navigation,
+  HelpCircle,
 } from "lucide-react";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -44,6 +45,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { InteractiveLocationMap } from "@/shared/components/map/InteractiveLocationMap";
+import { VerificationInfoModal } from "./VerificationInfoModal";
 import type {
   ShelterProfile,
   UpdateShelterProfileDto,
@@ -232,39 +240,67 @@ export function ShelterProfileForm({
   };
 
   const isVerified = profile?.isVerified ?? false;
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   return (
-    <Card className="bg-white border-line shadow-sm">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-verde-700" />
-              Datos Institucionales del Albergue
-            </CardTitle>
-            <CardDescription className="text-sm text-tinta-600 mt-1">
-              Esta información es visible para los adoptantes y en las fichas de tus animales rescatados.
-            </CardDescription>
-          </div>
+    <>
+      <Card className="bg-white border-line shadow-sm">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-verde-700" />
+                Datos Institucionales del Albergue
+              </CardTitle>
+              <CardDescription className="text-sm text-tinta-600 mt-1">
+                Esta información es visible para los adoptantes y en las fichas de tus animales rescatados.
+              </CardDescription>
+            </div>
 
-          <Badge
-            variant={isVerified ? "disponible" : "reason"}
-            className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold self-start sm:self-auto"
-          >
-            {isVerified ? (
-              <>
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Verificado por AdoptaNet
-              </>
-            ) : (
-              <>
-                <AlertTriangle className="w-3.5 h-3.5" />
-                Pendiente de verificación
-              </>
-            )}
-          </Badge>
-        </div>
-      </CardHeader>
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="inline-flex cursor-help">
+                    <Badge
+                      variant={isVerified ? "disponible" : "reason"}
+                      className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold"
+                    >
+                      {isVerified ? (
+                        <>
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          Verificado por AdoptaNet
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          Pendiente de verificación
+                        </>
+                      )}
+                    </Badge>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-xs p-3">
+                  {isVerified
+                    ? "Tu albergue cuenta con acreditación oficial de AdoptaNet tras corroborar tu trayectoria y labor."
+                    : "La acreditación es otorgada administrativamente por AdoptaNet tras corroborar tus datos y antecedentes. Haz clic en '¿Cómo verificarse?' para ver los requisitos."}
+                </TooltipContent>
+              </Tooltip>
+
+              {!isVerified && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsInfoModalOpen(true)}
+                  className="text-xs h-7 px-2.5 gap-1 border-amber-200 bg-amber-50/50 hover:bg-amber-100 text-amber-900 cursor-pointer"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
+                  <span>¿Cómo verificarse?</span>
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
 
       <Separator className="bg-line" />
 
@@ -355,16 +391,17 @@ export function ShelterProfileForm({
             </div>
           </div>
 
-          {/* Selector de Ubicación Interactivo y Coordenadas GPS (US-07) */}
+          {/* Selector de Ubicación Interactivo y Coordenadas GPS */}
           <div className="space-y-3 bg-superficie-2 border border-line rounded-xl p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            {/* Cabecera de Ubicación con Botón Detectar mi ubicación */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-tinta-900 flex items-center gap-2">
                   <Navigation className="w-4 h-4 text-verde-700" />
-                  Ubicación en el Mapa y Coordenadas GPS
+                  Ubicación del Albergue en el Mapa
                 </h4>
-                <p className="text-xs text-tinta-600">
-                  Permite a los adoptantes ubicar tu albergue y calcular distancias en las búsquedas geográficas.
+                <p className="text-xs text-tinta-600 mt-0.5">
+                  Haz clic en el mapa o arrastra el marcador para fijar la ubicación exacta. Permite a los adoptantes ubicarte y calcular distancias.
                 </p>
               </div>
 
@@ -381,71 +418,31 @@ export function ShelterProfileForm({
                 ) : (
                   <Crosshair className="w-3.5 h-3.5 text-verde-700" />
                 )}
-                <span>{isDetectingLocation ? "Detectando..." : "Detectar mi GPS"}</span>
+                <span>{isDetectingLocation ? "Detectando ubicación..." : "Detectar mi ubicación"}</span>
               </Button>
             </div>
 
-            {/* Inputs de Latitud y Longitud */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="latitude" className="text-xs font-semibold text-tinta-700">
-                  Latitud (°N/S)
-                </Label>
-                <Input
-                  id="latitude"
-                  type="number"
-                  step="0.000001"
-                  value={formData.latitude ?? ""}
-                  onChange={(e) => updateField("latitude", parseFloat(e.target.value) || null)}
-                  placeholder="-12.0464"
-                  disabled={isLoading || isSaving}
-                  className="h-10 bg-white border-line text-sm font-mono"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="longitude" className="text-xs font-semibold text-tinta-700">
-                  Longitud (°E/W)
-                </Label>
-                <Input
-                  id="longitude"
-                  type="number"
-                  step="0.000001"
-                  value={formData.longitude ?? ""}
-                  onChange={(e) => updateField("longitude", parseFloat(e.target.value) || null)}
-                  placeholder="-77.0428"
-                  disabled={isLoading || isSaving}
-                  className="h-10 bg-white border-line text-sm font-mono"
-                />
-              </div>
-            </div>
-
-            {/* Vista Previa del Mapa con Pin Interactivo */}
-            <div className="relative rounded-lg overflow-hidden border border-line bg-white h-52 sm:h-60 shadow-xs">
-              <iframe
-                title="Mapa interactivo del albergue"
-                className="w-full h-full border-0 pointer-events-none"
-                loading="lazy"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${(formData.longitude ?? -77.0428) - 0.008}%2C${(formData.latitude ?? -12.0464) - 0.008}%2C${(formData.longitude ?? -77.0428) + 0.008}%2C${(formData.latitude ?? -12.0464) + 0.008}&layer=mapnik&marker=${formData.latitude ?? -12.0464}%2C${formData.longitude ?? -77.0428}`}
+            {/* Mapa Interactivo con Selección Directa por Clic o Arrastre (Más alto: h-80 sm:h-[420px]) */}
+            <div className="space-y-2">
+              <InteractiveLocationMap
+                latitude={formData.latitude}
+                longitude={formData.longitude}
+                onChange={({ latitude, longitude }) => {
+                  updateField("latitude", latitude);
+                  updateField("longitude", longitude);
+                }}
+                shelterName={formData.organizationName || "Tu albergue"}
+                className="h-80 sm:h-[420px]"
               />
 
-              <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-md text-[11px] font-mono text-tinta-800 border border-line shadow-xs flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-verde-700" />
-                <span>
-                  {(formData.latitude ?? -12.0464).toFixed(4)}, {(formData.longitude ?? -77.0428).toFixed(4)}
+              <div className="flex items-center justify-between text-xs text-tinta-500 px-1 pt-0.5">
+                <span className="inline-flex items-center gap-1.5 text-verde-700 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-verde-600 animate-pulse" />
+                  Ubicación fijada en el mapa
                 </span>
-              </div>
-
-              <div className="absolute bottom-2 left-2">
-                <a
-                  href={`https://www.google.com/maps?q=${formData.latitude ?? -12.0464},${formData.longitude ?? -77.0428}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 bg-white/90 hover:bg-white text-tinta-700 text-xs px-2.5 py-1 rounded-md border border-line shadow-xs transition-colors"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  Abrir en Google Maps
-                </a>
+                <span className="text-tinta-400 hidden sm:inline">
+                  Toca o haz clic sobre cualquier punto para mover el pin
+                </span>
               </div>
             </div>
           </div>
@@ -575,5 +572,13 @@ export function ShelterProfileForm({
         </CardFooter>
       </form>
     </Card>
+
+    <VerificationInfoModal
+      isOpen={isInfoModalOpen}
+      onClose={() => setIsInfoModalOpen(false)}
+      organizationName={formData.organizationName || profile?.organizationName}
+      isVerified={isVerified}
+    />
+  </>
   );
 }

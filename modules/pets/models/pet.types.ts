@@ -10,7 +10,8 @@ export type PetStatus = "draft" | "available" | "in_process" | "adopted" | "hidd
 export interface PetPhotoItem {
   id?: string;
   url: string;
-  publicId: string;
+  publicId?: string;
+  file?: File;
   isPrimary: boolean;
   order?: number;
 }
@@ -22,6 +23,7 @@ export interface PetShelter {
   department: string | null;
   contactEmail: string | null;
   phoneNumber: string | null;
+  isVerified?: boolean;
 }
 
 export interface Pet {
@@ -51,6 +53,9 @@ export interface Pet {
   status: PetStatus;
   photos: PetPhotoItem[];
   shelter?: PetShelter;
+  colors?: string[];
+  characteristics?: Record<string, any>;
+  visualEmbedding?: number[];
   createdAt: string;
   updatedAt: string;
 }
@@ -79,6 +84,48 @@ export interface CreatePetDto {
   description: string;
   status?: PetStatus;
   photos: PetPhotoItem[];
+  colors?: string[];
+  characteristics?: Record<string, any>;
+  visualEmbedding?: number[];
+}
+
+export interface AttributeOption {
+  value: string;
+  label: string;
+  probability: number;
+}
+
+export interface SingleAttributePrediction {
+  value: string | null;
+  label: string | null;
+  confidence: number;
+  autocompleted: boolean;
+  options: AttributeOption[];
+}
+
+export interface MultipleAttributePrediction {
+  value: string[] | null;
+  label: string[] | null;
+  confidence: number;
+  autocompleted: boolean;
+  options: AttributeOption[];
+}
+
+export interface AnalyzePetPhotosResponse {
+  species: SingleAttributePrediction;
+  fur: SingleAttributePrediction;
+  size: SingleAttributePrediction;
+  colors: MultipleAttributePrediction;
+  autocompletedFields: string[];
+  reviewFields: string[];
+  embedding?: number[];
+  inferenceTimeMs: number;
+}
+
+export interface SimilarPetResponse {
+  pet: Pet;
+  similarityScore?: number;
+  similarityPercentage: number;
 }
 
 export type UpdatePetDto = Partial<CreatePetDto>;
@@ -89,6 +136,18 @@ export interface UpdatePetStatusDto {
 
 export interface QueryShelterPetsParams {
   status?: PetStatus;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface QueryPublicPetsParams {
+  species?: PetSpecies;
+  size?: PetSize;
+  ageCategory?: PetAgeCategory;
+  gender?: PetGender;
+  city?: string;
+  department?: string;
   search?: string;
   page?: number;
   limit?: number;

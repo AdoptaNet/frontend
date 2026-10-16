@@ -6,11 +6,22 @@ import type {
   UpdatePetDto,
   UpdatePetStatusDto,
   QueryShelterPetsParams,
+  QueryPublicPetsParams,
   PaginatedPetsResponse,
   UploadMediaResponse,
+  AnalyzePetPhotosResponse,
+  SimilarPetResponse,
 } from "../models/pet.types";
 
 export const petsService = {
+  async getPublicPets(
+    params?: QueryPublicPetsParams,
+  ): Promise<PaginatedPetsResponse> {
+    return httpClient.get<PaginatedPetsResponse>(API_ROUTES.PETS.BASE, {
+      params: params as Record<string, string | number | boolean | undefined>,
+    });
+  },
+
   async getMyPets(
     params?: QueryShelterPetsParams,
   ): Promise<PaginatedPetsResponse> {
@@ -52,5 +63,32 @@ export const petsService = {
     return httpClient.delete<{ success: boolean }>(API_ROUTES.MEDIA.DELETE, {
       params: { publicId },
     });
+  },
+
+  async analyzePhotos(files: File[]): Promise<AnalyzePetPhotosResponse> {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("photos", file);
+    });
+    return httpClient.post<AnalyzePetPhotosResponse>(
+      API_ROUTES.PETS.ANALYZE_PHOTOS,
+      formData,
+    );
+  },
+
+  async searchSimilarPets(
+    file: File,
+    options?: { limit?: number; species?: "dog" | "cat"; threshold?: number },
+  ): Promise<SimilarPetResponse[]> {
+    const formData = new FormData();
+    formData.append("photo", file);
+    return httpClient.post<SimilarPetResponse[]>(
+      API_ROUTES.PETS.SEARCH_SIMILAR,
+      formData,
+      {
+        params: options as Record<string, string | number | boolean | undefined>,
+        skipAuth: true,
+      },
+    );
   },
 };

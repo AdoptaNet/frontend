@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   Search,
@@ -13,47 +13,83 @@ import {
   ClipboardCheck,
   MessageSquare,
   LogOut,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { authService } from "@/modules/auth/services/auth.service";
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user, logout: storeLogout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // ignore
+    }
+    storeLogout();
+    if (
+      pathname === "/pets" ||
+      (pathname.startsWith("/pets/") &&
+        !pathname.endsWith("/new") &&
+        !pathname.endsWith("/edit"))
+    ) {
+      router.refresh();
+    } else {
+      router.push("/login");
+    }
+  };
 
   const isShelter = user?.role === "shelter";
 
   // Desktop Navigation items
-  const desktopNav = isShelter
-    ? [
-        { href: "/home", label: "Panel", icon: LayoutDashboard },
-        { href: "/pets", label: "Mascotas", icon: PawPrint },
-        { href: "/applications", label: "Solicitudes", icon: FileText },
-        { href: "/follow-up", label: "Seguimiento", icon: ClipboardCheck },
-      ]
+  const desktopNav = user
+    ? isShelter
+      ? [
+          { href: "/home", label: "Panel", icon: LayoutDashboard },
+          { href: "/pets", label: "Mascotas", icon: PawPrint },
+          { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/follow-up", label: "Seguimiento", icon: ClipboardCheck },
+        ]
+      : [
+          { href: "/home", label: "Inicio", icon: Home },
+          { href: "/pets", label: "Explorar", icon: Search },
+          { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/messages", label: "Mensajes", icon: MessageSquare },
+        ]
     : [
-        { href: "/home", label: "Inicio", icon: Home },
-        { href: "/pets", label: "Explorar", icon: Search },
-        { href: "/applications", label: "Solicitudes", icon: FileText },
-        { href: "/messages", label: "Mensajes", icon: MessageSquare },
+        { href: "/", label: "Inicio", icon: Home },
+        { href: "/pets", label: "Explorar Mascotas", icon: Search },
       ];
 
   // Mobile Bottom Navigation items (4 destinations with labels always visible)
-  const mobileNav = isShelter
-    ? [
-        { href: "/home", label: "Panel", icon: LayoutDashboard },
-        { href: "/pets", label: "Mascotas", icon: PawPrint },
-        { href: "/applications", label: "Solicitudes", icon: FileText },
-        { href: "/profile", label: "Perfil", icon: User },
-      ]
+  const mobileNav = user
+    ? isShelter
+      ? [
+          { href: "/home", label: "Panel", icon: LayoutDashboard },
+          { href: "/pets", label: "Mascotas", icon: PawPrint },
+          { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/profile", label: "Perfil", icon: User },
+        ]
+      : [
+          { href: "/home", label: "Para ti", icon: Home },
+          { href: "/pets", label: "Explorar", icon: Search },
+          { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/profile", label: "Perfil", icon: User },
+        ]
     : [
-        { href: "/home", label: "Para ti", icon: Home },
+        { href: "/", label: "Inicio", icon: Home },
         { href: "/pets", label: "Explorar", icon: Search },
-        { href: "/applications", label: "Solicitudes", icon: FileText },
-        { href: "/profile", label: "Perfil", icon: User },
+        { href: "/login", label: "Acceder", icon: LogIn },
+        { href: "/register", label: "Registro", icon: UserPlus },
       ];
 
   const displayName = user?.fullName || (isShelter ? "Albergue" : "Usuario");
@@ -65,13 +101,15 @@ export function AppShell({ children }: AppShellProps) {
     .join("")
     .toUpperCase();
 
+  const brandHref = user ? "/home" : "/";
+
   return (
     <div className="min-h-screen flex flex-col bg-fondo text-tinta-900">
       {/* ---------- HEADER DE ESCRITORIO (>= 768px) ---------- */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Brand Logo */}
-          <Link href="/home" className="flex items-center gap-2.5 group">
+          <Link href={brandHref} className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-verde-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
               <PawPrint className="w-5 h-5 fill-current" />
             </div>
@@ -84,7 +122,11 @@ export function AppShell({ children }: AppShellProps) {
           <nav className="hidden md:flex items-center gap-1">
             {desktopNav.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname === item.href ||
+                    (item.href !== "/home" && pathname.startsWith(`${item.href}/`));
               return (
                 <Link
                   key={item.href}
@@ -95,59 +137,94 @@ export function AppShell({ children }: AppShellProps) {
                       : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-verde-700" : "text-tinta-400"}`} />
+                  <Icon
+                    className={`w-4 h-4 ${isActive ? "text-verde-700" : "text-tinta-400"}`}
+                  />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Action: User Menu */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/profile"
-              className={`flex items-center gap-2.5 p-1.5 pl-2 rounded-full border transition-all ${
-                pathname === "/profile"
-                  ? "border-verde-700 bg-verde-50 ring-2 ring-verde-500/20"
-                  : "border-line bg-white hover:border-verde-500"
-              }`}
-            >
-              <div className="w-7 h-7 rounded-full bg-verde-700 text-white flex items-center justify-center text-xs font-bold overflow-hidden">
-                {user?.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-                ) : (
-                  <span>{initials || "AN"}</span>
-                )}
-              </div>
-              <span className="text-xs font-semibold text-tinta-900 hidden sm:inline pr-2 truncate max-w-[120px]">
-                {displayName}
-              </span>
-            </Link>
+          {/* Right Action: User Menu or Auth Buttons */}
+          <div className="flex items-center gap-2.5">
+            {user ? (
+              <>
+                <Link
+                  href="/profile"
+                  className={`flex items-center gap-2.5 p-1.5 pl-2 rounded-full border transition-all ${
+                    pathname === "/profile"
+                      ? "border-verde-700 bg-verde-50 ring-2 ring-verde-500/20"
+                      : "border-line bg-white hover:border-verde-500"
+                  }`}
+                >
+                  <div className="w-7 h-7 rounded-full bg-verde-700 text-white flex items-center justify-center text-xs font-bold overflow-hidden">
+                    {user?.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={user.avatarUrl}
+                        alt={displayName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>{initials || "AN"}</span>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-tinta-900 hidden sm:inline pr-2 truncate max-w-[120px]">
+                    {displayName}
+                  </span>
+                </Link>
 
-            <button
-              type="button"
-              onClick={logout}
-              title="Cerrar sesión"
-              className="hidden md:flex p-2 rounded-lg text-tinta-400 hover:text-coral-600 hover:bg-coral-100/50 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title="Cerrar sesión"
+                  aria-label="Cerrar sesión"
+                  className="flex p-2 rounded-lg text-tinta-400 hover:text-coral-600 hover:bg-coral-100/50 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Link
+                  href={`/login?redirect=${encodeURIComponent(pathname)}`}
+                  className={buttonVariants({
+                    variant: "ghost",
+                    className:
+                      "h-8 sm:h-9 px-2.5 sm:px-3 text-xs font-semibold text-tinta-700 hover:text-verde-700",
+                  })}
+                >
+                  Iniciar sesión
+                </Link>
+                <Link
+                  href="/register"
+                  className={buttonVariants({
+                    className:
+                      "h-8 sm:h-9 px-2.5 sm:px-3.5 text-xs font-semibold bg-verde-700 hover:bg-verde-800 text-white shadow-2xs",
+                  })}
+                >
+                  Registrarse
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       {/* ---------- MAIN CONTENT WRAPPER ---------- */}
-      <main className="flex-1 pb-20 md:pb-10">
-        {children}
-      </main>
+      <main className="flex-1 pb-20 md:pb-10">{children}</main>
 
       {/* ---------- BARRA DE NAVEGACIÓN INFERIOR (MÓVIL < 768px) ---------- */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-line pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg">
         <div className="grid grid-cols-4 h-16 items-center px-1">
           {mobileNav.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href !== "/home" && pathname.startsWith(item.href));
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname === item.href ||
+                  (item.href !== "/home" && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}

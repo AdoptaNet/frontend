@@ -28,10 +28,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { authService } from "@/modules/auth/services/auth.service";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { useModal } from "@/shared/hooks/useModal";
 import type { UserProfile } from "../models/user.types";
 
 interface SecurityFormProps {
-  user?: UserProfile | null;
+  user: UserProfile | null;
   onChangePassword: (data: {
     currentPassword?: string;
     newPassword?: string;
@@ -68,6 +69,12 @@ export function SecurityForm({
   const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useModal({
+    isOpen: isDeleteModalOpen,
+    onClose: () => setIsDeleteModalOpen(false),
+    preventClose: isDeleting,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -430,9 +437,10 @@ export function SecurityForm({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200"
         >
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-coral-200 space-y-5 relative">
+          <div className="fixed inset-0" onClick={() => !isDeleting && setIsDeleteModalOpen(false)} />
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-coral-200 space-y-5 relative z-10 overscroll-contain">
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(false)}
