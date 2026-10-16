@@ -465,7 +465,7 @@ export function Step1BasicInfo({
                 const years = rawYears === "" ? 0 : parseInt(rawYears, 10) || 0;
                 const currentMonths = typeof ageMonths === "number" && !isNaN(ageMonths) ? ageMonths % 12 : 0;
                 if (rawYears === "" && currentMonths === 0) {
-                  setValue("ageMonths", undefined as any, { shouldValidate: true, shouldDirty: true });
+                  setValue("ageMonths", undefined as unknown as number, { shouldValidate: true, shouldDirty: true });
                 } else {
                   setValue("ageMonths", Math.max(0, years * 12 + currentMonths), {
                     shouldValidate: true,
@@ -500,7 +500,7 @@ export function Step1BasicInfo({
                 const months = rawMonths === "" ? 0 : parseInt(rawMonths, 10) || 0;
                 const currentYears = typeof ageMonths === "number" && !isNaN(ageMonths) ? Math.floor(ageMonths / 12) : 0;
                 if (rawMonths === "" && currentYears === 0) {
-                  setValue("ageMonths", undefined as any, { shouldValidate: true, shouldDirty: true });
+                  setValue("ageMonths", undefined as unknown as number, { shouldValidate: true, shouldDirty: true });
                 } else {
                   setValue("ageMonths", Math.max(0, currentYears * 12 + months), {
                     shouldValidate: true,

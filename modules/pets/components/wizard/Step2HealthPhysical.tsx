@@ -2,7 +2,7 @@
 
 import React from "react";
 import { UseFormReturn, Controller } from "react-hook-form";
-import { ShieldCheck, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CompletePetFormData } from "../../models/pet-form.schemas";

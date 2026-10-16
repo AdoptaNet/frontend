@@ -54,7 +54,7 @@ export interface Pet {
   photos: PetPhotoItem[];
   shelter?: PetShelter;
   colors?: string[];
-  characteristics?: Record<string, any>;
+  characteristics?: Record<string, unknown>;
   visualEmbedding?: number[];
   createdAt: string;
   updatedAt: string;
@@ -85,7 +85,7 @@ export interface CreatePetDto {
   status?: PetStatus;
   photos: PetPhotoItem[];
   colors?: string[];
-  characteristics?: Record<string, any>;
+  characteristics?: Record<string, unknown>;
   visualEmbedding?: number[];
 }
 

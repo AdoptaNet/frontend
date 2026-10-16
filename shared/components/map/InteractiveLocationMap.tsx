@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { MapPin, ExternalLink, Hand } from "lucide-react";
+import { ExternalLink, Hand } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 interface InteractiveLocationMapProps {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { MapPin, PawPrint, ShieldCheck, Heart, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { MapPin, PawPrint, ShieldCheck, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,

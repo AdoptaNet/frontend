@@ -8,7 +8,6 @@ import {
   PawPrint,
   Users,
   Heart,
-  CheckCircle2,
   ArrowRight,
   Phone,
   Mail,
