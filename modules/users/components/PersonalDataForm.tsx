@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User as UserIcon, Mail, Calendar, Loader2 } from "lucide-react";
+import { User as UserIcon, Mail, Calendar, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,12 +29,51 @@ export function PersonalDataForm({
 }: PersonalDataFormProps) {
   const [fullName, setFullName] = useState(user.fullName || "");
   const [isSaving, setIsSaving] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [bottomFeedback, setBottomFeedback] = useState<{
+    type: "success" | "error" | null;
+    message: string | null;
+  }>({ type: null, message: null });
+
+  const handleNameChange = (val: string) => {
+    setFullName(val);
+    if (nameError) setNameError(null);
+    if (bottomFeedback.type === "error") setBottomFeedback({ type: null, message: null });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBottomFeedback({ type: null, message: null });
+
+    const trimmed = fullName.trim();
+    if (trimmed.length < 3) {
+      setNameError("El nombre completo debe tener al menos 3 caracteres.");
+      setBottomFeedback({
+        type: "error",
+        message: "Por favor ingresa un nombre válido de al menos 3 caracteres.",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await onUpdatePersonalData({ fullName });
+      await onUpdatePersonalData({ fullName: trimmed });
+      setBottomFeedback({
+        type: "success",
+        message: "¡Datos personales actualizados correctamente!",
+      });
+      setTimeout(() => {
+        setBottomFeedback((prev) => (prev.type === "success" ? { type: null, message: null } : prev));
+      }, 5000);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Error al actualizar datos personales";
+      setBottomFeedback({
+        type: "error",
+        message,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -84,18 +123,25 @@ export function PersonalDataForm({
             <div className="space-y-2">
               <Label htmlFor="fullName" className="text-sm font-medium text-tinta-900 flex items-center gap-1.5">
                 <UserIcon className="w-4 h-4 text-verde-700" />
-                Nombre completo
+                Nombre completo <span className="text-rojo-600 font-bold">*</span>
               </Label>
               <Input
                 id="fullName"
                 type="text"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="Ej. Franco Morales"
-                required
                 disabled={isLoading || isSaving}
-                className="h-12 border-line focus-visible:ring-verde-500 text-sm"
+                className={`h-12 border-line focus-visible:ring-verde-500 text-sm ${
+                  nameError ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
+                }`}
               />
+              {nameError && (
+                <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{nameError}</span>
+                </p>
+              )}
             </div>
 
             {/* Correo Electrónico (Deshabilitado con nota) */}
@@ -128,11 +174,30 @@ export function PersonalDataForm({
 
         <Separator className="bg-line mt-4" />
 
-        <CardFooter className="py-4 bg-superficie-2 flex justify-end">
+        <CardFooter className="py-4 bg-superficie-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div className="flex-1">
+            {bottomFeedback.message && (
+              <div
+                className={`p-3 rounded-lg border text-xs sm:text-sm font-medium flex items-center gap-2 ${
+                  bottomFeedback.type === "success"
+                    ? "bg-verde-50 border-verde-200 text-verde-800"
+                    : "bg-red-50 border-red-200 text-red-700"
+                }`}
+              >
+                {bottomFeedback.type === "success" ? (
+                  <CheckCircle2 className="w-4 h-4 text-verde-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                )}
+                <span>{bottomFeedback.message}</span>
+              </div>
+            )}
+          </div>
+
           <Button
             type="submit"
             disabled={isLoading || isSaving || fullName.trim() === (user.fullName || "")}
-            className="bg-verde-700 hover:bg-verde-hover text-white font-medium min-w-[160px]"
+            className="bg-verde-700 hover:bg-verde-hover text-white font-medium min-w-[160px] cursor-pointer"
           >
             {isSaving ? (
               <>
