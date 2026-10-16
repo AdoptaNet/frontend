@@ -3,11 +3,10 @@ import { z } from "zod";
 export const petPhotoItemSchema = z.object({
   id: z.string().optional(),
   url: z
-    .string({ required_error: "La URL de la foto es requerida" })
-    .url("URL de imagen inválida"),
-  publicId: z
-    .string({ required_error: "El identificador de la foto es requerido" })
-    .min(1, "El identificador de la foto es requerido"),
+    .string({ required_error: "La foto es requerida" })
+    .min(1, "La foto es requerida"),
+  publicId: z.string().optional(),
+  file: z.any().optional(),
   isPrimary: z.boolean({
     required_error: "Debe especificarse si es foto principal",
   }),
@@ -47,6 +46,8 @@ export const step1BasicInfoSchema = z.object({
       (photos) => photos.filter((p) => p.isPrimary).length === 1,
       "Debes seleccionar exactamente una foto como portada principal",
     ),
+  colors: z.array(z.string()).max(3, "Máximo 3 colores").optional(),
+  visualEmbedding: z.array(z.number()).optional(),
 });
 
 export const step2HealthPhysicalSchema = z.object({

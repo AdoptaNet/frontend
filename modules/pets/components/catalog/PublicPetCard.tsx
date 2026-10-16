@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { MapPin, PawPrint, ShieldCheck, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, PawPrint, ShieldCheck, Heart, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -13,9 +13,10 @@ import type { Pet } from "../../models/pet.types";
 
 interface PublicPetCardProps {
   pet: Pet;
+  similarityPercentage?: number;
 }
 
-export function PublicPetCard({ pet }: PublicPetCardProps) {
+export function PublicPetCard({ pet, similarityPercentage }: PublicPetCardProps) {
   const photos = pet.photos && pet.photos.length > 0 ? pet.photos : [];
   const primaryIndex = photos.findIndex((p) => p.isPrimary);
   const [activePhotoIndex, setActivePhotoIndex] = useState(
@@ -84,6 +85,16 @@ export function PublicPetCard({ pet }: PublicPetCardProps) {
               Disponible
             </Badge>
           </div>
+
+          {/* Similarity Badge */}
+          {similarityPercentage !== undefined && (
+            <div className="absolute bottom-2.5 left-2.5 z-20">
+              <span className="bg-verde-800/90 backdrop-blur-xs text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-verde-300" />
+                {similarityPercentage}% coincidencia
+              </span>
+            </div>
+          )}
 
           {/* Lateral navigation buttons (if > 1 photo) */}
           {photos.length > 1 && (
