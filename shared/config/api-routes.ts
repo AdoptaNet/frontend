@@ -14,8 +14,7 @@ export const API_ROUTES = {
   USERS: {
     ME: "/users/me",
     AVATAR: "/users/me/avatar",
-    PASSWORD: "/users/change-password",
-    PASSWORD_LEGACY: "/users/me/password",
+    PASSWORD: "/users/me/password",
     ADOPTER_PROFILE: "/users/me/adopter-profile",
     SHELTER_PROFILE: "/users/me/shelter-profile",
     ROLE: "/users/select-role",
@@ -35,5 +34,13 @@ export const API_ROUTES = {
     BY_ID: (id: string) => `/shelters/${id}`,
     VERIFY: (id: string) => `/shelters/${id}/verify`,
     ADMIN_VERIFY: (id: string) => `/admin/shelters/${id}/verify`,
+  },
+  ADOPTIONS: {
+    BASE: "/adoptions",
+    MY_REQUESTS: "/adoptions/my-requests",
+    SHELTER: "/adoptions/shelter",
+    BY_ID: (id: string) => `/adoptions/${id}`,
+    CANCEL: (id: string) => `/adoptions/${id}/cancel`,
+    REVIEW: (id: string) => `/adoptions/${id}/review`,
   },
 } as const;

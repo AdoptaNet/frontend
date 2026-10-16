@@ -6,6 +6,18 @@ import "lenis/dist/lenis.css";
 
 let globalLenis: Lenis | null = null;
 
+export function pauseLenis() {
+  globalLenis?.stop();
+}
+
+export function resumeLenis() {
+  globalLenis?.start();
+}
+
+export function getLenis(): Lenis | null {
+  return globalLenis;
+}
+
 export function scrollToSection(id: string) {
   const target = document.getElementById(id);
   if (!target) return;
@@ -29,6 +41,16 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       smoothWheel: true,
+      allowNestedScroll: true,
+      prevent: (node) => {
+        if (!(node instanceof HTMLElement)) return false;
+        return (
+          node.hasAttribute("data-lenis-prevent") ||
+          Boolean(node.closest?.("[data-lenis-prevent]")) ||
+          Boolean(node.closest?.("[role='dialog']")) ||
+          Boolean(node.closest?.(".modal-scrollable"))
+        );
+      },
     });
 
     globalLenis = lenis;

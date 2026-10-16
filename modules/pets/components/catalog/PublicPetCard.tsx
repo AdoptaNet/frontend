@@ -4,6 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { MapPin, PawPrint, ShieldCheck, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import type { Pet } from "../../models/pet.types";
 
 interface PublicPetCardProps {
@@ -162,13 +167,17 @@ export function PublicPetCard({ pet }: PublicPetCardProps) {
 
             {/* Verified Shelter Badge */}
             {pet.shelter?.isVerified && (
-              <span
-                title="Albergue Verificado"
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-verde-700 bg-verde-50 border border-verde-200/60 px-1.5 py-0.5 rounded-md shrink-0"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-verde-700" />
-                <span>Verificado</span>
-              </span>
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded-md shrink-0 cursor-help">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Verificado</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs p-2">
+                  Albergue verificado por AdoptaNet
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         </div>

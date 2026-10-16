@@ -2,12 +2,18 @@
 
 import React from "react";
 import { Loader2 } from "lucide-react";
+import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { useProfile } from "@/modules/users/hooks/useProfile";
 import { ShelterPetsDashboard } from "./dashboard/ShelterPetsDashboard";
 import { PublicPetsCatalog } from "./catalog/PublicPetsCatalog";
 
 export function PetsPage() {
+  const { isAuthenticated, isHydrated } = useAuthStore();
   const { role, isInitialLoading } = useProfile();
+
+  if (isHydrated && !isAuthenticated) {
+    return <PublicPetsCatalog />;
+  }
 
   if (isInitialLoading) {
     return (

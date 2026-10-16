@@ -12,6 +12,7 @@ import {
   Sparkles,
   MapPin,
   X,
+  ArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,9 +38,12 @@ export function PublicPetsCatalog() {
     city,
     search,
     isLoading,
+    isLoadingMore,
+    hasMore,
     error,
     hasActiveFilters,
     setPage,
+    loadMore,
     setSpecies,
     setSize,
     setAgeCategory,
@@ -55,6 +59,20 @@ export function PublicPetsCatalog() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSearch(searchInput);
+  };
+
+  const getPageNumbers = () => {
+    const pages: number[] = [];
+    const maxButtons = 5;
+    let start = Math.max(1, page - Math.floor(maxButtons / 2));
+    let end = Math.min(totalPages, start + maxButtons - 1);
+    if (end - start + 1 < maxButtons) {
+      start = Math.max(1, end - maxButtons + 1);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   return (
@@ -307,7 +325,7 @@ export function PublicPetsCatalog() {
           )}
         </div>
       ) : (
-        <>
+        <div className="space-y-8">
           {/* Pet Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {pets.map((pet) => (
@@ -315,37 +333,81 @@ export function PublicPetsCatalog() {
             ))}
           </div>
 
+          {/* Load More Button (Progressive list expansion) */}
+          {hasMore && (
+            <div className="flex flex-col items-center justify-center pt-2 pb-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isLoadingMore}
+                onClick={loadMore}
+                className="h-10 px-6 rounded-xl border border-verde-200 bg-verde-50/70 hover:bg-verde-100 text-verde-800 text-xs sm:text-sm font-semibold gap-2 shadow-2xs transition-all cursor-pointer"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-verde-700" />
+                    <span>Cargando más mascotas...</span>
+                  </>
+                ) : (
+                  <>
+                    <ArrowDown className="w-4 h-4 text-verde-700" />
+                    <span>
+                      Cargar más mascotas ({total - pets.length} restantes)
+                    </span>
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-6 border-t border-line">
-              <span className="text-xs text-tinta-600 font-medium">
-                Página {page} de {totalPages}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-line">
+              <span className="text-xs text-tinta-600 font-medium order-2 sm:order-1">
+                Mostrando {pets.length} de {total} mascotas (Página {page} de {totalPages})
               </span>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 order-1 sm:order-2">
                 <button
                   type="button"
                   disabled={page <= 1}
                   onClick={() => setPage(page - 1)}
-                  className="h-9 px-3 rounded-xl border border-line bg-white hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-tinta-700 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                  className="h-8 px-2.5 rounded-lg border border-line bg-white hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-tinta-700 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                  aria-label="Página anterior"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Anterior</span>
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Anterior</span>
                 </button>
+
+                {getPageNumbers().map((pNum) => (
+                  <button
+                    key={pNum}
+                    type="button"
+                    onClick={() => setPage(pNum)}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      pNum === page
+                        ? "bg-verde-700 text-white shadow-2xs font-bold"
+                        : "border border-line bg-white text-tinta-700 hover:bg-superficie-2 hover:text-tinta-900"
+                    }`}
+                  >
+                    {pNum}
+                  </button>
+                ))}
 
                 <button
                   type="button"
                   disabled={page >= totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="h-9 px-3 rounded-xl border border-line bg-white hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-tinta-700 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                  className="h-8 px-2.5 rounded-lg border border-line bg-white hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-tinta-700 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                  aria-label="Página siguiente"
                 >
-                  <span>Siguiente</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">Siguiente</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,23 @@
 import Link from "next/link";
-import { Building2, ShieldCheck, PawPrint, Users, HeartHandshake, ArrowRight, Phone, Mail, MapPin } from "lucide-react";
+import {
+  Building2,
+  ShieldCheck,
+  PawPrint,
+  Users,
+  HeartHandshake,
+  ArrowRight,
+  Phone,
+  Mail,
+  MapPin,
+  AlertTriangle,
+} from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import type { UserProfile } from "@/modules/users/models/user.types";
 
 interface ShelterHomeViewProps {
@@ -17,16 +33,32 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
     <div className="w-full max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-8">
       {/* Welcome Header */}
       <div className="space-y-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-tinta-900 tracking-tight">
             ¡Hola, {shelterName}! 🐾
           </h1>
-          {isVerified && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-verde-50 border border-verde-200 text-verde-700 text-xs font-semibold">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Verificado
-            </span>
-          )}
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="inline-flex cursor-help">
+                {isVerified ? (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    Verificado por AdoptaNet
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                    Pendiente de verificación
+                  </span>
+                )}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-xs p-3">
+              {isVerified
+                ? "Tu albergue cuenta con acreditación oficial de AdoptaNet. Tus animales publicados lucen el sello de confianza."
+                : "La acreditación oficial es evaluada por el equipo administrador de AdoptaNet. Visita tu perfil para ver los requisitos."}
+            </TooltipContent>
+          </Tooltip>
         </div>
         <p className="text-sm text-tinta-600 max-w-2xl">
           Panel de administración institucional y gestión de animales rescatados en AdoptaNet.
@@ -110,10 +142,19 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
         <aside className="space-y-6">
           <Card className="border-line bg-white shadow-xs rounded-xl overflow-hidden">
             <CardHeader className="p-5 pb-3">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-verde-50 border border-verde-200 text-verde-700 text-xs font-semibold w-fit">
-                <Building2 className="w-3.5 h-3.5" />
-                <span>{isVerified ? "Albergue verificado" : "Albergue registrado"}</span>
-              </div>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-verde-50 border border-verde-200 text-verde-700 text-xs font-semibold w-fit cursor-help">
+                    <Building2 className="w-3.5 h-3.5" />
+                    <span>{isVerified ? "Albergue verificado" : "Albergue registrado"}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-xs p-3">
+                  {isVerified
+                    ? "Este albergue cuenta con validación oficial de AdoptaNet."
+                    : "Organización registrada. La verificación oficial es concedida administrativamente tras evaluar credenciales."}
+                </TooltipContent>
+              </Tooltip>
               <CardTitle className="text-lg font-heading font-bold text-tinta-900 mt-2.5">
                 {profile?.organizationName || "Organización"}
               </CardTitle>

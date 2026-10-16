@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Calendar,
   Heart,
   MapPin,
   PawPrint,
@@ -29,10 +28,16 @@ import {
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { usePetDetail } from "../../hooks/usePetDetail";
 import { useProfile } from "@/modules/users/hooks/useProfile";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { useModal } from "@/shared/hooks/useModal";
+import { ApplyAdoptionModal } from "@/modules/adoptions/components/ApplyAdoptionModal";
 
 interface PetDetailPageProps {
   petId: string;
@@ -49,6 +54,20 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [showShelterNoticeModal, setShowShelterNoticeModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+
+  useModal({
+    isOpen: showSurveyModal,
+    onClose: () => setShowSurveyModal(false),
+  });
+  useModal({
+    isOpen: showShelterNoticeModal,
+    onClose: () => setShowShelterNoticeModal(false),
+  });
+  useModal({
+    isOpen: showAuthModal,
+    onClose: () => setShowAuthModal(false),
+  });
 
   if (isLoading) {
     return (
@@ -127,6 +146,10 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   const isShelterUser = role === "shelter";
 
   const handleApplyClick = () => {
+    if (pet.status !== 'available') {
+      return;
+    }
+
     if (!user) {
       setShowAuthModal(true);
       return;
@@ -137,14 +160,14 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
       return;
     }
 
-    // US-06 CA-06.4: Gate de Machine Learning
+    // Validar cuestionario de compatibilidad
     if (!adopterProfile?.isSurveyCompleted) {
       setShowSurveyModal(true);
       return;
     }
 
-    // Redirige al flujo de postulación formal (Épica 5 / US-15)
-    router.push(`/pets/${pet.id}/apply`);
+    // Abre el flujo de postulación formal
+    setShowApplyModal(true);
   };
 
   const nextPhoto = () => {
@@ -340,13 +363,17 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               </div>
 
               {pet.shelter?.isVerified && (
-                <span
-                  title="Albergue Verificado"
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-verde-700 bg-verde-50 border border-verde-200 px-2 py-0.5 rounded-full shrink-0"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-verde-700" />
-                  <span>Verificado</span>
-                </span>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0 cursor-help">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Verificado</span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs p-2">
+                    Albergue verificado por AdoptaNet
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
 
@@ -367,13 +394,22 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              className="w-full h-12 bg-verde-700 hover:bg-verde-800 text-white font-bold text-sm sm:text-base gap-2 rounded-xl shadow-sm cursor-pointer"
+              disabled={pet.status !== "available"}
+              className="w-full h-12 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-bold text-sm sm:text-base gap-2 rounded-xl shadow-sm cursor-pointer disabled:cursor-not-allowed"
             >
               <Heart className="w-5 h-5 fill-current" />
-              <span>Postular a Adopción</span>
+              <span>
+                {pet.status === "available"
+                  ? "Postular a Adopción"
+                  : pet.status === "adopted"
+                  ? "Mascota Ya Adoptada"
+                  : "No disponible para postular"}
+              </span>
             </Button>
             <p className="text-[11px] text-center text-tinta-500">
-              El proceso incluye evaluación de compatibilidad de hogar y seguimiento responsable.
+              {pet.status === "available"
+                ? "El proceso incluye evaluación de compatibilidad de hogar y seguimiento responsable."
+                : "Esta mascota ya cuenta con un hogar formalizado o no admite nuevas solicitudes."}
             </p>
           </div>
         </div>
@@ -623,10 +659,17 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   {pet.shelter?.organizationName || "Albergue Responsable"}
                 </h3>
                 {pet.shelter?.isVerified && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-verde-700 bg-verde-100 px-2 py-0.5 rounded-full">
-                    <ShieldCheck className="w-3.5 h-3.5 text-verde-700" />
-                    <span>Verificado</span>
-                  </span>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full cursor-help">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Verificado</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs p-2">
+                      Albergue verificado por AdoptaNet
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
               <p className="text-xs text-tinta-600 mt-0.5 flex items-center gap-1.5">
@@ -664,20 +707,31 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              className="h-10 bg-verde-700 hover:bg-verde-800 text-white font-semibold text-xs sm:text-sm gap-2 shadow-xs cursor-pointer"
+              disabled={pet.status !== "available"}
+              className="h-10 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-semibold text-xs sm:text-sm gap-2 shadow-xs cursor-pointer disabled:cursor-not-allowed"
             >
               <Heart className="w-4 h-4 fill-current" />
-              <span>Postular</span>
+              <span>{pet.status === "available" ? "Postular" : "No disponible"}</span>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* ---------- MODAL 1: GATE DE ML (US-06 CA-06.4) ---------- */}
+      {/* Modal: Perfil de compatibilidad pendiente */}
       {showSurveyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+        <div
+          data-lenis-prevent
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+        >
           <div className="fixed inset-0" onClick={() => setShowSurveyModal(false)} />
-          <div className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 animate-in zoom-in-95 duration-150 text-center">
+          <div
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Perfil de compatibilidad pendiente"
+            data-lenis-prevent
+            className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 overscroll-contain outline-none animate-in zoom-in-95 duration-150 text-center"
+          >
             <div className="w-12 h-12 rounded-full bg-verde-50 border border-verde-200 text-verde-700 flex items-center justify-center mx-auto">
               <Sparkles className="w-6 h-6" />
             </div>
@@ -717,11 +771,21 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
         </div>
       )}
 
-      {/* ---------- MODAL 2: AVISO PARA ALBERGUES ---------- */}
+      {/* Modal: Aviso para albergues */}
       {showShelterNoticeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+        <div
+          data-lenis-prevent
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+        >
           <div className="fixed inset-0" onClick={() => setShowShelterNoticeModal(false)} />
-          <div className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 animate-in zoom-in-95 duration-150 text-center">
+          <div
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Acción no disponible para albergues"
+            data-lenis-prevent
+            className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 overscroll-contain outline-none animate-in zoom-in-95 duration-150 text-center"
+          >
             <div className="w-12 h-12 rounded-full bg-ambar-50 border border-ambar-200 text-ambar-700 flex items-center justify-center mx-auto">
               <ShieldAlert className="w-6 h-6" />
             </div>
@@ -749,11 +813,21 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
         </div>
       )}
 
-      {/* ---------- MODAL 3: AVISO PARA VISITANTES NO AUTENTICADOS ---------- */}
+      {/* Modal: Aviso para visitantes no autenticados */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+        <div
+          data-lenis-prevent
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-hidden overscroll-contain animate-in fade-in duration-150"
+        >
           <div className="fixed inset-0" onClick={() => setShowAuthModal(false)} />
-          <div className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 animate-in zoom-in-95 duration-150 text-center">
+          <div
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Inicia sesión para postular"
+            data-lenis-prevent
+            className="relative w-full max-w-md p-6 bg-white rounded-2xl border border-line shadow-xl z-10 space-y-4 overscroll-contain outline-none animate-in zoom-in-95 duration-150 text-center"
+          >
             <div className="w-12 h-12 rounded-full bg-verde-50 border border-verde-200 text-verde-700 flex items-center justify-center mx-auto">
               <Heart className="w-6 h-6 fill-current" />
             </div>
@@ -790,6 +864,20 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
           </div>
         </div>
       )}
+
+      {/* Modal: Formulario de postulación formal */}
+      <ApplyAdoptionModal
+        isOpen={showApplyModal}
+        onClose={() => setShowApplyModal(false)}
+        pet={{
+          id: pet.id,
+          name: pet.name,
+          species: pet.species,
+          breed: pet.breed,
+          primaryPhotoUrl: pet.photos?.[0]?.url,
+          status: pet.status,
+        }}
+      />
     </div>
   );
 }

@@ -64,7 +64,7 @@ export function AdopterHomeView({ user }: AdopterHomeViewProps) {
                     Afinidad IA
                   </div>
                   <p className="text-[11px] text-tinta-600 leading-snug">
-                    Porcentaje de compatibilidad y motivos claros.
+                    Motivos claros y afinidad para tu estilo de vida.
                   </p>
                 </div>
 

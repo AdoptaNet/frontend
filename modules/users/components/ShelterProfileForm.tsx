@@ -13,6 +13,7 @@ import {
   Crosshair,
   ExternalLink,
   Navigation,
+  HelpCircle,
 } from "lucide-react";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -44,7 +45,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { InteractiveLocationMap } from "@/shared/components/map/InteractiveLocationMap";
+import { VerificationInfoModal } from "./VerificationInfoModal";
 import type {
   ShelterProfile,
   UpdateShelterProfileDto,
@@ -233,39 +240,67 @@ export function ShelterProfileForm({
   };
 
   const isVerified = profile?.isVerified ?? false;
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   return (
-    <Card className="bg-white border-line shadow-sm">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-verde-700" />
-              Datos Institucionales del Albergue
-            </CardTitle>
-            <CardDescription className="text-sm text-tinta-600 mt-1">
-              Esta información es visible para los adoptantes y en las fichas de tus animales rescatados.
-            </CardDescription>
-          </div>
+    <>
+      <Card className="bg-white border-line shadow-sm">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-verde-700" />
+                Datos Institucionales del Albergue
+              </CardTitle>
+              <CardDescription className="text-sm text-tinta-600 mt-1">
+                Esta información es visible para los adoptantes y en las fichas de tus animales rescatados.
+              </CardDescription>
+            </div>
 
-          <Badge
-            variant={isVerified ? "disponible" : "reason"}
-            className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold self-start sm:self-auto"
-          >
-            {isVerified ? (
-              <>
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Verificado por AdoptaNet
-              </>
-            ) : (
-              <>
-                <AlertTriangle className="w-3.5 h-3.5" />
-                Pendiente de verificación
-              </>
-            )}
-          </Badge>
-        </div>
-      </CardHeader>
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="inline-flex cursor-help">
+                    <Badge
+                      variant={isVerified ? "disponible" : "reason"}
+                      className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold"
+                    >
+                      {isVerified ? (
+                        <>
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          Verificado por AdoptaNet
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          Pendiente de verificación
+                        </>
+                      )}
+                    </Badge>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-xs p-3">
+                  {isVerified
+                    ? "Tu albergue cuenta con acreditación oficial de AdoptaNet tras corroborar tu trayectoria y labor."
+                    : "La acreditación es otorgada administrativamente por AdoptaNet tras corroborar tus datos y antecedentes. Haz clic en '¿Cómo verificarse?' para ver los requisitos."}
+                </TooltipContent>
+              </Tooltip>
+
+              {!isVerified && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsInfoModalOpen(true)}
+                  className="text-xs h-7 px-2.5 gap-1 border-amber-200 bg-amber-50/50 hover:bg-amber-100 text-amber-900 cursor-pointer"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
+                  <span>¿Cómo verificarse?</span>
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
 
       <Separator className="bg-line" />
 
@@ -356,7 +391,7 @@ export function ShelterProfileForm({
             </div>
           </div>
 
-          {/* Selector de Ubicación Interactivo y Coordenadas GPS (US-07) */}
+          {/* Selector de Ubicación Interactivo y Coordenadas GPS */}
           <div className="space-y-3 bg-superficie-2 border border-line rounded-xl p-4">
             {/* Cabecera de Ubicación con Botón Detectar mi ubicación */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -537,5 +572,13 @@ export function ShelterProfileForm({
         </CardFooter>
       </form>
     </Card>
+
+    <VerificationInfoModal
+      isOpen={isInfoModalOpen}
+      onClose={() => setIsInfoModalOpen(false)}
+      organizationName={formData.organizationName || profile?.organizationName}
+      isVerified={isVerified}
+    />
+  </>
   );
 }
