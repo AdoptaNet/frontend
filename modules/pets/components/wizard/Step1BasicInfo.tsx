@@ -2,14 +2,13 @@
 
 import React, { useState } from "react";
 import { UseFormReturn, Controller } from "react-hook-form";
-import { Dog, Cat, Sparkles, AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
+import { Dog, Cat, Sparkles, CheckCircle2, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { PetPhotoUploader } from "../photo-uploader/PetPhotoUploader";
 import { petsService } from "../../services/pets.service";
-import type {
-  AnalyzePetPhotosResponse,
-} from "../../models/pet.types";
+import type { AnalyzePetPhotosResponse } from "../../models/pet.types";
 import {
   CompletePetFormData,
   getAgeCategoryLabel,
@@ -32,6 +31,32 @@ const COLOR_OPTIONS = [
   { value: "blanco", label: "Blanco", swatch: "bg-white border-gray-300" },
 ];
 
+const normalizeSpecies = (val?: string | null): "dog" | "cat" | null => {
+  if (!val) return null;
+  const lower = val.toLowerCase().trim();
+  if (lower === "dog" || lower === "perro") return "dog";
+  if (lower === "cat" || lower === "gato") return "cat";
+  return null;
+};
+
+const normalizeFur = (val?: string | null): "short" | "long" | "hairless" | null => {
+  if (!val) return null;
+  const lower = val.toLowerCase().trim();
+  if (lower === "short" || lower === "corto") return "short";
+  if (lower === "long" || lower === "largo") return "long";
+  if (lower === "hairless" || lower === "sin pelo" || lower === "calvo") return "hairless";
+  return null;
+};
+
+const normalizeSize = (val?: string | null): "small" | "medium" | "large" | null => {
+  if (!val) return null;
+  const lower = val.toLowerCase().trim();
+  if (lower === "small" || lower === "pequeno" || lower === "pequeño") return "small";
+  if (lower === "medium" || lower === "mediano") return "medium";
+  if (lower === "large" || lower === "grande") return "large";
+  return null;
+};
+
 export function Step1BasicInfo({
   form,
   disabled,
@@ -51,91 +76,115 @@ export function Step1BasicInfo({
   const [internalAnalysisResult, setInternalAnalysisResult] =
     useState<AnalyzePetPhotosResponse | null>(null);
   const [internalIsAnalyzing, setInternalIsAnalyzing] = useState(false);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analysisSuccess, setAnalysisSuccess] = useState(false);
+  const [rawFiles, setRawFiles] = useState<File[]>([]);
 
-  const analysisResult = externalAnalysisResult !== undefined ? externalAnalysisResult : internalAnalysisResult;
+  const analysisResult =
+    externalAnalysisResult !== undefined ? externalAnalysisResult : internalAnalysisResult;
   const setAnalysisResult = externalSetAnalysisResult || setInternalAnalysisResult;
-  const isAnalyzing = externalIsAnalyzing !== undefined ? externalIsAnalyzing : internalIsAnalyzing;
+  const isAnalyzing =
+    externalIsAnalyzing !== undefined ? externalIsAnalyzing : internalIsAnalyzing;
   const setIsAnalyzing = externalSetIsAnalyzing || setInternalIsAnalyzing;
 
   const ageMonths = watch("ageMonths");
+  const photos = watch("photos") || [];
   const ageInfo = getAgeCategoryLabel(Number(ageMonths) || 0);
 
-  const handlePhotosSelected = async (files: File[]) => {
-    if (!files || files.length === 0) return;
+  const handlePhotosSelected = (files: File[]) => {
+    setRawFiles((prev) => [...prev, ...files]);
+    setAnalysisSuccess(false);
+  };
+
+  const handleAnalyzeWithAI = async () => {
     setIsAnalyzing(true);
-    setAnalysisError(null);
+    setAnalysisSuccess(false);
 
     try {
-      const res = await petsService.analyzePhotos(files);
+      let filesToAnalyze = rawFiles;
+
+      // Si no tenemos los objetos File en memoria (ej. foto existente en Cloudinary), descargamos la foto principal
+      if (filesToAnalyze.length === 0 && photos.length > 0) {
+        const primary = photos.find((p) => p.isPrimary) || photos[0];
+        if (primary?.url) {
+          const res = await fetch(primary.url);
+          const blob = await res.blob();
+          filesToAnalyze = [
+            new File([blob], "pet-photo.jpg", {
+              type: blob.type || "image/jpeg",
+            }),
+          ];
+        }
+      }
+
+      if (filesToAnalyze.length === 0) {
+        return;
+      }
+
+      const res = await petsService.analyzePhotos(filesToAnalyze);
       setAnalysisResult(res);
 
-      // Pre-rellenado inteligente de campos detectados por el modelo de visión DINOv2
-      if (res.species?.autocompleted && res.species?.value) {
-        setValue("species", res.species.value as "dog" | "cat", {
+      // Asignar especie normalizada
+      const detectedSpecies = normalizeSpecies(res.species?.value);
+      if (detectedSpecies) {
+        setValue("species", detectedSpecies, {
           shouldValidate: true,
           shouldDirty: true,
         });
       }
 
-      if (
-        res.colors?.autocompleted &&
-        Array.isArray(res.colors?.value) &&
-        res.colors.value.length > 0
-      ) {
+      // Asignar colores sugeridos
+      if (Array.isArray(res.colors?.value) && res.colors.value.length > 0) {
         setValue("colors", res.colors.value, {
           shouldValidate: true,
           shouldDirty: true,
         });
       }
 
-      if (res.fur?.autocompleted && res.fur?.value) {
-        setValue("furLength", res.fur.value as "short" | "long" | "hairless", {
+      // Asignar tipo de pelaje
+      const detectedFur = normalizeFur(res.fur?.value);
+      if (detectedFur) {
+        setValue("furLength", detectedFur, {
           shouldValidate: true,
           shouldDirty: true,
         });
       }
 
-      if (res.size?.autocompleted && res.size?.value) {
-        setValue("size", res.size.value as "small" | "medium" | "large", {
+      // Asignar tamaño sugerido
+      const detectedSize = normalizeSize(res.size?.value);
+      if (detectedSize) {
+        setValue("size", detectedSize, {
           shouldValidate: true,
           shouldDirty: true,
         });
       }
 
+      // Guardar embedding visual si fue generado
       if (res.embedding && Array.isArray(res.embedding)) {
         setValue("visualEmbedding", res.embedding);
       }
+
+      setAnalysisSuccess(true);
     } catch (err: unknown) {
-      console.warn("No se pudo autocompletar con IA:", err);
-      setAnalysisError(
-        "No se pudo completar el análisis IA de las fotos automáticamente. Puedes ingresar los datos manualmente.",
-      );
+      console.warn("No se pudo completar el autocompletado con IA:", err);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
   return (
-    <div className="space-y-7">
-      {/* 1. SECCIÓN PRINCIPAL: FOTO PRIMERO */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-superficie-2/50 border border-line space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <h3 className="text-sm sm:text-base font-bold text-tinta-900 flex items-center gap-2">
-              <span>1. Fotografías de la Mascota</span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-verde-100/80 text-verde-800 border border-verde-200 shadow-2xs">
-                <Sparkles className="w-3 h-3 text-verde-700" />
-                Foto Primero ✨
-              </span>
-            </h3>
-            <p className="text-xs text-tinta-600 leading-relaxed">
-              Sube entre 3 y 6 fotos de tu rescatado. Nuestra IA (DINOv2) analizará las imágenes para predecir automáticamente su especie, colores, tipo de pelaje y contextura física.
-            </p>
-          </div>
+    <div className="space-y-6">
+      {/* 1. SECCIÓN: FOTOGRAFÍAS DE LA MASCOTA */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-superficie-2/50 border border-line space-y-3">
+        <div className="space-y-0.5">
+          <h3 className="text-sm sm:text-base font-bold text-tinta-900">
+            1. Fotografías de la mascota
+          </h3>
+          <p className="text-xs text-tinta-500">
+            Sube entre 3 y 6 fotografías de la mascota.
+          </p>
         </div>
 
-        {/* Componente Uploader con soporte de análisis inmediato */}
+        {/* Uploader de Fotos */}
         <Controller
           name="photos"
           control={control}
@@ -151,69 +200,36 @@ export function Step1BasicInfo({
           )}
         />
 
-        {/* Estado animado: Analizando con IA */}
-        {isAnalyzing && (
-          <div className="p-3.5 rounded-xl bg-gradient-to-r from-verde-50 via-superficie-2 to-verde-50 border border-verde-300 animate-pulse flex items-center gap-3 shadow-2xs">
-            <div className="p-2 rounded-lg bg-verde-100 text-verde-700">
-              <RefreshCw className="w-4 h-4 animate-spin text-verde-700" />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-xs sm:text-sm font-bold text-verde-900 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-verde-700 animate-spin" />
-                Analizando fotos con IA (DINOv2)...
-              </p>
-              <p className="text-[11px] text-verde-700">
-                Calculando vector de similitud visual y prediciendo especie, pelaje, tamaño y colores...
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Botón opcional para autocompletar con IA */}
+        {photos.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-line/60">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={disabled || isAnalyzing}
+              onClick={handleAnalyzeWithAI}
+              className="h-8 px-3 text-xs font-semibold text-verde-800 border-verde-300 hover:bg-verde-50 gap-1.5 cursor-pointer shadow-2xs"
+            >
+              {isAnalyzing ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-verde-700" />
+                  <span>Analizando fotos...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-verde-600" />
+                  <span>Autocompletar con IA</span>
+                </>
+              )}
+            </Button>
 
-        {/* Estado de éxito: IA Autocompletó los campos */}
-        {analysisResult && !isAnalyzing && (
-          <div className="p-3.5 rounded-xl bg-verde-50/90 border border-verde-200 text-verde-900 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm font-bold flex items-center gap-1.5 text-verde-800">
-                <CheckCircle2 className="w-4 h-4 text-verde-600" />
-                ¡Análisis completado en {analysisResult.inferenceTimeMs} ms!
+            {analysisSuccess && !isAnalyzing && (
+              <span className="text-xs font-medium text-verde-700 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-verde-600 shrink-0" />
+                Análisis completado. Sugerencias aplicadas.
               </span>
-              <span className="text-[10px] sm:text-[11px] font-semibold text-verde-700 bg-white border border-verde-200 px-2 py-0.5 rounded-full shadow-2xs">
-                Sugerencias aplicadas
-              </span>
-            </div>
-            <p className="text-xs text-verde-700 leading-relaxed">
-              Hemos autocompletado los campos sugeridos por la IA. Puedes revisarlos o modificarlos libremente antes de guardar.
-            </p>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {analysisResult.species.autocompleted && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white border border-verde-200 text-verde-800 shadow-2xs">
-                  ✨ Especie: {analysisResult.species.label} ({Math.round(analysisResult.species.confidence * 100)}%)
-                </span>
-              )}
-              {analysisResult.colors.autocompleted && analysisResult.colors.label && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white border border-verde-200 text-verde-800 shadow-2xs">
-                  ✨ Colores: {analysisResult.colors.label.join(", ")}
-                </span>
-              )}
-              {analysisResult.fur.autocompleted && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white border border-verde-200 text-verde-800 shadow-2xs">
-                  ✨ Pelaje: {analysisResult.fur.label}
-                </span>
-              )}
-              {analysisResult.size.autocompleted && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white border border-verde-200 text-verde-800 shadow-2xs">
-                  ✨ Tamaño: {analysisResult.size.label}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Error en el análisis IA */}
-        {analysisError && !isAnalyzing && (
-          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
-            <span>{analysisError}</span>
+            )}
           </div>
         )}
       </div>
@@ -227,9 +243,8 @@ export function Step1BasicInfo({
               Especie <span className="text-coral-600">*</span>
             </Label>
             {analysisResult?.species?.autocompleted && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-verde-700 bg-verde-50 border border-verde-200 px-2 py-0.5 rounded-full">
-                <Sparkles className="w-3 h-3 text-verde-600" />
-                Sugerido por IA ({Math.round(analysisResult.species.confidence * 100)}%)
+              <span className="text-[11px] font-semibold text-verde-700 bg-verde-50 border border-verde-200 px-2 py-0.5 rounded-full">
+                Sugerido por IA
               </span>
             )}
           </div>
@@ -317,7 +332,7 @@ export function Step1BasicInfo({
         </div>
       </div>
 
-      {/* 3. SECCIÓN: COLORES IDENTIFICADOS */}
+      {/* 3. SECCIÓN: COLORES */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
@@ -327,9 +342,8 @@ export function Step1BasicInfo({
             </span>
           </Label>
           {analysisResult?.colors?.autocompleted && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-verde-700 bg-verde-50 border border-verde-200 px-2 py-0.5 rounded-full">
-              <Sparkles className="w-3 h-3 text-verde-600" />
-              Sugerido por IA ({Math.round(analysisResult.colors.confidence * 100)}%)
+            <span className="text-[11px] font-semibold text-verde-700 bg-verde-50 border border-verde-200 px-2 py-0.5 rounded-full">
+              Sugerido por IA
             </span>
           )}
         </div>
@@ -351,8 +365,6 @@ export function Step1BasicInfo({
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 {COLOR_OPTIONS.map((opt) => {
                   const isSelected = currentColors.includes(opt.value);
-                  const isSuggested =
-                    analysisResult?.colors?.value?.includes(opt.value);
 
                   return (
                     <button
@@ -370,9 +382,6 @@ export function Step1BasicInfo({
                         className={`w-4 h-4 rounded-full shrink-0 border ${opt.swatch}`}
                       />
                       <span className="text-xs sm:text-sm truncate">{opt.label}</span>
-                      {isSuggested && (
-                        <Sparkles className="w-3 h-3 text-verde-600 ml-auto shrink-0" />
-                      )}
                     </button>
                   );
                 })}
@@ -418,7 +427,7 @@ export function Step1BasicInfo({
         </div>
       </div>
 
-      {/* 5. SECCIÓN: EDAD EN MESES + CÁLCULO DE CATEGORÍA ETARIA */}
+      {/* 5. SECCIÓN: EDAD EN MESES */}
       <div className="p-4 rounded-xl bg-superficie-2 border border-line space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
           <div className="space-y-1.5">
@@ -451,19 +460,17 @@ export function Step1BasicInfo({
             )}
           </div>
 
-          <div className="space-y-1">
-            <span className="text-xs font-medium text-tinta-600 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-ambar-600" />
-              Categoría etaria calculada:
+          <div className="space-y-1.5">
+            <span className="text-xs font-medium text-tinta-600">
+              Categoría de edad
             </span>
-            <div
-              className={`inline-flex items-center px-3 py-1.5 rounded-lg border text-xs font-bold ${ageInfo.badgeColor}`}
-            >
-              {ageInfo.label}
+            <div>
+              <span
+                className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-semibold ${ageInfo.badgeColor}`}
+              >
+                {ageInfo.label}
+              </span>
             </div>
-            <p className="text-[11px] text-tinta-400">
-              El recomendador de adoptantes usa esta clasificación etaria para matching.
-            </p>
           </div>
         </div>
       </div>
