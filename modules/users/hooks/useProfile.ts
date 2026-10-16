@@ -127,12 +127,14 @@ export function useProfile() {
           createdAt: updated.createdAt,
         });
         showFeedback("success", "Datos personales actualizados correctamente");
+        return;
       } catch (err: unknown) {
         const message =
           err instanceof Error
             ? err.message
             : "Error al actualizar datos personales";
         showFeedback("error", message);
+        throw err;
       } finally {
         setIsSaving(false);
       }
@@ -230,12 +232,14 @@ export function useProfile() {
             "Preferencias de adopción guardadas exitosamente",
           );
         }
+        return;
       } catch (err: unknown) {
         const message =
           err instanceof Error
             ? err.message
             : "Error al guardar preferencias de adopción";
         showFeedback("error", message);
+        throw err;
       } finally {
         setIsSaving(false);
       }
@@ -255,12 +259,14 @@ export function useProfile() {
           "success",
           "Información del albergue guardada exitosamente",
         );
+        return;
       } catch (err: unknown) {
         const message =
           err instanceof Error
             ? err.message
             : "Error al guardar información del albergue";
         showFeedback("error", message);
+        throw err;
       } finally {
         setIsSaving(false);
       }

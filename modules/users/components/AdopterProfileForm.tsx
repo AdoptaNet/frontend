@@ -7,6 +7,7 @@ import {
   Clock,
   Sparkles,
   CheckCircle2,
+  AlertCircle,
   Loader2,
   Phone,
   MapPin,
@@ -160,12 +161,27 @@ export function AdopterProfileForm({
 
   const [activeSection, setActiveSection] = useState<number>(1);
   const [isSaving, setIsSaving] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [bottomFeedback, setBottomFeedback] = useState<{
+    type: "success" | "error" | null;
+    message: string | null;
+  }>({ type: null, message: null });
 
   const updateField = <K extends keyof UpdateAdopterProfileDto>(
     field: K,
     value: UpdateAdopterProfileDto[K]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+    if (bottomFeedback.type === "error") {
+      setBottomFeedback({ type: null, message: null });
+    }
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,28 +190,83 @@ export function AdopterProfileForm({
       raw = raw.slice(2);
     }
     if (raw === "") {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next.phoneNumber;
+        return next;
+      });
       updateField("phoneNumber", "");
       return;
     }
     // Peruvian mobile numbers must start with 9
     if (!raw.startsWith("9")) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        phoneNumber: "El número telefónico debe iniciar con 9",
+      }));
       return;
     }
     // Maximum 9 digits
-    updateField("phoneNumber", raw.slice(0, 9));
+    const clean = raw.slice(0, 9);
+    updateField("phoneNumber", clean);
+    if (clean.length === 9) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next.phoneNumber;
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBottomFeedback({ type: null, message: null });
+
     // Guard against accidental submissions before the final section
     if (activeSection < 4) {
       setActiveSection((prev) => Math.min(4, prev + 1));
       return;
     }
 
+    // Validate phone number if provided
+    const errors: Record<string, string> = {};
+    if (formData.phoneNumber && formData.phoneNumber.trim().length > 0) {
+      const clean = formData.phoneNumber.replace(/\D/g, "");
+      if (!/^9\d{8}$/.test(clean)) {
+        errors.phoneNumber = "El número telefónico debe ser un celular válido de Perú (9 dígitos, ej: 987654321).";
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setBottomFeedback({
+        type: "error",
+        message: "Por favor corrige los campos señalados antes de guardar.",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       await onSave(formData);
+      setBottomFeedback({
+        type: "success",
+        message: isNewProfile
+          ? "¡Cuestionario completado y recomendaciones activadas con éxito! 🎉"
+          : "¡Preferencias de adopción actualizadas correctamente!",
+      });
+      setTimeout(() => {
+        setBottomFeedback((prev) => (prev.type === "success" ? { type: null, message: null } : prev));
+      }, 5000);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Error al guardar el perfil de adoptante";
+      setBottomFeedback({
+        type: "error",
+        message,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -787,8 +858,16 @@ export function AdopterProfileForm({
                   value={formData.phoneNumber || ""}
                   onChange={handlePhoneChange}
                   placeholder="987654321"
-                  className="h-11 border-line max-w-sm text-sm tracking-wide font-medium"
+                  className={`h-11 border-line max-w-sm text-sm tracking-wide font-medium ${
+                    fieldErrors.phoneNumber ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
+                  }`}
                 />
+                {fieldErrors.phoneNumber && (
+                  <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.phoneNumber}</span>
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -796,68 +875,87 @@ export function AdopterProfileForm({
 
         <Separator className="bg-line mt-4" />
 
-        <CardFooter className="py-4 bg-superficie-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Botón Anterior o aviso */}
-          <div>
-            {activeSection > 1 ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setActiveSection((prev) => Math.max(1, prev - 1));
-                }}
-                className="text-xs h-10 gap-1.5 cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Sección anterior
-              </Button>
-            ) : (
-              <div className="flex items-center gap-2 text-xs text-tinta-600">
-                <CheckCircle2 className="w-4 h-4 text-verde-700 shrink-0" />
-                <span>Las respuestas se guardan en tu perfil de adoptante</span>
-              </div>
-            )}
-          </div>
+        <CardFooter className="py-4 bg-superficie-2 flex flex-col gap-3">
+          {bottomFeedback.message && (
+            <div
+              className={`w-full p-3 rounded-lg border text-xs sm:text-sm font-medium flex items-center gap-2 ${
+                bottomFeedback.type === "success"
+                  ? "bg-verde-50 border-verde-200 text-verde-800"
+                  : "bg-red-50 border-red-200 text-red-700"
+              }`}
+            >
+              {bottomFeedback.type === "success" ? (
+                <CheckCircle2 className="w-4 h-4 text-verde-600 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              )}
+              <span>{bottomFeedback.message}</span>
+            </div>
+          )}
 
-          {/* Botón Siguiente o Finalizar */}
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            {activeSection < 4 ? (
-              <Button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setActiveSection((prev) => Math.min(4, prev + 1));
-                }}
-                className="bg-verde-700 hover:bg-verde-hover text-white font-medium text-xs sm:text-sm h-10 gap-1.5 cursor-pointer"
-              >
-                <span>Avanzar a {SECTIONS[activeSection].label}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                disabled={isLoading || isSaving}
-                className={`font-semibold min-w-[200px] h-10 shadow-xs cursor-pointer ${
-                  isNewProfile
-                    ? "bg-ambar-500 hover:bg-[#D89102] text-verde-900 font-bold"
-                    : "bg-verde-700 hover:bg-verde-hover text-white"
-                }`}
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Guardando...
-                  </>
-                ) : isNewProfile ? (
-                  "¡Finalizar y Activar Recomendaciones! 🎉"
-                ) : (
-                  "Guardar preferencias"
-                )}
-              </Button>
-            )}
+          <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3">
+            {/* Botón Anterior o aviso */}
+            <div>
+              {activeSection > 1 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveSection((prev) => Math.max(1, prev - 1));
+                  }}
+                  className="text-xs h-10 gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Sección anterior
+                </Button>
+              ) : (
+                <div className="flex items-center gap-2 text-xs text-tinta-600">
+                  <CheckCircle2 className="w-4 h-4 text-verde-700 shrink-0" />
+                  <span>Las respuestas se guardan en tu perfil de adoptante</span>
+                </div>
+              )}
+            </div>
+
+            {/* Botón Siguiente o Finalizar */}
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              {activeSection < 4 ? (
+                <Button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveSection((prev) => Math.min(4, prev + 1));
+                  }}
+                  className="bg-verde-700 hover:bg-verde-hover text-white font-medium text-xs sm:text-sm h-10 gap-1.5 cursor-pointer"
+                >
+                  <span>Avanzar a {SECTIONS[activeSection].label}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={isLoading || isSaving}
+                  className={`font-semibold min-w-[200px] h-10 shadow-xs cursor-pointer ${
+                    isNewProfile
+                      ? "bg-ambar-500 hover:bg-[#D89102] text-verde-900 font-bold"
+                      : "bg-verde-700 hover:bg-verde-hover text-white"
+                  }`}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : isNewProfile ? (
+                    "¡Finalizar y Activar Recomendaciones! 🎉"
+                  ) : (
+                    "Guardar preferencias"
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
         </CardFooter>
       </form>

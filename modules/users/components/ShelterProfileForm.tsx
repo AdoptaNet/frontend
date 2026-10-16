@@ -14,6 +14,8 @@ import {
   ExternalLink,
   Navigation,
   HelpCircle,
+  AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -140,7 +142,11 @@ export function ShelterProfileForm({
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [bottomFeedback, setBottomFeedback] = useState<{
+    type: "success" | "error" | null;
+    message: string | null;
+  }>({ type: null, message: null });
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   const updateField = <K extends keyof UpdateShelterProfileDto>(
@@ -148,6 +154,16 @@ export function ShelterProfileForm({
     value: UpdateShelterProfileDto[K]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+    if (bottomFeedback.type === "error") {
+      setBottomFeedback({ type: null, message: null });
+    }
   };
 
   const handleDepartmentChange = (dep: string) => {
@@ -185,22 +201,104 @@ export function ShelterProfileForm({
       raw = raw.slice(2);
     }
     if (raw === "") {
-      setPhoneError(null);
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next.phoneNumber;
+        return next;
+      });
       updateField("phoneNumber", "");
       return;
     }
     // Peruvian mobile numbers must start with 9
     if (!raw.startsWith("9")) {
-      setPhoneError("El teléfono móvil peruano debe iniciar con 9");
+      setFieldErrors((prev) => ({
+        ...prev,
+        phoneNumber: "El teléfono móvil peruano debe iniciar con 9",
+      }));
       return;
     }
-    setPhoneError(null);
     // Maximum 9 digits
-    updateField("phoneNumber", raw.slice(0, 9));
+    const cleanPhone = raw.slice(0, 9);
+    updateField("phoneNumber", cleanPhone);
+    if (cleanPhone.length === 9) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next.phoneNumber;
+        return next;
+      });
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.organizationName || formData.organizationName.trim().length === 0) {
+      errors.organizationName = "El nombre de la organización o albergue es obligatorio.";
+    }
+
+    if (formData.phoneNumber && formData.phoneNumber.trim().length > 0) {
+      const clean = formData.phoneNumber.replace(/\D/g, "");
+      if (!/^9\d{8}$/.test(clean)) {
+        errors.phoneNumber = "El número telefónico debe ser un celular válido de Perú (9 dígitos, ej: 999888777).";
+      }
+    }
+
+    if (formData.contactEmail && formData.contactEmail.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.contactEmail.trim())) {
+        errors.contactEmail = "El correo de contacto no es válido (ej: contacto@patitasfelices.pe).";
+      }
+    }
+
+    if (formData.facebookUrl && formData.facebookUrl.trim().length > 0) {
+      try {
+        const url = new URL(formData.facebookUrl.trim());
+        if (!url.protocol.startsWith("http")) {
+          errors.facebookUrl = "La URL de Facebook debe iniciar con https:// o http://";
+        }
+      } catch {
+        errors.facebookUrl = "La URL de Facebook no es válida (ej: https://facebook.com/patitasfelices).";
+      }
+    }
+
+    if (formData.instagramUrl && formData.instagramUrl.trim().length > 0) {
+      try {
+        const url = new URL(formData.instagramUrl.trim());
+        if (!url.protocol.startsWith("http")) {
+          errors.instagramUrl = "La URL de Instagram debe iniciar con https:// o http://";
+        }
+      } catch {
+        errors.instagramUrl = "La URL de Instagram no es válida (ej: https://instagram.com/patitasfelices).";
+      }
+    }
+
+    if (
+      formData.rescueCapacity !== undefined &&
+      formData.rescueCapacity !== null &&
+      formData.rescueCapacity !== ("" as unknown as number)
+    ) {
+      const cap = Number(formData.rescueCapacity);
+      if (isNaN(cap) || cap < 0) {
+        errors.rescueCapacity = "La capacidad estimada debe ser un número entero mayor o igual a 0.";
+      }
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBottomFeedback({ type: null, message: null });
+
+    if (!validateForm()) {
+      setBottomFeedback({
+        type: "error",
+        message: "Hay campos con errores o incompletos. Por favor revísalos arriba.",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       const cleanPayload: UpdateShelterProfileDto = {
@@ -234,6 +332,22 @@ export function ShelterProfileForm({
       };
 
       await onSave(cleanPayload);
+      setBottomFeedback({
+        type: "success",
+        message: "¡Información del albergue guardada exitosamente!",
+      });
+      setTimeout(() => {
+        setBottomFeedback((prev) => (prev.type === "success" ? { type: null, message: null } : prev));
+      }, 5000);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Error al guardar información del albergue";
+      setBottomFeedback({
+        type: "error",
+        message,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -289,13 +403,12 @@ export function ShelterProfileForm({
               {!isVerified && (
                 <Button
                   type="button"
-                  variant="outline"
                   size="sm"
                   onClick={() => setIsInfoModalOpen(true)}
-                  className="text-xs h-7 px-2.5 gap-1 border-amber-200 bg-amber-50/50 hover:bg-amber-100 text-amber-900 cursor-pointer"
+                  className="text-xs h-8 px-3 gap-1.5 bg-amber-500 hover:bg-amber-600 text-verde-900 font-bold shadow-2xs cursor-pointer border border-amber-600/20"
                 >
-                  <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
-                  <span>¿Cómo verificarse?</span>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Solicitar Verificación Oficial</span>
                 </Button>
               )}
             </div>
@@ -308,8 +421,9 @@ export function ShelterProfileForm({
         <CardContent className="pt-6 space-y-6">
           {/* Nombre de la Organización */}
           <div className="space-y-1.5">
-            <Label htmlFor="orgName" className="text-sm font-semibold text-tinta-900">
-              Nombre de la organización o albergue
+            <Label htmlFor="orgName" className="text-sm font-semibold text-tinta-900 flex items-center gap-1">
+              <span>Nombre de la organización o albergue</span>
+              <span className="text-rojo-600 font-bold">*</span>
             </Label>
             <Input
               id="orgName"
@@ -317,10 +431,17 @@ export function ShelterProfileForm({
               value={formData.organizationName || ""}
               onChange={(e) => updateField("organizationName", e.target.value)}
               placeholder="Ej. Asociación Protectora Huellitas Felices"
-              required
               disabled={isLoading || isSaving}
-              className="h-12 border-line focus-visible:ring-verde-500 text-sm"
+              className={`h-12 border-line focus-visible:ring-verde-500 text-sm ${
+                fieldErrors.organizationName ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
+              }`}
             />
+            {fieldErrors.organizationName && (
+              <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{fieldErrors.organizationName}</span>
+              </p>
+            )}
           </div>
 
           {/* Misión y Descripción */}
@@ -466,11 +587,14 @@ export function ShelterProfileForm({
                 placeholder="912345678"
                 disabled={isLoading || isSaving}
                 className={`h-11 border-line text-sm tracking-wide font-medium ${
-                  phoneError ? "border-rojo-500 focus-visible:ring-rojo-500" : ""
+                  fieldErrors.phoneNumber ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
                 }`}
               />
-              {phoneError && (
-                <p className="text-xs text-rojo-600 font-medium">{phoneError}</p>
+              {fieldErrors.phoneNumber && (
+                <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{fieldErrors.phoneNumber}</span>
+                </p>
               )}
             </div>
 
@@ -486,8 +610,16 @@ export function ShelterProfileForm({
                 onChange={(e) => updateField("contactEmail", e.target.value)}
                 placeholder="adopciones@albergue.org"
                 disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm"
+                className={`h-11 border-line text-sm ${
+                  fieldErrors.contactEmail ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
+                }`}
               />
+              {fieldErrors.contactEmail && (
+                <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{fieldErrors.contactEmail}</span>
+                </p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -498,13 +630,21 @@ export function ShelterProfileForm({
               <Input
                 id="rescueCapacity"
                 type="number"
-                min={1}
+                min={0}
                 max={500}
                 value={formData.rescueCapacity ?? 30}
                 onChange={(e) => updateField("rescueCapacity", parseInt(e.target.value, 10) || 0)}
                 disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm"
+                className={`h-11 border-line text-sm ${
+                  fieldErrors.rescueCapacity ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
+                }`}
               />
+              {fieldErrors.rescueCapacity && (
+                <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{fieldErrors.rescueCapacity}</span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -529,8 +669,16 @@ export function ShelterProfileForm({
                   onChange={(e) => updateField("facebookUrl", e.target.value)}
                   placeholder="https://facebook.com/tualbergue"
                   disabled={isLoading || isSaving}
-                  className="h-11 border-line text-sm"
+                  className={`h-11 border-line text-sm ${
+                    fieldErrors.facebookUrl ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
+                  }`}
                 />
+                {fieldErrors.facebookUrl && (
+                  <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.facebookUrl}</span>
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -545,20 +693,74 @@ export function ShelterProfileForm({
                   onChange={(e) => updateField("instagramUrl", e.target.value)}
                   placeholder="https://instagram.com/tualbergue"
                   disabled={isLoading || isSaving}
-                  className="h-11 border-line text-sm"
+                  className={`h-11 border-line text-sm ${
+                    fieldErrors.instagramUrl ? "border-rojo-500 focus-visible:ring-rojo-500 bg-red-50/20" : ""
+                  }`}
                 />
+                {fieldErrors.instagramUrl && (
+                  <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.instagramUrl}</span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Banner de Verificación Oficial si no está verificado */}
+          {!isVerified && (
+            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-amber-950 font-heading">
+                    Insignia Oficial de Albergue Verificado
+                  </h4>
+                  <p className="text-xs text-amber-900 mt-0.5 leading-relaxed">
+                    Acredita tu personería y labor de rescate para generar mayor confianza en la comunidad y dar mayor alcance a tus animales.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                onClick={() => setIsInfoModalOpen(true)}
+                className="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-verde-900 shrink-0 cursor-pointer h-9 px-4 gap-1.5 shadow-2xs"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Solicitar Verificación</span>
+              </Button>
+            </div>
+          )}
         </CardContent>
 
         <Separator className="bg-line mt-4" />
 
-        <CardFooter className="py-4 bg-superficie-2 flex justify-end">
+        <CardFooter className="py-4 bg-superficie-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div className="flex-1">
+            {bottomFeedback.message && (
+              <div
+                className={`p-3 rounded-lg border text-xs sm:text-sm font-medium flex items-center gap-2 ${
+                  bottomFeedback.type === "success"
+                    ? "bg-verde-50 border-verde-200 text-verde-800"
+                    : "bg-red-50 border-red-200 text-red-700"
+                }`}
+              >
+                {bottomFeedback.type === "success" ? (
+                  <CheckCircle2 className="w-4 h-4 text-verde-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                )}
+                <span>{bottomFeedback.message}</span>
+              </div>
+            )}
+          </div>
+
           <Button
             type="submit"
             disabled={isLoading || isSaving}
-            className="bg-verde-700 hover:bg-verde-hover text-white font-medium min-w-[180px]"
+            className="bg-verde-700 hover:bg-verde-hover text-white font-medium min-w-[200px] cursor-pointer"
           >
             {isSaving ? (
               <>
