@@ -23,6 +23,8 @@ export const API_ROUTES = {
   PETS: {
     BASE: "/pets",
     MY_PETS: "/pets/my-pets",
+    ANALYZE_PHOTOS: "/pets/analyze-photos",
+    SEARCH_SIMILAR: "/pets/search-similar",
     BY_ID: (id: string) => `/pets/${id}`,
     STATUS: (id: string) => `/pets/${id}/status`,
   },

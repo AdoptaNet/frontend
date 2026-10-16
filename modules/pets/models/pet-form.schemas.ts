@@ -47,6 +47,8 @@ export const step1BasicInfoSchema = z.object({
       (photos) => photos.filter((p) => p.isPrimary).length === 1,
       "Debes seleccionar exactamente una foto como portada principal",
     ),
+  colors: z.array(z.string()).max(3, "Máximo 3 colores").optional(),
+  visualEmbedding: z.array(z.number()).optional(),
 });
 
 export const step2HealthPhysicalSchema = z.object({

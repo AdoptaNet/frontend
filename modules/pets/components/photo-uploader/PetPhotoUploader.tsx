@@ -9,15 +9,19 @@ import { PetPhotoThumbnail } from "./PetPhotoThumbnail";
 interface PetPhotoUploaderProps {
   photos: PetPhotoItem[];
   onChange: (photos: PetPhotoItem[]) => void;
+  onFilesSelected?: (files: File[]) => void;
   disabled?: boolean;
   error?: string;
+  isAnalyzing?: boolean;
 }
 
 export function PetPhotoUploader({
   photos,
   onChange,
+  onFilesSelected,
   disabled = false,
   error,
+  isAnalyzing = false,
 }: PetPhotoUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingCount, setUploadingCount] = useState(0);
@@ -56,6 +60,7 @@ export function PetPhotoUploader({
     }
 
     const selectedFiles = Array.from(files).slice(0, availableSlots);
+    onFilesSelected?.(selectedFiles);
     setUploadingCount(selectedFiles.length);
 
     try {
@@ -173,7 +178,7 @@ export function PetPhotoUploader({
               setDraggedIndex(null);
             }}
             isDragging={draggedIndex === index}
-            disabled={disabled || uploadingCount > 0}
+            disabled={disabled || uploadingCount > 0 || isAnalyzing}
           />
         ))}
 
@@ -182,7 +187,7 @@ export function PetPhotoUploader({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled || uploadingCount > 0}
+            disabled={disabled || uploadingCount > 0 || isAnalyzing}
             className="aspect-square rounded-xl border-2 border-dashed border-line hover:border-verde-600 hover:bg-verde-50/40 text-tinta-600 hover:text-verde-700 flex flex-col items-center justify-center gap-1.5 p-3 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group shadow-2xs"
           >
             {uploadingCount > 0 ? (

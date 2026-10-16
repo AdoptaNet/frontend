@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2, AlertCircle } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { petsService } from "../../services/pets.service";
-import type { Pet } from "../../models/pet.types";
+import type { Pet, AnalyzePetPhotosResponse } from "../../models/pet.types";
 import {
   completePetFormSchema,
   CompletePetFormData,
@@ -29,6 +29,9 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] =
+    useState<AnalyzePetPhotosResponse | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const isEditMode = !!initialPet;
 
@@ -43,6 +46,8 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
           gender: initialPet.gender,
           ageMonths: initialPet.ageMonths,
           photos: initialPet.photos || [],
+          colors: initialPet.colors || [],
+          visualEmbedding: initialPet.visualEmbedding,
           size: initialPet.size,
           furLength: initialPet.furLength || "short",
           isSterilized: initialPet.isSterilized ?? false,
@@ -67,6 +72,8 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
           gender: "male",
           ageMonths: 12,
           photos: [],
+          colors: [],
+          visualEmbedding: undefined,
           size: "medium",
           furLength: "short",
           isSterilized: false,
@@ -91,7 +98,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
     let stepFields: (keyof CompletePetFormData)[] = [];
 
     if (currentStep === 1) {
-      stepFields = ["name", "species", "breed", "gender", "ageMonths", "photos"];
+      stepFields = ["name", "species", "breed", "gender", "ageMonths", "photos", "colors"];
     } else if (currentStep === 2) {
       stepFields = ["size", "furLength", "isSterilized", "isVaccinated", "healthStatus"];
     } else if (currentStep === 3) {
@@ -141,7 +148,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
     const errorKeys = Object.keys(errors);
     if (errorKeys.length === 0) return;
 
-    const step1Keys = ["name", "species", "breed", "gender", "ageMonths", "photos"];
+    const step1Keys = ["name", "species", "breed", "gender", "ageMonths", "photos", "colors"];
     const step2Keys = ["size", "furLength", "isSterilized", "isVaccinated", "healthStatus", "healthNotes"];
     const step3Keys = ["energyLevel", "vocalizationLevel", "goodWithChildren", "goodWithDogs", "goodWithCats", "trainingLevel", "timeAloneToleranceHours"];
     const step4Keys = ["shelterStayMonths", "description", "status"];
@@ -207,10 +214,21 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
           >
             {/* Step Views */}
             {currentStep === 1 && (
-              <Step1BasicInfo form={form} disabled={isSubmitting} />
+              <Step1BasicInfo
+                form={form}
+                disabled={isSubmitting}
+                analysisResult={analysisResult}
+                setAnalysisResult={setAnalysisResult}
+                isAnalyzing={isAnalyzing}
+                setIsAnalyzing={setIsAnalyzing}
+              />
             )}
             {currentStep === 2 && (
-              <Step2HealthPhysical form={form} disabled={isSubmitting} />
+              <Step2HealthPhysical
+                form={form}
+                disabled={isSubmitting}
+                analysisResult={analysisResult}
+              />
             )}
             {currentStep === 3 && (
               <Step3Personality form={form} disabled={isSubmitting} />
