@@ -114,6 +114,11 @@ export const step4StoryStatusSchema = z.object({
     .number({ invalid_type_error: "Ingresa un número válido de meses" })
     .int("Debe ser un número entero")
     .min(0, "El tiempo en el albergue no puede ser negativo"),
+  adoptionFee: z
+    .number({ invalid_type_error: "Ingresa un monto válido" })
+    .min(0, "El aporte no puede ser negativo")
+    .nullable()
+    .optional(),
   description: z
     .string({ required_error: "La historia y descripción es obligatoria" })
     .min(

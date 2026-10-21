@@ -50,6 +50,7 @@ export interface Pet {
   trainingLevel: PetTrainingLevel;
   timeAloneToleranceHours: number | null;
   shelterStayMonths: number;
+  adoptionFee?: number | null;
   description: string;
   status: PetStatus;
   photos: PetPhotoItem[];
@@ -83,6 +84,7 @@ export interface CreatePetDto {
   trainingLevel?: PetTrainingLevel;
   timeAloneToleranceHours?: number | null;
   shelterStayMonths?: number;
+  adoptionFee?: number | null;
   description: string;
   status?: PetStatus;
   photos: PetPhotoItem[];
@@ -152,6 +154,8 @@ export interface QueryPublicPetsParams {
   city?: string;
   department?: string;
   search?: string;
+  feeType?: "all" | "free" | "with_fee";
+  isSterilized?: boolean;
   page?: number;
   limit?: number;
 }

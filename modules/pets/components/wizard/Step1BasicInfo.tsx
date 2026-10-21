@@ -26,7 +26,7 @@ interface Step1BasicInfoProps {
 const COLOR_OPTIONS = [
   { value: "negro", label: "Negro", swatch: "bg-zinc-900 border-zinc-700" },
   { value: "marron", label: "Marrón", swatch: "bg-amber-900 border-amber-950" },
-  { value: "crema", label: "Crema / Beige", swatch: "bg-amber-100 border-amber-300" },
+  { value: "crema", label: "Crema", swatch: "bg-amber-100 border-amber-300" },
   { value: "gris", label: "Gris", swatch: "bg-gray-400 border-gray-500" },
   { value: "blanco", label: "Blanco", swatch: "bg-white border-gray-300" },
 ];

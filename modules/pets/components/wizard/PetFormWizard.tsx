@@ -67,6 +67,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
           trainingLevel: initialPet.trainingLevel || "none",
           timeAloneToleranceHours: initialPet.timeAloneToleranceHours ?? null,
           shelterStayMonths: initialPet.shelterStayMonths || 0,
+          adoptionFee: initialPet.adoptionFee ?? 0,
           description: initialPet.description,
           status: initialPet.status || "available",
         }
@@ -94,6 +95,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
           trainingLevel: "none",
           timeAloneToleranceHours: null,
           shelterStayMonths: 0,
+          adoptionFee: 0,
           description: "",
           status: "available",
         },
@@ -160,6 +162,10 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
 
       const finalData: CompletePetFormData = {
         ...data,
+        adoptionFee:
+          data.adoptionFee !== undefined && data.adoptionFee !== null
+            ? Number(data.adoptionFee)
+            : 0,
         vaccinesApplied: data.isVaccinated
           ? cleanedVaccines.length > 0
             ? cleanedVaccines
@@ -196,7 +202,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
     const step1Keys = ["name", "species", "breed", "gender", "ageMonths", "photos", "colors"];
     const step2Keys = ["size", "furLength", "isSterilized", "isVaccinated", "vaccinesApplied", "healthStatus", "healthNotes"];
     const step3Keys = ["energyLevel", "vocalizationLevel", "goodWithChildren", "goodWithDogs", "goodWithCats", "trainingLevel", "timeAloneToleranceHours"];
-    const step4Keys = ["shelterStayMonths", "description", "status"];
+    const step4Keys = ["shelterStayMonths", "adoptionFee", "description", "status"];
 
     if (errorKeys.some((k) => step1Keys.includes(k))) {
       setCurrentStep(1);
