@@ -56,34 +56,10 @@ import type {
   ShelterProfile,
   UpdateShelterProfileDto,
 } from "../models/shelter-profile.types";
-
-const PERU_DEPARTMENTS = [
-  "Lima",
-  "Arequipa",
-  "Cusco",
-  "La Libertad",
-  "Piura",
-  "Lambayeque",
-  "Áncash",
-  "Junín",
-  "Ica",
-  "San Martín",
-  "Cajamarca",
-  "Loreto",
-  "Ucayali",
-  "Tacna",
-  "Huánuco",
-  "Ayacucho",
-  "Puno",
-  "Moquegua",
-  "Tumbes",
-  "Amazonas",
-  "Apurímac",
-  "Huancavelica",
-  "Madre de Dios",
-  "Pasco",
-  "Callao",
-];
+import {
+  PERU_DEPARTMENTS,
+  getDistrictsByDepartment,
+} from "@/shared/constants/peru-locations";
 
 const DEPARTMENT_COORDS: Record<string, { lat: number; lng: number }> = {
   Lima: { lat: -12.0464, lng: -77.0428 },
@@ -165,7 +141,9 @@ export function ShelterProfileForm({
   };
 
   const handleDepartmentChange = (dep: string) => {
+    const districts = getDistrictsByDepartment(dep);
     updateField("department", dep);
+    updateField("city", districts[0] || "");
     const coords = DEPARTMENT_COORDS[dep];
     if (coords) {
       updateField("latitude", coords.lat);
@@ -476,21 +454,7 @@ export function ShelterProfileForm({
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="city" className="text-sm font-semibold text-tinta-900">
-                Distrito o Ciudad
-              </Label>
-              <Input
-                id="city"
-                type="text"
-                value={formData.city || ""}
-                onChange={(e) => updateField("city", e.target.value)}
-                placeholder="Ej. Los Olivos"
-                disabled={isLoading || isSaving}
-                className="h-11 border-line text-sm"
-              />
-            </div>
-
+            {/* Ubicación: Departamento y Distrito en cascada */}
             <div className="space-y-1.5">
               <Label htmlFor="shelterDepartment" className="text-sm font-semibold text-tinta-900">
                 Departamento
@@ -499,7 +463,7 @@ export function ShelterProfileForm({
                 id="shelterDepartment"
                 value={formData.department || "Lima"}
                 onChange={(e) => handleDepartmentChange(e.target.value)}
-                className="w-full h-11 px-3 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo"
+                className="w-full h-11 px-3 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo cursor-pointer"
               >
                 {PERU_DEPARTMENTS.map((dep) => (
                   <option key={dep} value={dep}>
@@ -508,6 +472,35 @@ export function ShelterProfileForm({
                 ))}
               </select>
             </div>
+
+            {(() => {
+              const currentDistricts = getDistrictsByDepartment(formData.department || "Lima");
+
+              return (
+                <div className="space-y-1.5">
+                  <Label htmlFor="city" className="text-sm font-semibold text-tinta-900">
+                    Distrito
+                  </Label>
+                  <select
+                    id="city"
+                    value={
+                      (currentDistricts.includes(formData.city || "")
+                        ? formData.city
+                        : currentDistricts[0]) || ""
+                    }
+                    onChange={(e) => updateField("city", e.target.value)}
+                    disabled={isLoading || isSaving}
+                    className="w-full h-11 px-3 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo cursor-pointer"
+                  >
+                    {currentDistricts.map((dist) => (
+                      <option key={dist} value={dist}>
+                        {dist}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Selector de Ubicación Interactivo y Coordenadas GPS */}

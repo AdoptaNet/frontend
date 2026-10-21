@@ -40,6 +40,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
   const [gender, setGender] = useState<PetGender | "all">(
     initialFilters?.gender || "all",
   );
+  const [department, setDepartment] = useState(initialFilters?.department || "");
   const [city, setCity] = useState(initialFilters?.city || "");
   const [search, setSearch] = useState(initialFilters?.search || "");
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +65,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
           size: size === "all" ? undefined : size,
           ageCategory: ageCategory === "all" ? undefined : ageCategory,
           gender: gender === "all" ? undefined : gender,
+          department: department.trim() || undefined,
           city: city.trim() || undefined,
           search: search.trim() || undefined,
         });
@@ -87,7 +89,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
         setIsLoadingMore(false);
       }
     },
-    [limit, species, size, ageCategory, gender, city, search],
+    [limit, species, size, ageCategory, gender, department, city, search],
   );
 
   // Initial and on-filter-change fetch (always resets to page 1)
@@ -116,6 +118,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     setSize("all");
     setAgeCategory("all");
     setGender("all");
+    setDepartment("");
     setCity("");
     setSearch("");
   }, []);
@@ -125,6 +128,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     size !== "all" ||
     ageCategory !== "all" ||
     gender !== "all" ||
+    department.trim() !== "" ||
     city.trim() !== "" ||
     search.trim() !== "";
 
@@ -140,6 +144,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     size,
     ageCategory,
     gender,
+    department,
     city,
     search,
     isLoading,
@@ -154,6 +159,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     setSize: (val: PetSize | "all") => setSize(val),
     setAgeCategory: (val: PetAgeCategory | "all") => setAgeCategory(val),
     setGender: (val: PetGender | "all") => setGender(val),
+    setDepartment: (val: string) => setDepartment(val),
     setCity: (val: string) => setCity(val),
     setSearch: (val: string) => setSearch(val),
     resetFilters,
