@@ -2,7 +2,6 @@
 
 import React, { useRef, useState } from "react";
 import {
-  Camera,
   UploadCloud,
   X,
   Sparkles,
@@ -122,21 +121,27 @@ export function VisualSearchModal({
         tabIndex={-1}
         className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl border border-line overflow-hidden focus:outline-none"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-line bg-superficie-2/50">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-verde-100 text-verde-700 flex items-center justify-center">
-              <Camera className="w-4 h-4" />
+        {/* Header con Realce de IA */}
+        <div className="flex items-center justify-between p-5 border-b border-line bg-gradient-to-r from-verde-50/70 via-superficie-2 to-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-verde-700 text-white flex items-center justify-center shadow-xs">
+              <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
             </div>
             <div>
-              <h3
-                id="visual-search-title"
-                className="text-base font-bold text-tinta-900 font-heading"
-              >
-                Buscar por foto
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3
+                  id="visual-search-title"
+                  className="text-base font-bold text-tinta-900 font-heading"
+                >
+                  Búsqueda Inteligente por Foto
+                </h3>
+                <span className="text-[10px] font-semibold bg-verde-100 text-verde-800 border border-verde-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-verde-600" />
+                  Con IA
+                </span>
+              </div>
               <p className="text-xs text-tinta-500">
-                Encuentra mascotas por parecido físico y color
+                Sube una foto y nuestra IA encontrará a las mascotas más parecidas en fisionomía y color
               </p>
             </div>
           </div>
@@ -281,13 +286,13 @@ export function VisualSearchModal({
           >
             {isSearching ? (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Buscando mascotas...</span>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-300" />
+                <span>Analizando rasgos con IA...</span>
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Buscar parecidos</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Buscar parecidos con IA</span>
               </>
             )}
           </Button>
