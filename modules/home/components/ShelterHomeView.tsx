@@ -95,7 +95,7 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
   }, []);
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-8 animate-in fade-in duration-150">
+    <div className="w-full max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 space-y-8 animate-in fade-in duration-150">
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -235,7 +235,7 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
                   ¿Tienes un nuevo rescatado listo para adopción?
                 </h3>
                 <p className="text-xs text-tinta-600 max-w-md">
-                  Publica su ficha con fotos. Nuestra IA autocompletará especie, pelaje y colores para agilizar el registro.
+                  Publica su ficha con fotos. Nuestra IA extraerá automáticamente especie, pelaje y colores a partir de las fotos.
                 </p>
               </div>
 

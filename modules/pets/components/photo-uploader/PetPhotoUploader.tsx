@@ -159,8 +159,8 @@ export function PetPhotoUploader({
         </span>
       </div>
 
-      {/* Grid of Thumbnails + Add Box */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+      {/* Grid of Thumbnails + Add Box - Responsive and Generous Size */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-5">
         {photos.map((photo, index) => (
           <PetPhotoThumbnail
             key={photo.publicId || photo.url || index}
@@ -189,12 +189,12 @@ export function PetPhotoUploader({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || isAnalyzing}
-            className="aspect-square rounded-xl border-2 border-dashed border-line hover:border-verde-600 hover:bg-verde-50/40 text-tinta-600 hover:text-verde-700 flex flex-col items-center justify-center gap-1.5 p-3 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group shadow-2xs"
+            className="aspect-square min-h-[140px] sm:min-h-[160px] rounded-xl border-2 border-dashed border-line hover:border-verde-600 hover:bg-verde-50/40 text-tinta-600 hover:text-verde-700 flex flex-col items-center justify-center gap-2 p-4 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group shadow-2xs hover:shadow-xs"
           >
-            <div className="p-2 rounded-lg bg-superficie-2 group-hover:bg-verde-100 text-tinta-500 group-hover:text-verde-700 transition-colors">
-              <ImagePlus className="w-5 h-5" />
+            <div className="p-3 rounded-xl bg-superficie-2 group-hover:bg-verde-100 text-tinta-500 group-hover:text-verde-700 transition-colors shadow-2xs">
+              <ImagePlus className="w-6 h-6" />
             </div>
-            <span className="text-[11px] font-semibold text-center leading-tight">
+            <span className="text-xs font-semibold text-center leading-tight">
               Agregar foto
             </span>
           </button>

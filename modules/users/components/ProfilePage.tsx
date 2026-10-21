@@ -75,7 +75,7 @@ export function ProfilePage() {
 
   if (isInitialLoading && !user) {
     return (
-      <div className="w-full max-w-5xl mx-auto py-24 px-4 sm:px-6 flex flex-col items-center justify-center gap-4 text-center">
+      <div className="w-full max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center gap-4 text-center">
         <Loader2 className="w-8 h-8 animate-spin text-verde-700" />
         <p className="text-sm font-medium text-tinta-600">Cargando perfil...</p>
       </div>
@@ -84,7 +84,7 @@ export function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="w-full max-w-5xl mx-auto py-24 px-4 sm:px-6 text-center">
+      <div className="w-full max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8 text-center">
         <AlertCircle className="w-10 h-10 text-coral-600 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-tinta-900">No se pudo cargar la información del perfil</h2>
         <p className="text-sm text-tinta-600 mt-1">Por favor verifica tu sesión e intenta recargar la página.</p>
@@ -93,7 +93,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
+    <div className="w-full max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 space-y-6">
 
 
       {/* Global Feedback Banner */}

@@ -13,7 +13,7 @@ export function AdopterHomeView({ user }: AdopterHomeViewProps) {
   const firstName = user?.fullName?.trim().split(" ")[0] || "Adoptante";
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-8">
+    <div className="w-full max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 space-y-8">
       {/* Welcome Header */}
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-tinta-900 tracking-tight">
