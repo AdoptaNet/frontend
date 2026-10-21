@@ -26,7 +26,7 @@ interface Step1BasicInfoProps {
 const COLOR_OPTIONS = [
   { value: "negro", label: "Negro", swatch: "bg-zinc-900 border-zinc-700" },
   { value: "marron", label: "Marrón", swatch: "bg-amber-900 border-amber-950" },
-  { value: "crema", label: "Crema / Beige", swatch: "bg-amber-100 border-amber-300" },
+  { value: "crema", label: "Crema", swatch: "bg-amber-100 border-amber-300" },
   { value: "gris", label: "Gris", swatch: "bg-gray-400 border-gray-500" },
   { value: "blanco", label: "Blanco", swatch: "bg-white border-gray-300" },
 ];
@@ -204,35 +204,57 @@ export function Step1BasicInfo({
           )}
         />
 
-        {/* Botón opcional para autocompletar con IA */}
+        {/* Asistente Inteligente de Reconocimiento de Fotos */}
         {photos.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-line/60">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={disabled || isAnalyzing}
-              onClick={handleAnalyzeWithAI}
-              className="h-8 px-3 text-xs font-semibold text-verde-800 border-verde-300 hover:bg-verde-50 gap-1.5 cursor-pointer shadow-2xs"
-            >
-              {isAnalyzing ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-verde-700" />
-                  <span>Analizando fotos...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5 text-verde-600" />
-                  <span>Autocompletar con IA</span>
-                </>
-              )}
-            </Button>
+          <div className="p-4 rounded-xl bg-gradient-to-r from-verde-50 via-emerald-50/40 to-teal-50 border border-verde-200 shadow-2xs space-y-3 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-verde-700 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-verde-950 font-heading">
+                      Extraer características con Inteligencia Artificial
+                    </span>
+                    <span className="text-[10px] font-semibold bg-verde-100 text-verde-800 border border-verde-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5 text-verde-600" />
+                      Ahorra tiempo
+                    </span>
+                  </div>
+                  <p className="text-xs text-tinta-600 leading-relaxed max-w-xl">
+                    Nuestra IA analiza las fotos que subiste para identificar y extraer automáticamente la especie, colores, tipo de pelaje y tamaño aproximado.
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                disabled={disabled || isAnalyzing}
+                onClick={handleAnalyzeWithAI}
+                className="h-9 px-4 text-xs font-bold bg-verde-700 hover:bg-verde-800 text-white gap-2 cursor-pointer shadow-xs shrink-0"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Extrayendo características...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                    <span>Extraer características con IA</span>
+                  </>
+                )}
+              </Button>
+            </div>
 
             {analysisSuccess && !isAnalyzing && (
-              <span className="text-xs font-medium text-verde-700 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-verde-600 shrink-0" />
-                Análisis completado. Sugerencias aplicadas.
-              </span>
+              <div className="p-3 rounded-lg bg-white border border-verde-200 text-xs text-verde-900 flex items-center gap-2 animate-in slide-in-from-top-1 duration-150">
+                <CheckCircle2 className="w-4 h-4 text-verde-600 shrink-0" />
+                <span>
+                  <strong>¡Características extraídas con éxito!</strong> Nuestra IA identificó los rasgos físicos de las fotos y los completó en la ficha. Puedes ajustarlos en cualquier momento.
+                </span>
+              </div>
             )}
           </div>
         )}

@@ -170,6 +170,15 @@ export function ShelterPetCard({
                 Esterilizado
               </span>
             )}
+            {pet.adoptionFee && pet.adoptionFee > 0 ? (
+              <span className="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded font-medium">
+                Aporte: S/ {pet.adoptionFee}
+              </span>
+            ) : (
+              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded font-medium">
+                Adopción gratuita
+              </span>
+            )}
           </div>
         </div>
 

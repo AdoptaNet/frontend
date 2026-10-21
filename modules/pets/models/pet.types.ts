@@ -39,6 +39,7 @@ export interface Pet {
   furLength: PetFurLength;
   isSterilized: boolean;
   isVaccinated: boolean;
+  vaccinesApplied?: string[] | string | null;
   healthStatus: PetHealthStatus;
   healthNotes: string | null;
   energyLevel: number;
@@ -49,6 +50,7 @@ export interface Pet {
   trainingLevel: PetTrainingLevel;
   timeAloneToleranceHours: number | null;
   shelterStayMonths: number;
+  adoptionFee?: number | null;
   description: string;
   status: PetStatus;
   photos: PetPhotoItem[];
@@ -71,6 +73,7 @@ export interface CreatePetDto {
   furLength?: PetFurLength;
   isSterilized?: boolean;
   isVaccinated?: boolean;
+  vaccinesApplied?: string[] | string | null;
   healthStatus?: PetHealthStatus;
   healthNotes?: string | null;
   energyLevel: number;
@@ -81,6 +84,7 @@ export interface CreatePetDto {
   trainingLevel?: PetTrainingLevel;
   timeAloneToleranceHours?: number | null;
   shelterStayMonths?: number;
+  adoptionFee?: number | null;
   description: string;
   status?: PetStatus;
   photos: PetPhotoItem[];
@@ -126,6 +130,7 @@ export interface SimilarPetResponse {
   pet: Pet;
   similarityScore?: number;
   similarityPercentage: number;
+  matchReasons?: string[];
 }
 
 export type UpdatePetDto = Partial<CreatePetDto>;
@@ -149,6 +154,8 @@ export interface QueryPublicPetsParams {
   city?: string;
   department?: string;
   search?: string;
+  feeType?: "all" | "free" | "with_fee";
+  isSterilized?: boolean;
   page?: number;
   limit?: number;
 }

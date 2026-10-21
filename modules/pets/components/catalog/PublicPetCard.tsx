@@ -14,9 +14,14 @@ import type { Pet } from "../../models/pet.types";
 interface PublicPetCardProps {
   pet: Pet;
   similarityPercentage?: number;
+  matchReasons?: string[];
 }
 
-export function PublicPetCard({ pet, similarityPercentage }: PublicPetCardProps) {
+export function PublicPetCard({
+  pet,
+  similarityPercentage,
+  matchReasons,
+}: PublicPetCardProps) {
   const photos = pet.photos && pet.photos.length > 0 ? pet.photos : [];
   const primaryIndex = photos.findIndex((p) => p.isPrimary);
   const [activePhotoIndex, setActivePhotoIndex] = useState(
@@ -162,7 +167,36 @@ export function PublicPetCard({ pet, similarityPercentage }: PublicPetCardProps)
                 Esterilizado/a
               </span>
             )}
+            {pet.adoptionFee && pet.adoptionFee > 0 ? (
+              <span className="text-[11px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
+                Aporte: S/ {pet.adoptionFee}
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+                Adopción gratuita
+              </span>
+            )}
           </div>
+
+          {/* Chips explicativos de coincidencia IA (XAI) */}
+          {matchReasons && matchReasons.length > 0 && (
+            <div className="pt-1.5 space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-verde-800 flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5 text-verde-600" />
+                Por qué coincide:
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {matchReasons.map((reason, idx) => (
+                  <span
+                    key={idx}
+                    className="text-[10px] font-semibold bg-verde-50 text-verde-900 border border-verde-200/90 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs"
+                  >
+                    {reason}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Shelter & Location Info */}
           <div className="pt-2 border-t border-line/60 flex items-center justify-between text-xs text-tinta-600">

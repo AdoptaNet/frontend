@@ -37,10 +37,10 @@ export function PetPhotoThumbnail({
       onDragStart={() => onDragStart?.(index)}
       onDragOver={(e) => onDragOver?.(e)}
       onDrop={() => onDrop?.(index)}
-      className={`relative group rounded-xl overflow-hidden border-2 transition-all aspect-square bg-superficie-2 flex items-center justify-center select-none ${
+      className={`relative group rounded-xl overflow-hidden border-2 transition-all aspect-square min-h-[140px] sm:min-h-[160px] bg-superficie-2 flex items-center justify-center select-none ${
         isDragging
           ? "border-verde-500 opacity-40 scale-95"
-          : "border-line hover:border-verde-500 shadow-2xs cursor-grab active:cursor-grabbing"
+          : "border-line hover:border-verde-500 shadow-2xs hover:shadow-xs cursor-grab active:cursor-grabbing"
       }`}
     >
       {/* Image */}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Home,
   Users,
@@ -13,6 +14,7 @@ import {
   MapPin,
   ArrowRight,
   ArrowLeft,
+  Compass,
 } from "lucide-react";
 import {
   Card,
@@ -62,34 +64,10 @@ import {
   FollowUpAcceptance,
   AdopterAgeRange,
 } from "../models/adopter-profile.types";
-
-const PERU_DEPARTMENTS = [
-  "Lima",
-  "Arequipa",
-  "Cusco",
-  "La Libertad",
-  "Piura",
-  "Lambayeque",
-  "Áncash",
-  "Junín",
-  "Ica",
-  "San Martín",
-  "Cajamarca",
-  "Loreto",
-  "Ucayali",
-  "Tacna",
-  "Huánuco",
-  "Ayacucho",
-  "Puno",
-  "Moquegua",
-  "Tumbes",
-  "Amazonas",
-  "Apurímac",
-  "Huancavelica",
-  "Madre de Dios",
-  "Pasco",
-  "Callao",
-];
+import {
+  PERU_DEPARTMENTS,
+  getDistrictsByDepartment,
+} from "@/shared/constants/peru-locations";
 
 const SECTIONS = [
   { id: 1, label: "1. Vivienda", fullLabel: "Vivienda y Entorno", icon: Home },
@@ -114,6 +92,21 @@ export function AdopterProfileForm({
     profile?.isSurveyCompleted ?? profile?.housingType,
   );
   const isNewProfile = !isProfileCompleted;
+  const router = useRouter();
+
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (redirectCountdown === null) return;
+    if (redirectCountdown <= 0) {
+      router.push("/pets?survey=completed");
+      return;
+    }
+    const timer = setTimeout(() => {
+      setRedirectCountdown((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [redirectCountdown, router]);
 
   const [formData, setFormData] = useState<UpdateAdopterProfileDto>({
     department: profile?.department || "Lima",
@@ -255,9 +248,8 @@ export function AdopterProfileForm({
           ? "¡Cuestionario completado y recomendaciones activadas con éxito! 🎉"
           : "¡Preferencias de adopción actualizadas correctamente!",
       });
-      setTimeout(() => {
-        setBottomFeedback((prev) => (prev.type === "success" ? { type: null, message: null } : prev));
-      }, 5000);
+      // Iniciar cuenta regresiva de 5 segundos hacia el catálogo (sin scroll para evitar mareo)
+      setRedirectCountdown(5);
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -275,7 +267,8 @@ export function AdopterProfileForm({
   const progressPercentage = Math.round((activeSection / 4) * 100);
 
   return (
-    <Card className="bg-white border-line shadow-sm">
+    <>
+      <Card className="bg-white border-line shadow-sm">
       <CardHeader className="pb-4 space-y-4">
         {/* Banner de Invitación o Encabezado de Edición */}
         {isNewProfile ? (
@@ -385,42 +378,66 @@ export function AdopterProfileForm({
                 </h3>
               </div>
 
-              {/* Ubicación: Departamento y Ciudad/Distrito */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="department" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-verde-700" />
-                    Departamento del Perú
-                  </Label>
-                  <select
-                    id="department"
-                    value={formData.department || "Lima"}
-                    onChange={(e) => updateField("department", e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo"
-                  >
-                    {PERU_DEPARTMENTS.map((dep) => (
-                      <option key={dep} value={dep}>
-                        {dep}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Ubicación: Departamento y Ciudad/Distrito en cascada */}
+              {(() => {
+                const currentDistricts = getDistrictsByDepartment(formData.department || "Lima");
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="city" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
-                    <Home className="w-4 h-4 text-verde-700" />
-                    Distrito o Ciudad
-                  </Label>
-                  <Input
-                    id="city"
-                    type="text"
-                    value={formData.city || ""}
-                    onChange={(e) => updateField("city", e.target.value)}
-                    placeholder="Ej. Miraflores, Yanahuara, etc."
-                    className="h-11 border-line text-sm"
-                  />
-                </div>
-              </div>
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Selector de Departamento */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="department" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-verde-700" />
+                        Departamento
+                      </Label>
+                      <select
+                        id="department"
+                        value={formData.department || "Lima"}
+                        onChange={(e) => {
+                          const newDept = e.target.value;
+                          const newDistricts = getDistrictsByDepartment(newDept);
+                          setFormData((prev) => ({
+                            ...prev,
+                            department: newDept,
+                            city: newDistricts[0] || "",
+                          }));
+                        }}
+                        className="w-full h-11 px-3.5 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo cursor-pointer"
+                      >
+                        {PERU_DEPARTMENTS.map((dep) => (
+                          <option key={dep} value={dep}>
+                            {dep}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Selector de Distrito Dependiente */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="city" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                        <Home className="w-4 h-4 text-verde-700" />
+                        Distrito
+                      </Label>
+                      <select
+                        id="city"
+                        value={
+                          (currentDistricts.includes(formData.city || "")
+                            ? formData.city
+                            : currentDistricts[0]) || ""
+                        }
+                        onChange={(e) => updateField("city", e.target.value)}
+                        className="w-full h-11 px-3.5 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo cursor-pointer"
+                      >
+                        {currentDistricts.map((dist) => (
+                          <option key={dist} value={dist}>
+                            {dist}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Tipo de Zona */}
               <OptionToggleGroup
@@ -960,6 +977,52 @@ export function AdopterProfileForm({
         </CardFooter>
       </form>
     </Card>
+
+    {/* Barra de notificación flotante inferior con cuenta regresiva (sin scroll ni salto de pantalla) */}
+    {redirectCountdown !== null && (
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl z-50 bg-gradient-to-r from-emerald-600 via-verde-700 to-teal-800 text-white p-4 sm:p-5 rounded-2xl shadow-2xl border border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center shrink-0 shadow-xs">
+            <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <h4 className="font-heading font-bold text-sm sm:text-base text-white">
+                ¡Cuestionario guardado con éxito! 🎉
+              </h4>
+              <span className="text-[10px] uppercase font-bold bg-white/20 px-2 py-0.5 rounded-full text-white">
+                Desbloqueado
+              </span>
+            </div>
+            <p className="text-xs text-white/90 leading-relaxed">
+              Redirigiéndote al catálogo de mascotas en{" "}
+              <strong className="font-mono text-amber-200 text-sm font-bold">
+                {redirectCountdown}s
+              </strong>
+              ... Ya puedes postular con un solo clic.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setRedirectCountdown(null)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+          >
+            Quedarme aquí
+          </button>
+          <Button
+            type="button"
+            onClick={() => router.push("/pets?survey=completed")}
+            className="h-8 px-3.5 bg-white text-verde-900 hover:bg-superficie-1 font-semibold text-xs rounded-lg gap-1.5 cursor-pointer shadow-xs"
+          >
+            <Compass className="w-3.5 h-3.5 text-verde-800" />
+            <span>Ir al catálogo ahora</span>
+          </Button>
+        </div>
+      </div>
+    )}
+  </>
   );
 }
 

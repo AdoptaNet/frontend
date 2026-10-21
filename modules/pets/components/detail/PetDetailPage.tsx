@@ -179,7 +179,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
       {/* Top Breadcrumb & Actions */}
       <div className="flex items-center justify-between">
         <Link
@@ -318,7 +318,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
           </div>
 
           {/* Quick Demographics Cards */}
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="p-3 rounded-xl bg-superficie-2 border border-line text-center space-y-0.5">
               <span className="text-[11px] font-medium text-tinta-500 block">Tamaño</span>
               <span className="text-xs font-bold text-tinta-900">
@@ -335,6 +335,20 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               <span className="text-[11px] font-medium text-tinta-500 block">Pelaje</span>
               <span className="text-xs font-bold text-tinta-900 truncate block">
                 {furLabels[pet.furLength] || "Corto"}
+              </span>
+            </div>
+            <div className="p-3 rounded-xl bg-superficie-2 border border-line text-center space-y-0.5">
+              <span className="text-[11px] font-medium text-tinta-500 block">Aporte</span>
+              <span
+                className={`text-xs font-bold truncate block ${
+                  pet.adoptionFee && pet.adoptionFee > 0
+                    ? "text-amber-800"
+                    : "text-emerald-800"
+                }`}
+              >
+                {pet.adoptionFee && pet.adoptionFee > 0
+                  ? `S/ ${pet.adoptionFee}`
+                  : "Gratuita"}
               </span>
             </div>
           </div>
@@ -375,6 +389,15 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   </TooltipContent>
                 </Tooltip>
               )}
+            </div>
+
+            <div className="pt-2 border-t border-line/60 flex items-center justify-between text-xs">
+              <span className="text-tinta-500">Condición de adopción</span>
+              <span className="font-semibold text-tinta-800">
+                {pet.adoptionFee && pet.adoptionFee > 0
+                  ? `Aporte: S/ ${pet.adoptionFee}`
+                  : "Adopción gratuita"}
+              </span>
             </div>
 
             <div className="pt-2 border-t border-line/60 flex items-center justify-between text-xs">
@@ -457,6 +480,25 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   </span>
                 )}
               </div>
+              {pet.vaccinesApplied && (
+                <div className="pt-1.5 border-t border-line/60 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-tinta-500 block">Dosis aplicadas:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {(Array.isArray(pet.vaccinesApplied)
+                      ? pet.vaccinesApplied
+                      : String(pet.vaccinesApplied).split(",").map((s) => s.trim()).filter(Boolean)
+                    ).map((vac, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-verde-50 text-verde-800 border border-verde-200"
+                      >
+                        <CheckCircle2 className="w-3 h-3 text-verde-600 shrink-0" />
+                        <span>{vac}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

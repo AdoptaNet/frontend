@@ -2,7 +2,15 @@
 
 import React from "react";
 import { UseFormReturn, Controller } from "react-hook-form";
-import { ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Trash2,
+  Syringe,
+  Check,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CompletePetFormData } from "../../models/pet-form.schemas";
@@ -22,8 +30,71 @@ export function Step2HealthPhysical({
   const {
     register,
     control,
+    watch,
     formState: { errors },
   } = form;
+
+  const isVaccinated = watch("isVaccinated");
+  const currentSpecies = watch("species");
+  const rawVaccines = watch("vaccinesApplied");
+
+  // Normalizar lista de vacunas: asegurar al menos una fila editable
+  const vaccineList: string[] = React.useMemo(() => {
+    if (Array.isArray(rawVaccines) && rawVaccines.length > 0) {
+      return rawVaccines;
+    }
+    if (typeof rawVaccines === "string" && rawVaccines.trim().length > 0) {
+      return rawVaccines.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+    return [""];
+  }, [rawVaccines]);
+
+  const handleUpdateVaccine = (index: number, value: string) => {
+    const updated = [...vaccineList];
+    updated[index] = value;
+    form.setValue("vaccinesApplied", updated, { shouldDirty: true });
+  };
+
+  const handleAddVaccine = (initialValue = "") => {
+    const updated = [...vaccineList, initialValue];
+    form.setValue("vaccinesApplied", updated, { shouldDirty: true });
+  };
+
+  const handleRemoveVaccine = (index: number) => {
+    const updated = vaccineList.filter((_, i) => i !== index);
+    form.setValue("vaccinesApplied", updated.length > 0 ? updated : [""], {
+      shouldDirty: true,
+    });
+  };
+
+  const quickSuggestions =
+    currentSpecies === "cat"
+      ? [
+          "Triple Felina (FVRCP)",
+          "Antirrábica",
+          "Leucemia Felina (FeLV)",
+          "PIF",
+        ]
+      : [
+          "Quíntuple",
+          "Antirrábica",
+          "Parvovirus",
+          "Séxtuple / Puppy",
+          "KC (Tos de perreras)",
+        ];
+
+  const handleQuickAdd = (vaccineName: string) => {
+    const emptyIndex = vaccineList.findIndex((v) => !v.trim());
+    if (emptyIndex !== -1) {
+      handleUpdateVaccine(emptyIndex, vaccineName);
+    } else if (
+      !vaccineList.some(
+        (v) => v.toLowerCase().trim() === vaccineName.toLowerCase().trim(),
+      )
+    ) {
+      handleAddVaccine(vaccineName);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -185,6 +256,95 @@ export function Step2HealthPhysical({
           )}
         />
       </div>
+
+      {/* Detalle de vacunas si está marcado como vacunado */}
+      {isVaccinated && (
+        <div className="space-y-3.5 p-4 bg-verde-50/40 rounded-2xl border border-verde-200 animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <Label className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
+                <Syringe className="w-4 h-4 text-verde-700" />
+                Vacunas aplicadas
+              </Label>
+              <p className="text-xs text-tinta-500">
+                Agrega un campo por cada vacuna o dosis administrada a la mascota.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => handleAddVaccine("")}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-verde-100 text-verde-900 border border-verde-300 transition-colors cursor-pointer self-start sm:self-auto shadow-2xs"
+            >
+              <Plus className="w-3.5 h-3.5 text-verde-700" />
+              <span>Agregar otra vacuna</span>
+            </button>
+          </div>
+
+          {/* Lista dinámica de inputs de vacunas */}
+          <div className="space-y-2">
+            {vaccineList.map((vac, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type="text"
+                    placeholder={`Vacuna #${idx + 1} (ej. ${quickSuggestions[idx % quickSuggestions.length] || "Antirrábica"})`}
+                    value={vac}
+                    disabled={disabled}
+                    onChange={(e) => handleUpdateVaccine(idx, e.target.value)}
+                    className="h-10 text-xs sm:text-sm bg-white border-line rounded-xl"
+                  />
+                </div>
+                {vaccineList.length > 1 && (
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => handleRemoveVaccine(idx)}
+                    className="p-2 text-tinta-400 hover:text-coral-600 rounded-lg hover:bg-coral-50 transition-colors cursor-pointer"
+                    title="Eliminar esta vacuna"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Sugerencias rápidas según especie */}
+          <div className="space-y-1.5 pt-1.5 border-t border-verde-200/60">
+            <span className="text-[11px] font-semibold text-verde-800 block">
+              Sugerencias frecuentes (haz clic para agregar rápido):
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {quickSuggestions.map((sug) => {
+                const isSelected = vaccineList.some(
+                  (v) => v.toLowerCase().trim() === sug.toLowerCase().trim(),
+                );
+                return (
+                  <button
+                    key={sug}
+                    type="button"
+                    disabled={disabled || isSelected}
+                    onClick={() => handleQuickAdd(sug)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
+                      isSelected
+                        ? "bg-verde-700 text-white cursor-default opacity-80"
+                        : "bg-white hover:bg-verde-100 text-verde-900 border border-verde-200 cursor-pointer shadow-2xs"
+                    }`}
+                  >
+                    {isSelected ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <Plus className="w-3 h-3 text-verde-600" />
+                    )}
+                    <span>{sug}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Estado de Salud */}
       <div className="space-y-2">

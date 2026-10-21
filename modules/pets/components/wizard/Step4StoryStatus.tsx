@@ -56,6 +56,44 @@ export function Step4StoryStatus({ form, disabled }: Step4StoryStatusProps) {
         </p>
       </div>
 
+      {/* Aporte de recuperación */}
+      <div className="space-y-1.5">
+        <Label htmlFor="adoption-fee" className="text-sm font-semibold text-tinta-900">
+          Aporte (S/) (opcional)
+        </Label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-tinta-500">
+            S/
+          </span>
+          <Input
+            id="adoption-fee"
+            type="number"
+            min={0}
+            step="any"
+            placeholder="0.00"
+            disabled={disabled}
+            className="pl-8"
+            onKeyDown={(e) => {
+              if (["e", "E", "+", "-"].includes(e.key)) {
+                e.preventDefault();
+              }
+            }}
+            {...register("adoptionFee", {
+              setValueAs: (v) =>
+                v === "" || v === null || v === undefined || isNaN(Number(v))
+                  ? 0
+                  : Number(v),
+            })}
+          />
+        </div>
+        {errors.adoptionFee && (
+          <p className="text-xs text-coral-600">{errors.adoptionFee.message}</p>
+        )}
+        <p className="text-xs text-tinta-500">
+          Monto simbólico o de recuperación para gastos veterinarios o manutención. Deja en 0 para adopción gratuita.
+        </p>
+      </div>
+
       {/* Biografía / Historia */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
