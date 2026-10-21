@@ -52,6 +52,11 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
           furLength: initialPet.furLength || "short",
           isSterilized: initialPet.isSterilized ?? false,
           isVaccinated: initialPet.isVaccinated ?? false,
+          vaccinesApplied: Array.isArray(initialPet.vaccinesApplied)
+            ? initialPet.vaccinesApplied
+            : typeof initialPet.vaccinesApplied === "string" && initialPet.vaccinesApplied.trim()
+              ? initialPet.vaccinesApplied.split(",").map((s) => s.trim()).filter(Boolean)
+              : [],
           healthStatus: initialPet.healthStatus || "healthy",
           healthNotes: initialPet.healthNotes || "",
           energyLevel: initialPet.energyLevel || 3,
@@ -78,6 +83,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
           furLength: "short",
           isSterilized: false,
           isVaccinated: false,
+          vaccinesApplied: [],
           healthStatus: "healthy",
           healthNotes: "",
           energyLevel: 3,
@@ -100,7 +106,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
     if (currentStep === 1) {
       stepFields = ["name", "species", "breed", "gender", "ageMonths", "photos", "colors"];
     } else if (currentStep === 2) {
-      stepFields = ["size", "furLength", "isSterilized", "isVaccinated", "healthStatus"];
+      stepFields = ["size", "furLength", "isSterilized", "isVaccinated", "vaccinesApplied", "healthStatus", "healthNotes"];
     } else if (currentStep === 3) {
       stepFields = ["energyLevel", "vocalizationLevel", "trainingLevel"];
     }
@@ -146,8 +152,19 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
         }),
       );
 
+      const cleanedVaccines = Array.isArray(data.vaccinesApplied)
+        ? data.vaccinesApplied.map((v) => v.trim()).filter(Boolean)
+        : typeof data.vaccinesApplied === "string"
+          ? data.vaccinesApplied.split(",").map((v) => v.trim()).filter(Boolean)
+          : [];
+
       const finalData: CompletePetFormData = {
         ...data,
+        vaccinesApplied: data.isVaccinated
+          ? cleanedVaccines.length > 0
+            ? cleanedVaccines
+            : null
+          : null,
         photos: processedPhotos,
       };
 
@@ -177,7 +194,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
     if (errorKeys.length === 0) return;
 
     const step1Keys = ["name", "species", "breed", "gender", "ageMonths", "photos", "colors"];
-    const step2Keys = ["size", "furLength", "isSterilized", "isVaccinated", "healthStatus", "healthNotes"];
+    const step2Keys = ["size", "furLength", "isSterilized", "isVaccinated", "vaccinesApplied", "healthStatus", "healthNotes"];
     const step3Keys = ["energyLevel", "vocalizationLevel", "goodWithChildren", "goodWithDogs", "goodWithCats", "trainingLevel", "timeAloneToleranceHours"];
     const step4Keys = ["shelterStayMonths", "description", "status"];
 
@@ -198,7 +215,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6">
       {/* Top Back Navigation */}
       <button
         type="button"

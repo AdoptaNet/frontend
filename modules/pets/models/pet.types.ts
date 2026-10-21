@@ -39,6 +39,7 @@ export interface Pet {
   furLength: PetFurLength;
   isSterilized: boolean;
   isVaccinated: boolean;
+  vaccinesApplied?: string[] | string | null;
   healthStatus: PetHealthStatus;
   healthNotes: string | null;
   energyLevel: number;
@@ -71,6 +72,7 @@ export interface CreatePetDto {
   furLength?: PetFurLength;
   isSterilized?: boolean;
   isVaccinated?: boolean;
+  vaccinesApplied?: string[] | string | null;
   healthStatus?: PetHealthStatus;
   healthNotes?: string | null;
   energyLevel: number;
@@ -126,6 +128,7 @@ export interface SimilarPetResponse {
   pet: Pet;
   similarityScore?: number;
   similarityPercentage: number;
+  matchReasons?: string[];
 }
 
 export type UpdatePetDto = Partial<CreatePetDto>;

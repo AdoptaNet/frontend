@@ -63,6 +63,10 @@ export const step2HealthPhysicalSchema = z.object({
   isVaccinated: z.boolean({
     required_error: "Indica si la mascota cuenta con vacunas",
   }),
+  vaccinesApplied: z
+    .union([z.array(z.string()), z.string()])
+    .optional()
+    .nullable(),
   healthStatus: z.enum(["healthy", "chronic_condition", "disability"], {
     errorMap: () => ({ message: "Selecciona el estado de salud" }),
   }),

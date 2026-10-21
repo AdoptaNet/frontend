@@ -179,7 +179,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
       {/* Top Breadcrumb & Actions */}
       <div className="flex items-center justify-between">
         <Link
@@ -457,6 +457,25 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   </span>
                 )}
               </div>
+              {pet.vaccinesApplied && (
+                <div className="pt-1.5 border-t border-line/60 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-tinta-500 block">Dosis aplicadas:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {(Array.isArray(pet.vaccinesApplied)
+                      ? pet.vaccinesApplied
+                      : String(pet.vaccinesApplied).split(",").map((s) => s.trim()).filter(Boolean)
+                    ).map((vac, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-verde-50 text-verde-800 border border-verde-200"
+                      >
+                        <CheckCircle2 className="w-3 h-3 text-verde-600 shrink-0" />
+                        <span>{vac}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
