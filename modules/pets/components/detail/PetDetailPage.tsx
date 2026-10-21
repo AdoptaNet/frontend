@@ -318,7 +318,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
           </div>
 
           {/* Quick Demographics Cards */}
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="p-3 rounded-xl bg-superficie-2 border border-line text-center space-y-0.5">
               <span className="text-[11px] font-medium text-tinta-500 block">Tamaño</span>
               <span className="text-xs font-bold text-tinta-900">
@@ -335,6 +335,20 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               <span className="text-[11px] font-medium text-tinta-500 block">Pelaje</span>
               <span className="text-xs font-bold text-tinta-900 truncate block">
                 {furLabels[pet.furLength] || "Corto"}
+              </span>
+            </div>
+            <div className="p-3 rounded-xl bg-superficie-2 border border-line text-center space-y-0.5">
+              <span className="text-[11px] font-medium text-tinta-500 block">Aporte</span>
+              <span
+                className={`text-xs font-bold truncate block ${
+                  pet.adoptionFee && pet.adoptionFee > 0
+                    ? "text-amber-800"
+                    : "text-emerald-800"
+                }`}
+              >
+                {pet.adoptionFee && pet.adoptionFee > 0
+                  ? `S/ ${pet.adoptionFee}`
+                  : "Gratuita"}
               </span>
             </div>
           </div>
@@ -375,6 +389,15 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   </TooltipContent>
                 </Tooltip>
               )}
+            </div>
+
+            <div className="pt-2 border-t border-line/60 flex items-center justify-between text-xs">
+              <span className="text-tinta-500">Condición de adopción</span>
+              <span className="font-semibold text-tinta-800">
+                {pet.adoptionFee && pet.adoptionFee > 0
+                  ? `Aporte: S/ ${pet.adoptionFee}`
+                  : "Adopción gratuita"}
+              </span>
             </div>
 
             <div className="pt-2 border-t border-line/60 flex items-center justify-between text-xs">

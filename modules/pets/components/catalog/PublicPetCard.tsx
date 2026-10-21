@@ -167,6 +167,15 @@ export function PublicPetCard({
                 Esterilizado/a
               </span>
             )}
+            {pet.adoptionFee && pet.adoptionFee > 0 ? (
+              <span className="text-[11px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
+                Aporte: S/ {pet.adoptionFee}
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+                Adopción gratuita
+              </span>
+            )}
           </div>
 
           {/* Chips explicativos de coincidencia IA (XAI) */}

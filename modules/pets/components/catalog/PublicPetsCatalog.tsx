@@ -43,6 +43,8 @@ export function PublicPetsCatalog() {
     size,
     ageCategory,
     gender,
+    feeType,
+    isSterilized,
     department,
     city,
     search,
@@ -57,6 +59,8 @@ export function PublicPetsCatalog() {
     setSize,
     setAgeCategory,
     setGender,
+    setFeeType,
+    setIsSterilized,
     setDepartment,
     setCity,
     setSearch,
@@ -257,7 +261,7 @@ export function PublicPetsCatalog() {
 
         {/* Expandable Advanced Filters Row */}
         {showAdvancedFilters && (
-          <div className="pt-3 border-t border-line/60 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 animate-in fade-in duration-150">
+          <div className="pt-3 border-t border-line/60 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 animate-in fade-in duration-150">
             {/* Tamaño */}
             <div className="space-y-1">
               <label className="text-[11px] font-semibold text-tinta-700">
@@ -308,6 +312,42 @@ export function PublicPetsCatalog() {
                 <option value="all">Cualquier sexo</option>
                 <option value="male">Macho</option>
                 <option value="female">Hembra</option>
+              </select>
+            </div>
+
+            {/* Aporte */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-tinta-700">
+                Aporte
+              </label>
+              <select
+                value={feeType}
+                onChange={(e) =>
+                  setFeeType(e.target.value as "all" | "free" | "with_fee")
+                }
+                className="w-full h-9 rounded-xl border border-line bg-white px-2.5 text-xs text-tinta-800 focus:outline-none focus:ring-1 focus:ring-verde-500 cursor-pointer"
+              >
+                <option value="all">Todos</option>
+                <option value="free">Adopción gratuita</option>
+                <option value="with_fee">Con aporte</option>
+              </select>
+            </div>
+
+            {/* Esterilización */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-tinta-700">
+                Esterilización
+              </label>
+              <select
+                value={isSterilized === "all" ? "all" : isSterilized ? "true" : "false"}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setIsSterilized(val === "all" ? "all" : val === "true");
+                }}
+                className="w-full h-9 rounded-xl border border-line bg-white px-2.5 text-xs text-tinta-800 focus:outline-none focus:ring-1 focus:ring-verde-500 cursor-pointer"
+              >
+                <option value="all">Todos los estados</option>
+                <option value="true">Solo esterilizados/as</option>
               </select>
             </div>
 
@@ -369,6 +409,32 @@ export function PublicPetsCatalog() {
               <span className="text-tinta-500 font-medium mr-0.5">
                 Filtros activos:
               </span>
+              {feeType !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-verde-50 text-verde-800 border border-verde-200 text-[11px] font-medium">
+                  🪙 {feeType === "free" ? "Adopción gratuita" : "Con aporte"}
+                  <button
+                    type="button"
+                    onClick={() => setFeeType("all")}
+                    className="hover:text-coral-600 font-bold ml-0.5 cursor-pointer"
+                    title="Quitar filtro de aporte"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              {isSterilized !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-verde-50 text-verde-800 border border-verde-200 text-[11px] font-medium">
+                  ✂️ {isSterilized ? "Esterilizado/a" : "Sin esterilizar"}
+                  <button
+                    type="button"
+                    onClick={() => setIsSterilized("all")}
+                    className="hover:text-coral-600 font-bold ml-0.5 cursor-pointer"
+                    title="Quitar filtro de esterilización"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
               {department && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-verde-50 text-verde-800 border border-verde-200 text-[11px] font-medium">
                   📍 {department}

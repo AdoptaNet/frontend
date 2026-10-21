@@ -15,6 +15,8 @@ export interface PublicPetsFilters {
   size?: PetSize | "all";
   ageCategory?: PetAgeCategory | "all";
   gender?: PetGender | "all";
+  feeType?: "all" | "free" | "with_fee";
+  isSterilized?: boolean | "all";
   city?: string;
   department?: string;
   search?: string;
@@ -39,6 +41,12 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
   );
   const [gender, setGender] = useState<PetGender | "all">(
     initialFilters?.gender || "all",
+  );
+  const [feeType, setFeeType] = useState<"all" | "free" | "with_fee">(
+    initialFilters?.feeType || "all",
+  );
+  const [isSterilized, setIsSterilized] = useState<boolean | "all">(
+    initialFilters?.isSterilized ?? "all",
   );
   const [department, setDepartment] = useState(initialFilters?.department || "");
   const [city, setCity] = useState(initialFilters?.city || "");
@@ -65,6 +73,8 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
           size: size === "all" ? undefined : size,
           ageCategory: ageCategory === "all" ? undefined : ageCategory,
           gender: gender === "all" ? undefined : gender,
+          feeType: feeType === "all" ? undefined : feeType,
+          isSterilized: isSterilized === "all" ? undefined : isSterilized,
           department: department.trim() || undefined,
           city: city.trim() || undefined,
           search: search.trim() || undefined,
@@ -89,7 +99,7 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
         setIsLoadingMore(false);
       }
     },
-    [limit, species, size, ageCategory, gender, department, city, search],
+    [limit, species, size, ageCategory, gender, feeType, isSterilized, department, city, search],
   );
 
   // Initial and on-filter-change fetch (always resets to page 1)
@@ -118,6 +128,8 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     setSize("all");
     setAgeCategory("all");
     setGender("all");
+    setFeeType("all");
+    setIsSterilized("all");
     setDepartment("");
     setCity("");
     setSearch("");
@@ -128,6 +140,8 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     size !== "all" ||
     ageCategory !== "all" ||
     gender !== "all" ||
+    feeType !== "all" ||
+    isSterilized !== "all" ||
     department.trim() !== "" ||
     city.trim() !== "" ||
     search.trim() !== "";
@@ -144,6 +158,8 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     size,
     ageCategory,
     gender,
+    feeType,
+    isSterilized,
     department,
     city,
     search,
@@ -159,6 +175,8 @@ export function usePublicPets(initialFilters?: Partial<PublicPetsFilters>) {
     setSize: (val: PetSize | "all") => setSize(val),
     setAgeCategory: (val: PetAgeCategory | "all") => setAgeCategory(val),
     setGender: (val: PetGender | "all") => setGender(val),
+    setFeeType: (val: "all" | "free" | "with_fee") => setFeeType(val),
+    setIsSterilized: (val: boolean | "all") => setIsSterilized(val),
     setDepartment: (val: string) => setDepartment(val),
     setCity: (val: string) => setCity(val),
     setSearch: (val: string) => setSearch(val),
