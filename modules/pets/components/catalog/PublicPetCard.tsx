@@ -86,8 +86,11 @@ export function PublicPetCard({
 
           {/* Status Badge */}
           <div className="absolute top-2.5 right-2.5 z-20">
-            <Badge variant="disponible" className="text-[11px] shadow-2xs">
-              Disponible
+            <Badge
+              variant={pet.status === "in_process" ? "in_process" : "disponible"}
+              className="text-[11px] shadow-2xs font-semibold"
+            >
+              {pet.status === "in_process" ? "En proceso" : "Disponible"}
             </Badge>
           </div>
 

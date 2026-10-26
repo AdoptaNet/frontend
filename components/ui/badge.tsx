@@ -11,6 +11,8 @@ const badgeVariants = cva(
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
         disponible:
           "bg-[#EDF5F2] text-[#1D5147] border border-[#BFDCD4] font-medium",
+        in_process:
+          "bg-[#FCEBC9] text-[#9A5D02] border border-[#F0A202]/30 font-medium",
         reason:
           "bg-[#FCEBC9] text-[#9A5D02] border border-[#F0A202]/30 font-medium",
         secondary:

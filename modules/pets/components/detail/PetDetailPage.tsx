@@ -244,8 +244,11 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               <span className="bg-white/95 backdrop-blur-xs text-tinta-900 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xs">
                 {pet.species === "dog" ? "🐶 Perro" : "🐱 Gato"}
               </span>
-              <Badge variant="disponible" className="shadow-2xs text-xs">
-                Disponible
+              <Badge
+                variant={pet.status === "in_process" ? "in_process" : "disponible"}
+                className="shadow-2xs text-xs font-semibold"
+              >
+                {pet.status === "in_process" ? "En proceso" : "Disponible"}
               </Badge>
             </div>
 
@@ -436,6 +439,8 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   <span>
                     {pet.status === "available"
                       ? "Postular a Adopción"
+                      : pet.status === "in_process"
+                      ? "Mascota en Proceso de Adopción"
                       : pet.status === "adopted"
                       ? "Mascota Ya Adoptada"
                       : "No disponible para postular"}
@@ -446,6 +451,8 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <p className="text-[11px] text-center text-tinta-500">
               {pet.status === "available"
                 ? "El proceso incluye evaluación de compatibilidad de hogar y seguimiento responsable."
+                : pet.status === "in_process"
+                ? "Esta mascota se encuentra en evaluación avanzada con un postulante. Si el proceso no se concreta, volverá a estar disponible."
                 : "Esta mascota ya cuenta con un hogar formalizado o no admite nuevas solicitudes."}
             </p>
           </div>
@@ -772,6 +779,8 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   ? "Verificando..."
                   : pet.status === "available"
                   ? "Postular"
+                  : pet.status === "in_process"
+                  ? "En proceso"
                   : "No disponible"}
               </span>
             </Button>

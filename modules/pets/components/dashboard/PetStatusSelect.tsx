@@ -22,7 +22,7 @@ const STATUS_CONFIG: Record<
   },
   in_process: {
     label: "En proceso",
-    bg: "bg-ambar-50 border-ambar-200",
+    bg: "bg-ambar-100 border-ambar-500/30",
     text: "text-ambar-700",
     dot: "bg-ambar-500",
   },
