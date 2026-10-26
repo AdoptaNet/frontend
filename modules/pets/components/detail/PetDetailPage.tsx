@@ -47,8 +47,8 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   const router = useRouter();
   const { pet, isLoading, error } = usePetDetail(petId);
   const { user } = useAuthStore();
-  const { user: profileUser, role } = useProfile();
-  const adopterProfile = profileUser?.adopterProfile;
+  const { user: profileUser, role, isInitialLoading: isProfileLoading } = useProfile();
+  const adopterProfile = profileUser?.adopterProfile ?? user?.adopterProfile;
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
@@ -157,6 +157,11 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
 
     if (isShelterUser) {
       setShowShelterNoticeModal(true);
+      return;
+    }
+
+    // Si aún se está cargando el perfil inicial y no hay datos en caché, esperar para evitar falso positivo
+    if (isProfileLoading && !adopterProfile) {
       return;
     }
 
@@ -417,17 +422,26 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              disabled={pet.status !== "available"}
+              disabled={pet.status !== "available" || (isProfileLoading && !adopterProfile)}
               className="w-full h-12 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-bold text-sm sm:text-base gap-2 rounded-xl shadow-sm cursor-pointer disabled:cursor-not-allowed"
             >
-              <Heart className="w-5 h-5 fill-current" />
-              <span>
-                {pet.status === "available"
-                  ? "Postular a Adopción"
-                  : pet.status === "adopted"
-                  ? "Mascota Ya Adoptada"
-                  : "No disponible para postular"}
-              </span>
+              {isProfileLoading && !adopterProfile ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Verificando perfil...</span>
+                </>
+              ) : (
+                <>
+                  <Heart className="w-5 h-5 fill-current" />
+                  <span>
+                    {pet.status === "available"
+                      ? "Postular a Adopción"
+                      : pet.status === "adopted"
+                      ? "Mascota Ya Adoptada"
+                      : "No disponible para postular"}
+                  </span>
+                </>
+              )}
             </Button>
             <p className="text-[11px] text-center text-tinta-500">
               {pet.status === "available"
@@ -749,11 +763,17 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              disabled={pet.status !== "available"}
+              disabled={pet.status !== "available" || (isProfileLoading && !adopterProfile)}
               className="h-10 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-semibold text-xs sm:text-sm gap-2 shadow-xs cursor-pointer disabled:cursor-not-allowed"
             >
               <Heart className="w-4 h-4 fill-current" />
-              <span>{pet.status === "available" ? "Postular" : "No disponible"}</span>
+              <span>
+                {isProfileLoading && !adopterProfile
+                  ? "Verificando..."
+                  : pet.status === "available"
+                  ? "Postular"
+                  : "No disponible"}
+              </span>
             </Button>
           </div>
         </div>
@@ -908,18 +928,21 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
       )}
 
       {/* Modal: Formulario de postulación formal */}
-      <ApplyAdoptionModal
-        isOpen={showApplyModal}
-        onClose={() => setShowApplyModal(false)}
-        pet={{
-          id: pet.id,
-          name: pet.name,
-          species: pet.species,
-          breed: pet.breed,
-          primaryPhotoUrl: pet.photos?.[0]?.url,
-          status: pet.status,
-        }}
-      />
+      {showApplyModal && (
+        <ApplyAdoptionModal
+          key={pet.id}
+          isOpen={showApplyModal}
+          onClose={() => setShowApplyModal(false)}
+          pet={{
+            id: pet.id,
+            name: pet.name,
+            species: pet.species,
+            breed: pet.breed,
+            primaryPhotoUrl: pet.photos?.[0]?.url,
+            status: pet.status,
+          }}
+        />
+      )}
     </div>
   );
 }

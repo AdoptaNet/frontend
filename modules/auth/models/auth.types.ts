@@ -1,3 +1,6 @@
+import type { AdopterProfile } from "@/modules/users/models/adopter-profile.types";
+import type { ShelterProfile } from "@/modules/users/models/shelter-profile.types";
+
 export type UserRole = "adopter" | "shelter" | "admin";
 export type RegisterRole = "adopter" | "shelter";
 
@@ -11,8 +14,8 @@ export interface User {
   hasPassword?: boolean;
   isEmailVerified?: boolean;
   createdAt: string;
-  adopterProfile?: Record<string, unknown> | null;
-  shelterProfile?: Record<string, unknown> | null;
+  adopterProfile?: AdopterProfile | null;
+  shelterProfile?: ShelterProfile | null;
 }
 
 export interface AuthTokens {

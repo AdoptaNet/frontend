@@ -47,6 +47,15 @@ export function ApplyAdoptionModal({
   const modalRef = React.useRef<HTMLDivElement>(null);
   useModal({ isOpen, onClose, preventClose: isSubmitting, modalRef });
 
+  React.useEffect(() => {
+    if (!isOpen) {
+      setMotivationLetter('');
+      setPledgeAccepted(false);
+      setErrorMessage(null);
+      setIsSubmittedSuccess(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const minChars = 30;
