@@ -9,6 +9,7 @@ import {
   Eye,
   Loader2,
   FileCheck2,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
@@ -209,18 +210,27 @@ export function ReviewAdoptionModal({
 
           {selectedStatus === 'under_review' && (
             <div className="space-y-3 animate-in fade-in duration-150">
-              <p className="text-xs text-tinta-600 leading-relaxed">
-                Cambia el estado para indicar que estás examinando el expediente, verificando referencias o agendando una entrevista inicial con el postulante.
-              </p>
+              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5 text-xs text-blue-900">
+                <Info className="w-4 h-4 shrink-0 text-blue-600 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-semibold text-blue-950">
+                    Pase a Evaluación y Estado &quot;En Proceso&quot;
+                  </p>
+                  <p className="text-blue-800 text-[11px] leading-relaxed">
+                    Al pasar esta postulación a evaluación, la publicación de <strong>{adoption.pet?.name}</strong> cambiará automáticamente al estado <strong>&quot;En proceso&quot;</strong> en el catálogo público y <strong>no recibirá nuevas postulaciones</strong> de otros adoptantes para que puedas evaluar tranquilamente este expediente. Si luego decides rechazarla, la mascota volverá a estar disponible de forma automática.
+                  </p>
+                </div>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-tinta-900 block">
-                  Notas internas (opcional):
+                  Notas internas de evaluación (opcional):
                 </label>
                 <textarea
                   rows={2}
                   value={reviewNotes}
                   onChange={(e) => setReviewNotes(e.target.value)}
-                  placeholder="Ej: Entrevista telefónica programada para mañana..."
+                  placeholder="Ej: Entrevista telefónica programada, esperando fotos de cerco/balcón..."
                   className="w-full p-2.5 text-xs rounded-xl border border-line bg-white focus:border-verde-600 focus:ring-1 focus:ring-verde-600 outline-none resize-none"
                   disabled={isSubmitting}
                 />

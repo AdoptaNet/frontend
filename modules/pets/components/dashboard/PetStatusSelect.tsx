@@ -77,6 +77,11 @@ export function PetStatusSelect({
         type="button"
         onClick={() => !disabled && !isUpdating && setIsOpen(!isOpen)}
         disabled={disabled || isUpdating}
+        title={
+          currentStatus === "in_process"
+            ? "Mascota en proceso: no admite nuevas postulaciones mientras evalúas"
+            : undefined
+        }
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold transition-all cursor-pointer shadow-2xs ${current.bg} ${current.text} hover:opacity-90 disabled:opacity-60`}
       >
         {isUpdating ? (
@@ -104,14 +109,26 @@ export function PetStatusSelect({
                   key={st}
                   type="button"
                   onClick={() => handleSelect(st)}
-                  className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer ${
+                  title={
+                    st === "in_process"
+                      ? "Pausa nuevas postulaciones de adoptantes para esta mascota"
+                      : undefined
+                  }
+                  className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                     isSelected
                       ? "bg-verde-50 text-verde-800 font-bold"
                       : "text-tinta-700 hover:bg-superficie-2"
                   }`}
                 >
-                  <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-                  <span>{cfg.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                    <span>{cfg.label}</span>
+                  </div>
+                  {st === "in_process" && (
+                    <span className="text-[10px] text-tinta-400 font-normal">
+                      Pausa postulaciones
+                    </span>
+                  )}
                 </button>
               );
             })}
