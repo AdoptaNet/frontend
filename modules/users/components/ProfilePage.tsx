@@ -93,8 +93,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 space-y-6">
-
+    <div className="w-full max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8 space-y-4">
 
       {/* Global Feedback Banner */}
       {feedback.message && (
@@ -121,7 +120,7 @@ export function ProfilePage() {
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-line pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-line pb-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-tinta-900">
             Mi Perfil y Ajustes
@@ -165,7 +164,7 @@ export function ProfilePage() {
       <Tabs
         value={activeTab}
         onValueChange={(val) => setActiveTab(val as string)}
-        className="w-full space-y-6"
+        className="w-full space-y-3.5"
       >
 
             <TabsList className="bg-superficie border border-line p-1 rounded-xl !h-auto min-h-[48px] w-full sm:w-auto flex flex-wrap items-center gap-1 shadow-2xs">

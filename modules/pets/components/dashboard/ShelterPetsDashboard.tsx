@@ -10,11 +10,14 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
+  AlertTriangle,
+  ArrowRight,
   FolderHeart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useShelterPets } from "../../hooks/useShelterPets";
+import { useProfile } from "@/modules/users/hooks/useProfile";
 import type { Pet, PetStatus } from "../../models/pet.types";
 import { ShelterPetCard } from "./ShelterPetCard";
 import { DeletePetModal } from "./DeletePetModal";
@@ -47,6 +50,24 @@ export function ShelterPetsDashboard() {
 
   const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
 
+  const { user: profileUser, isInitialLoading: isProfileLoading } = useProfile();
+  const shelterProfile = profileUser?.shelterProfile;
+
+  const missingFields: string[] = [];
+  if (!isProfileLoading && profileUser) {
+    if (!shelterProfile?.organizationName?.trim()) {
+      missingFields.push("Nombre de la organización");
+    }
+    if (!shelterProfile?.phoneNumber?.trim()) {
+      missingFields.push("Teléfono móvil de contacto");
+    }
+    if (!shelterProfile?.city?.trim()) {
+      missingFields.push("Distrito");
+    }
+  }
+
+  const isProfileIncomplete = missingFields.length > 0;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6">
       {/* Top Header Section */}
@@ -72,6 +93,38 @@ export function ShelterPetsDashboard() {
           </Button>
         </Link>
       </div>
+
+      {/* Banner de perfil incompleto */}
+      {isProfileIncomplete && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in-0 duration-200">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 shrink-0 mt-0.5 md:mt-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-amber-950 font-heading">
+                Perfil de albergue pendiente de completar
+              </h3>
+              <p className="text-xs text-amber-900 leading-relaxed">
+                Para poder publicar animales en adopción, es indispensable que configures en tu perfil institucional:{" "}
+                <strong className="text-amber-950 underline decoration-amber-400 decoration-2">
+                  {missingFields.join(", ")}
+                </strong>.
+              </p>
+            </div>
+          </div>
+
+          <Link href="/profile?tab=role-specific" className="shrink-0 w-full md:w-auto">
+            <Button
+              size="sm"
+              className="w-full md:w-auto bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs h-9 px-4 gap-1.5 shadow-xs cursor-pointer"
+            >
+              <span>Completar perfil de albergue</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Control Bar: Search and Status Tabs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-2">

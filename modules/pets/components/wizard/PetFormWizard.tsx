@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight, Check, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, AlertCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { petsService } from "../../services/pets.service";
+import { useProfile } from "@/modules/users/hooks/useProfile";
 import type { Pet, AnalyzePetPhotosResponse } from "../../models/pet.types";
 import {
   completePetFormSchema,
@@ -32,6 +34,24 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
   const [analysisResult, setAnalysisResult] =
     useState<AnalyzePetPhotosResponse | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const { user: profileUser, isInitialLoading: isProfileLoading } = useProfile();
+  const shelterProfile = profileUser?.shelterProfile;
+
+  const missingFields: string[] = [];
+  if (!isProfileLoading && profileUser) {
+    if (!shelterProfile?.organizationName?.trim()) {
+      missingFields.push("Nombre de la organización");
+    }
+    if (!shelterProfile?.phoneNumber?.trim()) {
+      missingFields.push("Teléfono móvil de contacto");
+    }
+    if (!shelterProfile?.city?.trim()) {
+      missingFields.push("Distrito");
+    }
+  }
+
+  const isProfileIncomplete = missingFields.length > 0;
 
   const isEditMode = !!initialPet;
 
@@ -129,6 +149,15 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
   const onSubmit = async (data: CompletePetFormData) => {
     setIsSubmitting(true);
     setSubmitError(null);
+
+    if (!isEditMode && isProfileIncomplete) {
+      setSubmitError(
+        `No puedes registrar mascotas porque el perfil institucional de tu albergue está incompleto. Debes completar: ${missingFields.join(", ")}.`
+      );
+      setIsSubmitting(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
 
     try {
       // Subir a Cloudinary únicamente las fotos locales pendientes
@@ -244,6 +273,38 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
         </CardHeader>
 
         <CardContent className="p-5 sm:p-7">
+          {/* Banner de advertencia si el perfil de albergue está incompleto */}
+          {!isEditMode && isProfileIncomplete && (
+            <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in-0 duration-200">
+              <div className="flex items-start gap-3.5">
+                <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 shrink-0 mt-0.5 md:mt-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-amber-950 font-heading">
+                    Perfil de albergue pendiente de completar
+                  </h3>
+                  <p className="text-xs text-amber-900 leading-relaxed">
+                    Para poder publicar mascotas en la plataforma, debes completar en tu perfil institucional:{" "}
+                    <strong className="text-amber-950 underline decoration-amber-400 decoration-2">
+                      {missingFields.join(", ")}
+                    </strong>.
+                  </p>
+                </div>
+              </div>
+
+              <Link href="/profile?tab=role-specific" className="shrink-0 w-full md:w-auto">
+                <Button
+                  size="sm"
+                  className="w-full md:w-auto bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs h-9 px-4 gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <span>Completar perfil de albergue</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </div>
+          )}
+
           <WizardStepTracker
             currentStep={currentStep}
             onStepClick={(step) => setCurrentStep(step)}
@@ -295,7 +356,7 @@ export function PetFormWizard({ initialPet }: PetFormWizardProps) {
                 <div className="space-y-1">
                   <p className="font-semibold">No se pudo guardar la mascota</p>
                   <p className="leading-relaxed">{submitError}</p>
-                  {submitError.includes("perfil del albergue") && (
+                  {submitError.toLowerCase().includes("perfil") && (
                     <Button
                       type="button"
                       variant="outline"
