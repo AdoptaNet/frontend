@@ -78,8 +78,8 @@ export function PublicPetCard({
           )}
 
           {/* Species Badge */}
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-20">
-            <span className="bg-white/90 backdrop-blur-xs text-tinta-800 text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-2xs">
+          <div className="absolute top-2.5 left-2.5 z-20">
+            <span className="bg-white/95 backdrop-blur-xs text-tinta-800 text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-2xs">
               {pet.species === "dog" ? "🐶 Perro" : "🐱 Gato"}
             </span>
           </div>
@@ -94,12 +94,12 @@ export function PublicPetCard({
             </Badge>
           </div>
 
-          {/* Similarity Badge */}
+          {/* Similarity Badge: Arriba debajo de la especie, sin taparse con botones de galería */}
           {similarityPercentage !== undefined && (
-            <div className="absolute bottom-2.5 left-2.5 z-20">
-              <span className="bg-verde-800/90 backdrop-blur-xs text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-verde-300" />
-                {similarityPercentage}% coincidencia
+            <div className="absolute top-9 left-2.5 z-20 pointer-events-none">
+              <span className="bg-gradient-to-r from-verde-900 via-emerald-950 to-verde-900 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-md shadow-sm border border-emerald-400/50 flex items-center gap-1.5 whitespace-nowrap">
+                <Sparkles className="w-3 h-3 text-amber-300 shrink-0 animate-pulse" />
+                <span className="whitespace-nowrap font-extrabold">{similarityPercentage}% de coincidencia</span>
               </span>
             </div>
           )}

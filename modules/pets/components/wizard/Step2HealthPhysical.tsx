@@ -10,11 +10,16 @@ import {
   Trash2,
   Syringe,
   Check,
+  Sparkles,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { CompletePetFormData } from "../../models/pet-form.schemas";
 import type { AnalyzePetPhotosResponse } from "../../models/pet.types";
+import {
+  normalizeSize,
+  normalizeFur,
+} from "../../utils/pet-ai-normalizer";
 
 interface Step2HealthPhysicalProps {
   form: UseFormReturn<CompletePetFormData>;
@@ -113,30 +118,49 @@ export function Step2HealthPhysical({
         <Controller
           name="size"
           control={control}
-          render={({ field }) => (
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { value: "small", label: "Pequeño", desc: "Hasta 10 kg" },
-                { value: "medium", label: "Mediano", desc: "10 a 25 kg" },
-                { value: "large", label: "Grande", desc: "Más de 25 kg" },
-              ].map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => field.onChange(item.value)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer text-center ${
-                    field.value === item.value
-                      ? "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
-                      : "border-line bg-white hover:border-verde-500 text-tinta-600"
-                  }`}
-                >
-                  <span className="text-sm">{item.label}</span>
-                  <span className="text-[11px] text-tinta-400">{item.desc}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          render={({ field }) => {
+            const aiSize = normalizeSize(analysisResult?.size?.value);
+            const isSizeAutocompleted = !!analysisResult?.size?.autocompleted;
+
+            return (
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: "small", label: "Pequeño", desc: "Hasta 10 kg" },
+                  { value: "medium", label: "Mediano", desc: "10 a 25 kg" },
+                  { value: "large", label: "Grande", desc: "Más de 25 kg" },
+                ].map((item) => {
+                  const isSelected = field.value === item.value;
+                  const isAiSuggested = isSizeAutocompleted && aiSize === item.value;
+
+                  return (
+                    <button
+                      key={item.value}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => field.onChange(item.value)}
+                      className={`relative flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer text-center ${
+                        isSelected
+                          ? isAiSuggested
+                            ? "border-emerald-600 bg-emerald-50 text-emerald-950 font-semibold shadow-2xs animate-[ai-pulse-halo_2.8s_ease-in-out_infinite]"
+                            : "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
+                          : isAiSuggested
+                            ? "border-emerald-300/80 bg-emerald-50/20 hover:border-emerald-400 text-tinta-700 animate-[ai-pulse-halo_3.2s_ease-in-out_infinite]"
+                            : "border-line bg-white hover:border-verde-500 text-tinta-600"
+                      }`}
+                    >
+                      <span className="text-sm font-medium">{item.label}</span>
+                      <span className="text-[11px] text-tinta-400">{item.desc}</span>
+                      {isAiSuggested && (
+                        <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
+                          <Sparkles className="w-2.5 h-2.5 text-amber-500" /> IA
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          }}
         />
         {errors.size && (
           <p className="text-xs text-coral-600">{errors.size.message}</p>
@@ -158,29 +182,48 @@ export function Step2HealthPhysical({
         <Controller
           name="furLength"
           control={control}
-          render={({ field }) => (
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { value: "short", label: "Corto" },
-                { value: "long", label: "Largo" },
-                { value: "hairless", label: "Sin pelo / Calvo" },
-              ].map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => field.onChange(item.value)}
-                  className={`p-3 rounded-xl border-2 transition-all cursor-pointer text-center text-sm ${
-                    field.value === item.value
-                      ? "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
-                      : "border-line bg-white hover:border-verde-500 text-tinta-600"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          )}
+          render={({ field }) => {
+            const aiFur = normalizeFur(analysisResult?.fur?.value);
+            const isFurAutocompleted = !!analysisResult?.fur?.autocompleted;
+
+            return (
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: "short", label: "Corto" },
+                  { value: "long", label: "Largo" },
+                  { value: "hairless", label: "Sin pelo / Calvo" },
+                ].map((item) => {
+                  const isSelected = field.value === item.value;
+                  const isAiSuggested = isFurAutocompleted && aiFur === item.value;
+
+                  return (
+                    <button
+                      key={item.value}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => field.onChange(item.value)}
+                      className={`relative flex items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer text-center text-sm ${
+                        isSelected
+                          ? isAiSuggested
+                            ? "border-emerald-600 bg-emerald-50 text-emerald-950 font-semibold shadow-2xs animate-[ai-pulse-halo_2.8s_ease-in-out_infinite]"
+                            : "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
+                          : isAiSuggested
+                            ? "border-emerald-300/80 bg-emerald-50/20 hover:border-emerald-400 text-tinta-700 animate-[ai-pulse-halo_3.2s_ease-in-out_infinite]"
+                            : "border-line bg-white hover:border-verde-500 text-tinta-600"
+                      }`}
+                    >
+                      <span className="font-medium">{item.label}</span>
+                      {isAiSuggested && (
+                        <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
+                          <Sparkles className="w-2.5 h-2.5 text-amber-500" /> IA
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          }}
         />
       </div>
 

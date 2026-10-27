@@ -15,12 +15,16 @@ import {
   X,
   ArrowDown,
   Camera,
+  Eye,
+  Maximize2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePublicPets } from "../../hooks/usePublicPets";
 import { PublicPetCard } from "./PublicPetCard";
 import { VisualSearchModal } from "./VisualSearchModal";
+import { VisualSearchDetailsModal } from "./VisualSearchDetailsModal";
+import { formatColorList } from "../../utils/pet-ai-normalizer";
 import {
   PERU_DEPARTMENTS,
   getDistrictsByDepartment,
@@ -31,6 +35,7 @@ import type {
   PetAgeCategory,
   PetGender,
   SimilarPetResponse,
+  AnalyzePetPhotosResponse,
 } from "../../models/pet.types";
 
 export function PublicPetsCatalog() {
@@ -85,13 +90,20 @@ export function PublicPetsCatalog() {
   const [isVisualSearchOpen, setIsVisualSearchOpen] = useState(false);
   const [visualSearchResults, setVisualSearchResults] = useState<SimilarPetResponse[] | null>(null);
   const [visualSearchPhotoUrl, setVisualSearchPhotoUrl] = useState<string | null>(null);
+  const [visualSearchAnalysis, setVisualSearchAnalysis] = useState<AnalyzePetPhotosResponse | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  const handleSearchResults = (results: SimilarPetResponse[], photoUrl: string) => {
+  const handleSearchResults = (
+    results: SimilarPetResponse[],
+    photoUrl: string,
+    analysis?: AnalyzePetPhotosResponse | null,
+  ) => {
     if (visualSearchPhotoUrl && visualSearchPhotoUrl !== photoUrl) {
       URL.revokeObjectURL(visualSearchPhotoUrl);
     }
     setVisualSearchResults(results);
     setVisualSearchPhotoUrl(photoUrl);
+    setVisualSearchAnalysis(analysis || null);
   };
 
   const handleClearVisualSearch = () => {
@@ -100,6 +112,8 @@ export function PublicPetsCatalog() {
     }
     setVisualSearchResults(null);
     setVisualSearchPhotoUrl(null);
+    setVisualSearchAnalysis(null);
+    setIsDetailsModalOpen(false);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -229,19 +243,18 @@ export function PublicPetsCatalog() {
               )}
             </form>
 
-            <Button
+            <button
               type="button"
               onClick={() => setIsVisualSearchOpen(true)}
-              className={`h-10 px-3 sm:px-3.5 rounded-xl text-xs font-semibold gap-1.5 cursor-pointer transition-all border ${
-                visualSearchResults !== null
-                  ? "bg-verde-800 border-verde-900 text-white shadow-xs"
-                  : "bg-gradient-to-r from-verde-50 via-emerald-50 to-teal-50 border-verde-300 text-verde-900 hover:border-verde-500 hover:shadow-xs"
-              }`}
+              className="relative inline-flex items-center justify-center gap-1.5 h-10 px-3 sm:px-3.5 rounded-xl font-bold text-xs text-white bg-verde-800 hover:bg-verde-700 active:scale-[0.98] transition-all cursor-pointer shadow-xs animate-[ai-button-breathing_2.6s_ease-in-out_infinite] shrink-0"
               title="Buscar mascotas parecidas a una foto usando Inteligencia Artificial"
             >
-              <Sparkles className="w-3.5 h-3.5 text-verde-700 animate-pulse" />
-              <span className="hidden sm:inline font-bold">Buscar por foto con IA</span>
-            </Button>
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse shrink-0" />
+              <span className="tracking-tight">
+                <span className="sm:hidden">Buscar con IA</span>
+                <span className="hidden sm:inline">Buscar por foto con IA</span>
+              </span>
+            </button>
 
             <Button
               type="button"
@@ -479,41 +492,129 @@ export function PublicPetsCatalog() {
 
       {/* Visual Search Active Banner */}
       {visualSearchResults !== null && (
-        <div className="bg-gradient-to-r from-verde-50 via-verde-50/70 to-white border border-verde-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs animate-in fade-in duration-200">
-          <div className="flex items-center gap-3.5">
+        <div className="bg-gradient-to-r from-verde-50 via-verde-50/70 to-white border border-verde-200 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-2xs animate-in fade-in duration-200">
+          <div className="flex items-start sm:items-center gap-4 sm:gap-5 w-full md:w-auto">
             {visualSearchPhotoUrl && (
-              <div className="relative w-14 h-14 rounded-xl overflow-hidden border-2 border-white shadow-xs shrink-0 bg-white">
+              <button
+                type="button"
+                onClick={() => setIsDetailsModalOpen(true)}
+                className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-white shadow-md shrink-0 bg-white cursor-pointer group focus:outline-none focus:ring-2 focus:ring-verde-600 transition-all hover:shadow-lg active:scale-95"
+                title="Haz clic para ver la fotografía y el reporte del modelo de IA"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={visualSearchPhotoUrl}
                   alt="Foto buscada"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-              </div>
+                <div className="absolute inset-0 bg-verde-950/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-1 p-1">
+                  <Maximize2 className="w-5 h-5 text-amber-300 drop-shadow-sm" />
+                  <span className="text-[10px] font-black text-center leading-tight">
+                    Ver análisis
+                  </span>
+                </div>
+              </button>
             )}
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-verde-900 text-white text-xs font-bold shadow-xs">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                <span>Búsqueda Inteligente por Foto</span>
+
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-verde-900 text-white text-xs font-bold shadow-xs">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>Búsqueda Inteligente por Foto</span>
+                </div>
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-tinta-900 mt-1 font-heading">
+
+              <h3 className="text-base sm:text-lg font-bold text-tinta-900 font-heading">
                 {visualSearchResults.length > 0
-                  ? `Encontramos ${visualSearchResults.length} mascotas parecidas a tu foto`
+                  ? `Encontramos ${visualSearchResults.length} mascotas parecidas`
                   : "No encontramos mascotas parecidas a esta fotografía"}
               </h3>
-              <p className="text-xs text-tinta-600">
-                Identificadas y ordenadas por Inteligencia Artificial según parecido en rostro, pelaje y color
+              <p className="text-xs text-tinta-600 leading-relaxed max-w-xl">
+                Identificadas y ordenadas por IA según similitud en rostro, color y pelaje.
               </p>
+
+              {/* Badges de rasgos extraídos por el modelo CV */}
+              {(() => {
+                const topItem =
+                  visualSearchResults && visualSearchResults.length > 0
+                    ? visualSearchResults[0]
+                    : null;
+                const traits = topItem?.queryTraits;
+
+                const rawSpecies =
+                  visualSearchAnalysis?.species?.value?.toLowerCase() ||
+                  traits?.species?.toLowerCase() ||
+                  topItem?.pet?.species?.toLowerCase();
+                const displaySpecies =
+                  rawSpecies === "dog" || rawSpecies === "perro"
+                    ? "🐶 Perro"
+                    : rawSpecies === "cat" || rawSpecies === "gato"
+                      ? "🐱 Gato"
+                      : null;
+
+                const displayColors =
+                  Array.isArray(visualSearchAnalysis?.colors?.value) &&
+                  visualSearchAnalysis.colors.value.length > 0
+                    ? visualSearchAnalysis.colors.value
+                    : Array.isArray(traits?.colors) && traits.colors.length > 0
+                      ? traits.colors
+                      : Array.isArray(topItem?.pet?.colors) &&
+                          topItem.pet.colors.length > 0
+                        ? topItem.pet.colors
+                        : [];
+
+                const rawFur =
+                  visualSearchAnalysis?.fur?.value?.toLowerCase() ||
+                  traits?.fur?.toLowerCase() ||
+                  topItem?.pet?.furLength?.toLowerCase();
+                const displayFur =
+                  rawFur?.includes("short") || rawFur?.includes("corto")
+                    ? "Pelaje corto"
+                    : rawFur?.includes("long") || rawFur?.includes("largo")
+                      ? "Pelaje largo"
+                      : rawFur?.includes("hairless") ||
+                          rawFur?.includes("sin pelo")
+                        ? "Sin pelo"
+                        : null;
+
+                return (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    {displaySpecies && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white border border-verde-200 text-verde-900 text-xs font-semibold shadow-2xs">
+                        <span>{displaySpecies}</span>
+                      </span>
+                    )}
+                    {displayColors.length > 0 && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white border border-verde-200 text-verde-900 text-xs font-semibold shadow-2xs">
+                        <span>🎨 {formatColorList(displayColors.slice(0, 3))}</span>
+                      </span>
+                    )}
+                    {displayFur && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white border border-verde-200 text-verde-900 text-xs font-semibold shadow-2xs">
+                        <span>✂️ {displayFur}</span>
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setIsDetailsModalOpen(true)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-verde-800 hover:text-verde-950 underline underline-offset-2 ml-1 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-verde-700" />
+                      <span>Ver análisis de IA completo</span>
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex sm:flex-row md:flex-col lg:flex-row items-center gap-2 w-full md:w-auto shrink-0">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsVisualSearchOpen(true)}
-              className="flex-1 sm:flex-none h-8.5 px-3 rounded-xl border-verde-300 bg-white hover:bg-verde-50 text-verde-800 text-xs font-semibold gap-1.5 cursor-pointer shadow-2xs"
+              className="flex-1 sm:flex-none h-9 px-3.5 rounded-xl border-verde-300 bg-white hover:bg-verde-50 text-verde-800 text-xs font-semibold gap-1.5 cursor-pointer shadow-2xs"
             >
               <Camera className="w-3.5 h-3.5 text-verde-700" />
               <span>Cambiar foto</span>
@@ -522,7 +623,7 @@ export function PublicPetsCatalog() {
               type="button"
               size="sm"
               onClick={handleClearVisualSearch}
-              className="flex-1 sm:flex-none h-8.5 px-3 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-xs font-semibold gap-1.5 cursor-pointer shadow-xs"
+              className="flex-1 sm:flex-none h-9 px-3.5 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-xs font-semibold gap-1.5 cursor-pointer shadow-xs"
             >
               <X className="w-3.5 h-3.5" />
               <span>Ver catálogo completo</span>
@@ -753,11 +854,29 @@ export function PublicPetsCatalog() {
         </div>
       )}
 
-      {/* Visual Search Modal */}
+      {/* Visual Search Upload Modal */}
       <VisualSearchModal
         isOpen={isVisualSearchOpen}
         onClose={() => setIsVisualSearchOpen(false)}
         onSearchResults={handleSearchResults}
+      />
+
+      {/* Visual Search Computer Vision Report Modal */}
+      <VisualSearchDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        photoUrl={visualSearchPhotoUrl}
+        analysis={visualSearchAnalysis}
+        matchCount={visualSearchResults ? visualSearchResults.length : 0}
+        topMatch={
+          visualSearchResults && visualSearchResults.length > 0
+            ? visualSearchResults[0]
+            : null
+        }
+        onChangePhoto={() => {
+          setIsDetailsModalOpen(false);
+          setIsVisualSearchOpen(true);
+        }}
       />
     </div>
   );

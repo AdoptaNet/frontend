@@ -126,11 +126,20 @@ export interface AnalyzePetPhotosResponse {
   inferenceTimeMs: number;
 }
 
+export interface QueryPhotoTraits {
+  species?: string | null;
+  speciesConfidence?: number;
+  fur?: string | null;
+  size?: string | null;
+  colors?: string[];
+}
+
 export interface SimilarPetResponse {
   pet: Pet;
   similarityScore?: number;
   similarityPercentage: number;
   matchReasons?: string[];
+  queryTraits?: QueryPhotoTraits;
 }
 
 export type UpdatePetDto = Partial<CreatePetDto>;

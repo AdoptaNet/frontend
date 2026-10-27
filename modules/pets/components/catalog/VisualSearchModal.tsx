@@ -11,12 +11,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/shared/hooks/useModal";
 import { petsService } from "../../services/pets.service";
-import type { SimilarPetResponse, PetSpecies } from "../../models/pet.types";
+import type {
+  SimilarPetResponse,
+  PetSpecies,
+  AnalyzePetPhotosResponse,
+} from "../../models/pet.types";
 
 interface VisualSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSearchResults: (results: SimilarPetResponse[], photoUrl: string) => void;
+  onSearchResults: (
+    results: SimilarPetResponse[],
+    photoUrl: string,
+    analysis?: AnalyzePetPhotosResponse | null,
+  ) => void;
 }
 
 export function VisualSearchModal({
@@ -87,14 +95,20 @@ export function VisualSearchModal({
     setErrorMessage(null);
 
     try {
-      const results = await petsService.searchSimilarPets(selectedFile, {
-        species: speciesFilter === "all" ? undefined : speciesFilter,
-        limit: 16,
-      });
+      const [results, analysis] = await Promise.all([
+        petsService.searchSimilarPets(selectedFile, {
+          species: speciesFilter === "all" ? undefined : speciesFilter,
+          limit: 16,
+        }),
+        petsService.analyzePhotos([selectedFile]).catch((err) => {
+          console.warn("No se pudo obtener el desglose de IA para la foto:", err);
+          return null;
+        }),
+      ]);
 
       const currentPreview = previewUrl;
       handleReset();
-      onSearchResults(results, currentPreview);
+      onSearchResults(results, currentPreview, analysis);
       onClose();
     } catch (err: unknown) {
       const msg =
@@ -278,11 +292,11 @@ export function VisualSearchModal({
             Cancelar
           </Button>
 
-          <Button
+          <button
             type="button"
             disabled={!selectedFile || isSearching}
             onClick={handleSearch}
-            className="h-9 px-4 text-xs font-semibold bg-verde-700 hover:bg-verde-800 text-white gap-2 cursor-pointer shadow-2xs"
+            className="relative inline-flex items-center justify-center gap-2 px-4 h-9 rounded-xl font-bold text-xs text-white bg-verde-800 hover:bg-verde-700 active:scale-[0.98] transition-all cursor-pointer shadow-xs animate-[ai-button-breathing_2.6s_ease-in-out_infinite] disabled:opacity-60 disabled:cursor-not-allowed disabled:animate-none"
           >
             {isSearching ? (
               <>
@@ -291,11 +305,11 @@ export function VisualSearchModal({
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
                 <span>Buscar parecidos con IA</span>
               </>
             )}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
