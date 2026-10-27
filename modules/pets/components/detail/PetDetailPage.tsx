@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -47,8 +48,8 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   const router = useRouter();
   const { pet, isLoading, error } = usePetDetail(petId);
   const { user } = useAuthStore();
-  const { user: profileUser, role } = useProfile();
-  const adopterProfile = profileUser?.adopterProfile;
+  const { user: profileUser, role, isInitialLoading: isProfileLoading } = useProfile();
+  const adopterProfile = profileUser?.adopterProfile ?? user?.adopterProfile;
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
@@ -160,6 +161,11 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
       return;
     }
 
+    // Si aún se está cargando el perfil inicial y no hay datos en caché, esperar para evitar falso positivo
+    if (isProfileLoading && !adopterProfile) {
+      return;
+    }
+
     // Validar cuestionario de compatibilidad
     if (!adopterProfile?.isSurveyCompleted) {
       setShowSurveyModal(true);
@@ -214,18 +220,21 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             {activePhoto ? (
               <>
                 {/* Ambient blur layer for zero crop distortion */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={activePhoto.url}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className="object-cover blur-2xl opacity-40 scale-110 pointer-events-none"
                 />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={activePhoto.url}
                   alt={`${pet.name} foto ${activePhotoIndex + 1}`}
-                  className="relative z-10 max-h-full max-w-full object-contain transition-all duration-300"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  priority
+                  className="relative z-10 object-contain transition-all duration-300"
                 />
               </>
             ) : (
@@ -239,8 +248,11 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               <span className="bg-white/95 backdrop-blur-xs text-tinta-900 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xs">
                 {pet.species === "dog" ? "🐶 Perro" : "🐱 Gato"}
               </span>
-              <Badge variant="disponible" className="shadow-2xs text-xs">
-                Disponible
+              <Badge
+                variant={pet.status === "in_process" ? "in_process" : "disponible"}
+                className="shadow-2xs text-xs font-semibold"
+              >
+                {pet.status === "in_process" ? "En proceso" : "Disponible"}
               </Badge>
             </div>
 
@@ -282,17 +294,18 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   key={photo.publicId || photo.url || idx}
                   type="button"
                   onClick={() => setActivePhotoIndex(idx)}
-                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                  className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
                     activePhotoIndex === idx
                       ? "border-verde-600 ring-2 ring-verde-500/20 scale-102"
                       : "border-line opacity-75 hover:opacity-100 hover:border-verde-400"
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={photo.url}
                     alt={`Miniatura ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="80px"
+                    className="object-cover"
                   />
                 </button>
               ))}
@@ -417,21 +430,34 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              disabled={pet.status !== "available"}
+              disabled={pet.status !== "available" || (isProfileLoading && !adopterProfile)}
               className="w-full h-12 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-bold text-sm sm:text-base gap-2 rounded-xl shadow-sm cursor-pointer disabled:cursor-not-allowed"
             >
-              <Heart className="w-5 h-5 fill-current" />
-              <span>
-                {pet.status === "available"
-                  ? "Postular a Adopción"
-                  : pet.status === "adopted"
-                  ? "Mascota Ya Adoptada"
-                  : "No disponible para postular"}
-              </span>
+              {isProfileLoading && !adopterProfile ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Verificando perfil...</span>
+                </>
+              ) : (
+                <>
+                  <Heart className="w-5 h-5 fill-current" />
+                  <span>
+                    {pet.status === "available"
+                      ? "Postular a Adopción"
+                      : pet.status === "in_process"
+                      ? "Mascota en Proceso de Adopción"
+                      : pet.status === "adopted"
+                      ? "Mascota Ya Adoptada"
+                      : "No disponible para postular"}
+                  </span>
+                </>
+              )}
             </Button>
             <p className="text-[11px] text-center text-tinta-500">
               {pet.status === "available"
                 ? "El proceso incluye evaluación de compatibilidad de hogar y seguimiento responsable."
+                : pet.status === "in_process"
+                ? "Esta mascota se encuentra en evaluación avanzada con un postulante. Si el proceso no se concreta, volverá a estar disponible."
                 : "Esta mascota ya cuenta con un hogar formalizado o no admite nuevas solicitudes."}
             </p>
           </div>
@@ -749,11 +775,19 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             <Button
               type="button"
               onClick={handleApplyClick}
-              disabled={pet.status !== "available"}
+              disabled={pet.status !== "available" || (isProfileLoading && !adopterProfile)}
               className="h-10 bg-verde-700 hover:bg-verde-800 disabled:bg-slate-200 disabled:text-slate-500 text-white font-semibold text-xs sm:text-sm gap-2 shadow-xs cursor-pointer disabled:cursor-not-allowed"
             >
               <Heart className="w-4 h-4 fill-current" />
-              <span>{pet.status === "available" ? "Postular" : "No disponible"}</span>
+              <span>
+                {isProfileLoading && !adopterProfile
+                  ? "Verificando..."
+                  : pet.status === "available"
+                  ? "Postular"
+                  : pet.status === "in_process"
+                  ? "En proceso"
+                  : "No disponible"}
+              </span>
             </Button>
           </div>
         </div>
@@ -908,18 +942,21 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
       )}
 
       {/* Modal: Formulario de postulación formal */}
-      <ApplyAdoptionModal
-        isOpen={showApplyModal}
-        onClose={() => setShowApplyModal(false)}
-        pet={{
-          id: pet.id,
-          name: pet.name,
-          species: pet.species,
-          breed: pet.breed,
-          primaryPhotoUrl: pet.photos?.[0]?.url,
-          status: pet.status,
-        }}
-      />
+      {showApplyModal && (
+        <ApplyAdoptionModal
+          key={pet.id}
+          isOpen={showApplyModal}
+          onClose={() => setShowApplyModal(false)}
+          pet={{
+            id: pet.id,
+            name: pet.name,
+            species: pet.species,
+            breed: pet.breed,
+            primaryPhotoUrl: pet.photos?.[0]?.url,
+            status: pet.status,
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -19,13 +19,23 @@ export function useProfile() {
     isAuthenticated,
     isHydrated,
   } = useAuthStore();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [internalLoading, setInternalLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(() =>
+    authUser ? (authUser as unknown as UserProfile) : null,
+  );
+  const [internalLoading, setInternalLoading] = useState(() => !authUser);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>({
     type: null,
     message: null,
   });
+
+  // Mantener sincronizado el estado si authUser se rehidrata posteriormente
+  useEffect(() => {
+    if (!user && authUser) {
+      setUser(authUser as unknown as UserProfile);
+      setInternalLoading(false);
+    }
+  }, [authUser, user]);
 
   const isInitialLoading =
     isHydrated && !isAuthenticated ? false : internalLoading;
@@ -57,7 +67,12 @@ export function useProfile() {
         fullName: data.fullName,
         avatarUrl: data.avatarUrl,
         role: data.role,
+        roleSelected: data.roleSelected,
+        hasPassword: data.hasPassword,
+        isEmailVerified: data.isEmailVerified,
         createdAt: data.createdAt,
+        adopterProfile: data.adopterProfile,
+        shelterProfile: data.shelterProfile,
       });
     } catch (err: unknown) {
       const message =
@@ -86,7 +101,12 @@ export function useProfile() {
             fullName: data.fullName,
             avatarUrl: data.avatarUrl,
             role: data.role,
+            roleSelected: data.roleSelected,
+            hasPassword: data.hasPassword,
+            isEmailVerified: data.isEmailVerified,
             createdAt: data.createdAt,
+            adopterProfile: data.adopterProfile,
+            shelterProfile: data.shelterProfile,
           });
         }
       })
@@ -118,14 +138,13 @@ export function useProfile() {
         setUser((prev) =>
           prev ? { ...prev, fullName: updated.fullName } : updated,
         );
-        setAuthUser({
-          id: updated.id,
-          email: updated.email,
-          fullName: updated.fullName,
-          avatarUrl: updated.avatarUrl,
-          role: updated.role,
-          createdAt: updated.createdAt,
-        });
+        if (authUser) {
+          setAuthUser({
+            ...authUser,
+            fullName: updated.fullName,
+            avatarUrl: updated.avatarUrl ?? authUser.avatarUrl,
+          });
+        }
         showFeedback("success", "Datos personales actualizados correctamente");
         return;
       } catch (err: unknown) {
@@ -139,7 +158,7 @@ export function useProfile() {
         setIsSaving(false);
       }
     },
-    [setAuthUser, showFeedback],
+    [authUser, setAuthUser, showFeedback],
   );
 
   const updateAvatar = useCallback(
@@ -150,14 +169,12 @@ export function useProfile() {
         setUser((prev) =>
           prev ? { ...prev, avatarUrl: updated.avatarUrl } : updated,
         );
-        setAuthUser({
-          id: updated.id,
-          email: updated.email,
-          fullName: updated.fullName,
-          avatarUrl: updated.avatarUrl,
-          role: updated.role,
-          createdAt: updated.createdAt,
-        });
+        if (authUser) {
+          setAuthUser({
+            ...authUser,
+            avatarUrl: updated.avatarUrl,
+          });
+        }
         showFeedback("success", "Foto de perfil actualizada exitosamente");
       } catch (err: unknown) {
         const message =
@@ -167,7 +184,7 @@ export function useProfile() {
         setIsSaving(false);
       }
     },
-    [setAuthUser, showFeedback],
+    [authUser, setAuthUser, showFeedback],
   );
 
   const removeAvatar = useCallback(async () => {
@@ -221,6 +238,12 @@ export function useProfile() {
         setUser((prev) =>
           prev ? { ...prev, adopterProfile: updatedProfile } : prev,
         );
+        if (authUser) {
+          setAuthUser({
+            ...authUser,
+            adopterProfile: updatedProfile,
+          });
+        }
         if (updatedProfile.isSurveyCompleted) {
           showFeedback(
             "success",
@@ -244,7 +267,7 @@ export function useProfile() {
         setIsSaving(false);
       }
     },
-    [showFeedback],
+    [authUser, setAuthUser, showFeedback],
   );
 
   const updateShelterProfile = useCallback(
@@ -255,6 +278,12 @@ export function useProfile() {
         setUser((prev) =>
           prev ? { ...prev, shelterProfile: updatedProfile } : prev,
         );
+        if (authUser) {
+          setAuthUser({
+            ...authUser,
+            shelterProfile: updatedProfile,
+          });
+        }
         showFeedback(
           "success",
           "Información del albergue guardada exitosamente",
@@ -271,7 +300,7 @@ export function useProfile() {
         setIsSaving(false);
       }
     },
-    [showFeedback],
+    [authUser, setAuthUser, showFeedback],
   );
 
   const activeRole: UserRole = user?.role ?? authUser?.role ?? "adopter";

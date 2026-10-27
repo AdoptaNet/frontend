@@ -82,14 +82,14 @@ export function PersonalDataForm({
   const isRoleAdopter = user.role === "adopter";
 
   return (
-    <Card className="bg-white border-line shadow-sm">
-      <CardHeader className="pb-4">
+    <Card className="bg-white border-line shadow-sm py-0 gap-0">
+      <CardHeader className="p-4 sm:p-6 pb-2.5 sm:pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
             <CardTitle className="text-xl font-heading text-tinta-900">
               Datos Personales
             </CardTitle>
-            <CardDescription className="text-sm text-tinta-600 mt-1">
+            <CardDescription className="text-sm text-tinta-600 mt-0.5">
               Información visible de tu cuenta y datos de contacto directo.
             </CardDescription>
           </div>
@@ -105,7 +105,7 @@ export function PersonalDataForm({
       <Separator className="bg-line" />
 
       <form onSubmit={handleSubmit}>
-        <CardContent className="pt-6 space-y-6">
+        <CardContent className="p-4 sm:p-6 pt-3 sm:pt-4 space-y-6">
           {/* Avatar Section */}
           <AvatarUploader
             avatarUrl={user.avatarUrl}

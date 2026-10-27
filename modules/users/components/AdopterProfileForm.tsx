@@ -268,8 +268,8 @@ export function AdopterProfileForm({
 
   return (
     <>
-      <Card className="bg-white border-line shadow-sm">
-      <CardHeader className="pb-4 space-y-4">
+      <Card className="bg-white border-line shadow-sm py-0 gap-0">
+        <CardHeader className="p-4 sm:p-6 pb-2.5 sm:pb-3 space-y-4">
         {/* Banner de Invitación o Encabezado de Edición */}
         {isNewProfile ? (
           <div className="bg-gradient-to-br from-[#FAF9F6] via-[#EDF5F2] to-[#FDFBF7] border border-verde-200 rounded-2xl p-4 sm:p-5 shadow-xs">
@@ -367,7 +367,7 @@ export function AdopterProfileForm({
 
 
       <form onSubmit={handleSubmit}>
-        <CardContent className="pt-6 space-y-7">
+        <CardContent className="p-4 sm:p-6 pt-3 sm:pt-4 space-y-7">
           {/* SECCIÓN 1: VIVIENDA Y UBICACIÓN */}
           {activeSection === 1 && (
             <div className="space-y-6">

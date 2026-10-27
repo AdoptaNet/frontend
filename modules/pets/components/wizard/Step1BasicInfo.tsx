@@ -13,6 +13,12 @@ import {
   CompletePetFormData,
   getAgeCategoryLabel,
 } from "../../models/pet-form.schemas";
+import {
+  normalizeSpecies,
+  normalizeFur,
+  normalizeSize,
+  formatColorList,
+} from "../../utils/pet-ai-normalizer";
 
 interface Step1BasicInfoProps {
   form: UseFormReturn<CompletePetFormData>;
@@ -30,32 +36,6 @@ const COLOR_OPTIONS = [
   { value: "gris", label: "Gris", swatch: "bg-gray-400 border-gray-500" },
   { value: "blanco", label: "Blanco", swatch: "bg-white border-gray-300" },
 ];
-
-const normalizeSpecies = (val?: string | null): "dog" | "cat" | null => {
-  if (!val) return null;
-  const lower = val.toLowerCase().trim();
-  if (lower === "dog" || lower === "perro") return "dog";
-  if (lower === "cat" || lower === "gato") return "cat";
-  return null;
-};
-
-const normalizeFur = (val?: string | null): "short" | "long" | "hairless" | null => {
-  if (!val) return null;
-  const lower = val.toLowerCase().trim();
-  if (lower === "short" || lower === "corto") return "short";
-  if (lower === "long" || lower === "largo") return "long";
-  if (lower === "hairless" || lower === "sin pelo" || lower === "calvo") return "hairless";
-  return null;
-};
-
-const normalizeSize = (val?: string | null): "small" | "medium" | "large" | null => {
-  if (!val) return null;
-  const lower = val.toLowerCase().trim();
-  if (lower === "small" || lower === "pequeno" || lower === "pequeño") return "small";
-  if (lower === "medium" || lower === "mediano") return "medium";
-  if (lower === "large" || lower === "grande") return "large";
-  return null;
-};
 
 export function Step1BasicInfo({
   form,
@@ -228,32 +208,73 @@ export function Step1BasicInfo({
                 </div>
               </div>
 
-              <Button
+              <button
                 type="button"
                 disabled={disabled || isAnalyzing}
                 onClick={handleAnalyzeWithAI}
-                className="h-9 px-4 text-xs font-bold bg-verde-700 hover:bg-verde-800 text-white gap-2 cursor-pointer shadow-xs shrink-0"
+                className="relative inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs text-white bg-verde-800 hover:bg-verde-700 active:scale-[0.98] transition-all cursor-pointer shadow-xs animate-[ai-button-breathing_2.6s_ease-in-out_infinite] disabled:opacity-60 disabled:cursor-not-allowed disabled:animate-none shrink-0"
               >
                 {isAnalyzing ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="w-4 h-4 animate-spin text-amber-300" />
                     <span>Extrayendo características...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 text-amber-300" />
+                    <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
                     <span>Extraer características con IA</span>
                   </>
                 )}
-              </Button>
+              </button>
             </div>
 
             {analysisSuccess && !isAnalyzing && (
-              <div className="p-3 rounded-lg bg-white border border-verde-200 text-xs text-verde-900 flex items-center gap-2 animate-in slide-in-from-top-1 duration-150">
-                <CheckCircle2 className="w-4 h-4 text-verde-600 shrink-0" />
-                <span>
-                  <strong>¡Características extraídas con éxito!</strong> Nuestra IA identificó los rasgos físicos de las fotos y los completó en la ficha. Puedes ajustarlos en cualquier momento.
-                </span>
+              <div className="p-4 rounded-xl bg-white/95 border border-emerald-300 text-xs text-verde-950 shadow-xs space-y-2.5 animate-in slide-in-from-top-1 duration-200">
+                <div className="flex items-center gap-2 font-bold text-verde-900">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>¡Características extraídas con éxito!</span>
+                </div>
+                <p className="text-xs text-tinta-600 leading-relaxed">
+                  Nuestra visión computacional detectó los rasgos fisionómicos en las fotos y los completó en la ficha con distintivo <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full"><Sparkles className="w-2.5 h-2.5 text-amber-500" /> IA</span>:
+                </p>
+                <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                  {analysisResult?.species?.value && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-900 text-[11px]">
+                      <span>Especie:</span>
+                      <strong>{analysisResult.species.value === "dog" ? "Perro 🐶" : "Gato 🐱"}</strong>
+                    </span>
+                  )}
+                  {Array.isArray(analysisResult?.colors?.value) && analysisResult.colors.value.length > 0 && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-900 text-[11px]">
+                      <span>Colores:</span>
+                      <strong>{formatColorList(analysisResult.colors.value)}</strong>
+                    </span>
+                  )}
+                  {analysisResult?.size?.value && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-900 text-[11px]">
+                      <span>Tamaño:</span>
+                      <strong>
+                        {analysisResult.size.value === "small"
+                          ? "Pequeño"
+                          : analysisResult.size.value === "large"
+                            ? "Grande"
+                            : "Mediano"}
+                      </strong>
+                    </span>
+                  )}
+                  {analysisResult?.fur?.value && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-900 text-[11px]">
+                      <span>Pelaje:</span>
+                      <strong>
+                        {analysisResult.fur.value === "short"
+                          ? "Corto"
+                          : analysisResult.fur.value === "long"
+                            ? "Largo"
+                            : "Sin pelo"}
+                      </strong>
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -277,37 +298,81 @@ export function Step1BasicInfo({
           <Controller
             name="species"
             control={control}
-            render={({ field }) => (
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => field.onChange("dog")}
-                  className={`flex items-center justify-center gap-2.5 p-3 rounded-xl border-2 transition-all cursor-pointer ${
-                    field.value === "dog"
-                      ? "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
-                      : "border-line bg-white hover:border-verde-500 text-tinta-600"
-                  }`}
-                >
-                  <Dog className="w-5 h-5 text-verde-700" />
-                  <span>Perro</span>
-                </button>
+            render={({ field }) => {
+              const aiSpecies = normalizeSpecies(analysisResult?.species?.value);
+              const isDogAi = !!(analysisResult?.species?.autocompleted && aiSpecies === "dog");
+              const isCatAi = !!(analysisResult?.species?.autocompleted && aiSpecies === "cat");
 
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => field.onChange("cat")}
-                  className={`flex items-center justify-center gap-2.5 p-3 rounded-xl border-2 transition-all cursor-pointer ${
-                    field.value === "cat"
-                      ? "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
-                      : "border-line bg-white hover:border-verde-500 text-tinta-600"
-                  }`}
-                >
-                  <Cat className="w-5 h-5 text-verde-700" />
-                  <span>Gato</span>
-                </button>
-              </div>
-            )}
+              return (
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => field.onChange("dog")}
+                    className={`relative flex items-center justify-center gap-2.5 p-3 rounded-xl border-2 transition-all cursor-pointer ${
+                      field.value === "dog"
+                        ? isDogAi
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-950 font-semibold shadow-2xs animate-[ai-pulse-halo_2.8s_ease-in-out_infinite]"
+                          : "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
+                        : isDogAi
+                          ? "border-emerald-300/80 bg-emerald-50/20 text-tinta-700 hover:border-emerald-400 animate-[ai-pulse-halo_3.2s_ease-in-out_infinite]"
+                          : "border-line bg-white hover:border-verde-500 text-tinta-600"
+                    }`}
+                  >
+                    <Dog
+                      className={`w-5 h-5 shrink-0 ${
+                        field.value === "dog"
+                          ? isDogAi
+                            ? "text-emerald-700"
+                            : "text-verde-700"
+                          : isDogAi
+                            ? "text-emerald-600"
+                            : "text-tinta-400"
+                      }`}
+                    />
+                    <span>Perro</span>
+                    {isDogAi && (
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
+                        <Sparkles className="w-2.5 h-2.5 text-amber-500" /> IA
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => field.onChange("cat")}
+                    className={`relative flex items-center justify-center gap-2.5 p-3 rounded-xl border-2 transition-all cursor-pointer ${
+                      field.value === "cat"
+                        ? isCatAi
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-950 font-semibold shadow-2xs animate-[ai-pulse-halo_2.8s_ease-in-out_infinite]"
+                          : "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
+                        : isCatAi
+                          ? "border-emerald-300/80 bg-emerald-50/20 text-tinta-700 hover:border-emerald-400 animate-[ai-pulse-halo_3.2s_ease-in-out_infinite]"
+                          : "border-line bg-white hover:border-verde-500 text-tinta-600"
+                    }`}
+                  >
+                    <Cat
+                      className={`w-5 h-5 shrink-0 ${
+                        field.value === "cat"
+                          ? isCatAi
+                            ? "text-emerald-700"
+                            : "text-verde-700"
+                          : isCatAi
+                            ? "text-emerald-600"
+                            : "text-tinta-400"
+                      }`}
+                    />
+                    <span>Gato</span>
+                    {isCatAi && (
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full shadow-2xs pointer-events-none">
+                        <Sparkles className="w-2.5 h-2.5 text-amber-500" /> IA
+                      </span>
+                    )}
+                  </button>
+                </div>
+              );
+            }}
           />
           {errors.species && (
             <p className="text-xs text-coral-600">{errors.species.message}</p>
@@ -387,10 +452,16 @@ export function Step1BasicInfo({
               }
             };
 
+            const aiColors = Array.isArray(analysisResult?.colors?.value)
+              ? analysisResult.colors.value
+              : [];
+            const isColorsAutocompleted = !!analysisResult?.colors?.autocompleted;
+
             return (
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 {COLOR_OPTIONS.map((opt) => {
                   const isSelected = currentColors.includes(opt.value);
+                  const isAiColor = isColorsAutocompleted && aiColors.includes(opt.value);
 
                   return (
                     <button
@@ -398,16 +469,25 @@ export function Step1BasicInfo({
                       type="button"
                       disabled={disabled}
                       onClick={() => toggleColor(opt.value)}
-                      className={`flex items-center gap-2 p-2.5 rounded-xl border-2 transition-all cursor-pointer text-left ${
+                      className={`relative flex items-center gap-2 p-2.5 pr-8 rounded-xl border-2 transition-all cursor-pointer text-left ${
                         isSelected
-                          ? "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
-                          : "border-line bg-white hover:border-verde-400 text-tinta-600"
+                          ? isAiColor
+                            ? "border-emerald-600 bg-emerald-50 text-emerald-950 font-semibold shadow-2xs animate-[ai-pulse-halo_2.8s_ease-in-out_infinite]"
+                            : "border-verde-700 bg-verde-50/70 text-verde-900 font-semibold shadow-2xs"
+                          : isAiColor
+                            ? "border-emerald-300/80 bg-emerald-50/20 hover:border-emerald-400 text-tinta-700 animate-[ai-pulse-halo_3.2s_ease-in-out_infinite]"
+                            : "border-line bg-white hover:border-verde-400 text-tinta-600"
                       } ${!isSelected && currentColors.length >= 3 ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       <span
                         className={`w-4 h-4 rounded-full shrink-0 border ${opt.swatch}`}
                       />
                       <span className="text-xs sm:text-sm truncate">{opt.label}</span>
+                      {isAiColor && (
+                        <span className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 text-[9px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1 py-0.5 rounded shadow-2xs pointer-events-none">
+                          <Sparkles className="w-2 h-2 text-amber-500" /> IA
+                        </span>
+                      )}
                     </button>
                   );
                 })}

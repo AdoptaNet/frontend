@@ -212,11 +212,17 @@ export function ShelterProfileForm({
       errors.organizationName = "El nombre de la organización o albergue es obligatorio.";
     }
 
-    if (formData.phoneNumber && formData.phoneNumber.trim().length > 0) {
+    if (!formData.phoneNumber || formData.phoneNumber.trim().length === 0) {
+      errors.phoneNumber = "El teléfono de contacto es obligatorio para poder publicar mascotas.";
+    } else {
       const clean = formData.phoneNumber.replace(/\D/g, "");
       if (!/^9\d{8}$/.test(clean)) {
         errors.phoneNumber = "El número telefónico debe ser un celular válido de Perú (9 dígitos, ej: 999888777).";
       }
+    }
+
+    if (!formData.city || formData.city.trim().length === 0) {
+      errors.city = "El distrito es obligatorio para poder publicar mascotas.";
     }
 
     if (formData.contactEmail && formData.contactEmail.trim().length > 0) {
@@ -334,16 +340,17 @@ export function ShelterProfileForm({
 
   return (
     <>
-      <Card className="bg-white border-line shadow-sm">
-        <CardHeader className="pb-4">
+      <Card className="bg-white border-line shadow-sm py-0 gap-0">
+        <CardHeader className="p-4 sm:p-6 pb-2.5 sm:pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-verde-700" />
                 Datos Institucionales del Albergue
               </CardTitle>
-              <CardDescription className="text-sm text-tinta-600 mt-1">
-                Esta información es visible para los adoptantes y en las fichas de tus animales rescatados.
+              <CardDescription className="text-sm text-tinta-600 mt-0.5">
+                Esta información es visible para los adoptantes. Los campos con{" "}
+                <span className="text-rojo-600 font-bold">*</span> son indispensables para publicar mascotas.
               </CardDescription>
             </div>
 
@@ -394,7 +401,7 @@ export function ShelterProfileForm({
       <Separator className="bg-line" />
 
       <form onSubmit={handleSubmit}>
-        <CardContent className="pt-6 space-y-6">
+        <CardContent className="p-4 sm:p-6 pt-3 sm:pt-4 space-y-5">
           {/* Nombre de la Organización */}
           <div className="space-y-1.5">
             <Label htmlFor="orgName" className="text-sm font-semibold text-tinta-900 flex items-center gap-1">
@@ -478,8 +485,9 @@ export function ShelterProfileForm({
 
               return (
                 <div className="space-y-1.5">
-                  <Label htmlFor="city" className="text-sm font-semibold text-tinta-900">
-                    Distrito
+                  <Label htmlFor="city" className="text-sm font-semibold text-tinta-900 flex items-center gap-1">
+                    <span>Distrito</span>
+                    <span className="text-rojo-600 font-bold">*</span>
                   </Label>
                   <select
                     id="city"
@@ -490,7 +498,9 @@ export function ShelterProfileForm({
                     }
                     onChange={(e) => updateField("city", e.target.value)}
                     disabled={isLoading || isSaving}
-                    className="w-full h-11 px-3 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo cursor-pointer"
+                    className={`w-full h-11 px-3 rounded-lg border border-line bg-white text-sm text-tinta-900 focus:outline-none focus:ring-2 focus:ring-anillo cursor-pointer ${
+                      fieldErrors.city ? "border-rojo-500 focus:ring-rojo-500 bg-red-50/20" : ""
+                    }`}
                   >
                     {currentDistricts.map((dist) => (
                       <option key={dist} value={dist}>
@@ -498,6 +508,12 @@ export function ShelterProfileForm({
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.city && (
+                    <p className="text-xs text-rojo-600 font-medium flex items-center gap-1 mt-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.city}</span>
+                    </p>
+                  )}
                 </div>
               );
             })()}
@@ -566,7 +582,8 @@ export function ShelterProfileForm({
             <div className="space-y-1.5">
               <Label htmlFor="shelterPhone" className="text-sm font-semibold text-tinta-900 flex items-center gap-1.5">
                 <Phone className="w-4 h-4 text-verde-700" />
-                Teléfono / WhatsApp (+51)
+                <span>Teléfono móvil (+51)</span>
+                <span className="text-rojo-600 font-bold">*</span>
               </Label>
               <Input
                 id="shelterPhone"

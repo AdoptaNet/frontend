@@ -153,15 +153,15 @@ export function SecurityForm({
   return (
     <div className="space-y-6">
       {/* Tarjeta de Gestión de Contraseña */}
-      <Card className="bg-white border-line shadow-sm">
-        <CardHeader className="pb-4">
+      <Card className="bg-white border-line shadow-sm py-0 gap-0">
+        <CardHeader className="p-4 sm:p-6 pb-2.5 sm:pb-3">
           <CardTitle className="text-xl font-heading text-tinta-900 flex items-center gap-2">
             <Lock className="w-5 h-5 text-verde-700" />
             {hasPassword
               ? "Seguridad y Contraseña"
               : "Definir Contraseña de Acceso"}
           </CardTitle>
-          <CardDescription className="text-sm text-tinta-600 mt-1">
+          <CardDescription className="text-sm text-tinta-600 mt-0.5">
             {hasPassword
               ? "Administra la clave de acceso para iniciar sesión en AdoptaNet."
               : "Define una contraseña para poder iniciar sesión con correo y clave además de Google."}
@@ -194,7 +194,7 @@ export function SecurityForm({
         )}
 
         <form onSubmit={handleSubmit}>
-          <CardContent className="pt-6 space-y-5">
+          <CardContent className="p-4 sm:p-6 pt-3 sm:pt-4 space-y-5">
             {validationError && (
               <div className="p-3.5 rounded-lg bg-coral-100 border-l-4 border-coral-600 text-coral-600 text-xs sm:text-sm flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 shrink-0" />

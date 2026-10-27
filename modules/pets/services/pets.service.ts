@@ -73,6 +73,7 @@ export const petsService = {
     return httpClient.post<AnalyzePetPhotosResponse>(
       API_ROUTES.PETS.ANALYZE_PHOTOS,
       formData,
+      { skipAuth: true },
     );
   },
 

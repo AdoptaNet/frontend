@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Building2,
   ShieldCheck,
@@ -305,12 +306,13 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
                     >
                       <div className="flex items-center gap-3">
                         {app.pet?.primaryPhotoUrl ? (
-                          <div className="w-12 h-12 rounded-xl overflow-hidden border border-line shrink-0 bg-superficie-2">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                          <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-line shrink-0 bg-superficie-2">
+                            <Image
                               src={app.pet.primaryPhotoUrl}
                               alt={app.pet.name}
-                              className="w-full h-full object-cover"
+                              fill
+                              sizes="48px"
+                              className="object-cover"
                             />
                           </div>
                         ) : (
