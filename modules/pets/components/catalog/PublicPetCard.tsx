@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, PawPrint, ShieldCheck, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -65,11 +66,12 @@ export function PublicPetCard({
         {/* Cover Photo - Vertical aspect ratio (4:5) with lateral buttons */}
         <div className="relative aspect-[4/5] w-full bg-superficie-2 overflow-hidden">
           {currentPhoto ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={currentPhoto.url}
               alt={pet.name}
-              className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+              className="object-cover group-hover:scale-102 transition-transform duration-300"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-tinta-300">

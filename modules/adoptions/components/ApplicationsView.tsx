@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   FileText,
   Heart,
@@ -253,12 +254,15 @@ export function ApplicationsView() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     {adoption.pet?.primaryPhotoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={adoption.pet.primaryPhotoUrl}
-                        alt={adoption.pet.name}
-                        className="w-14 h-14 rounded-xl object-cover border border-line shrink-0"
-                      />
+                      <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-line shrink-0">
+                        <Image
+                          src={adoption.pet.primaryPhotoUrl}
+                          alt={adoption.pet.name}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                      </div>
                     ) : (
                       <div className="w-14 h-14 rounded-xl bg-verde-50 border border-verde-200 flex items-center justify-center text-verde-700 shrink-0">
                         <Heart className="w-6 h-6" />

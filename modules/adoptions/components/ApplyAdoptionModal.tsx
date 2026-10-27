@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Heart,
   AlertCircle,
@@ -182,12 +183,15 @@ export function ApplyAdoptionModal({
               {/* Pet Quick Mini Card */}
               <div className="flex items-center gap-3 p-3 bg-superficie-1 rounded-xl border border-line">
                 {pet.primaryPhotoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={pet.primaryPhotoUrl}
-                    alt={pet.name}
-                    className="w-14 h-14 rounded-lg object-cover border border-line shrink-0"
-                  />
+                  <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-line shrink-0">
+                    <Image
+                      src={pet.primaryPhotoUrl}
+                      alt={pet.name}
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
+                  </div>
                 ) : (
                   <div className="w-14 h-14 rounded-lg bg-verde-50 border border-verde-200 flex items-center justify-center text-verde-700 shrink-0">
                     <Heart className="w-6 h-6" />

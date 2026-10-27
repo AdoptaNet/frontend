@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -219,18 +220,21 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
             {activePhoto ? (
               <>
                 {/* Ambient blur layer for zero crop distortion */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={activePhoto.url}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className="object-cover blur-2xl opacity-40 scale-110 pointer-events-none"
                 />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={activePhoto.url}
                   alt={`${pet.name} foto ${activePhotoIndex + 1}`}
-                  className="relative z-10 max-h-full max-w-full object-contain transition-all duration-300"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  priority
+                  className="relative z-10 object-contain transition-all duration-300"
                 />
               </>
             ) : (
@@ -290,17 +294,18 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
                   key={photo.publicId || photo.url || idx}
                   type="button"
                   onClick={() => setActivePhotoIndex(idx)}
-                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                  className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
                     activePhotoIndex === idx
                       ? "border-verde-600 ring-2 ring-verde-500/20 scale-102"
                       : "border-line opacity-75 hover:opacity-100 hover:border-verde-400"
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={photo.url}
                     alt={`Miniatura ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="80px"
+                    className="object-cover"
                   />
                 </button>
               ))}

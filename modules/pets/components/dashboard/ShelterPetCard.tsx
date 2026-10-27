@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Edit3, Trash2, PawPrint, Zap, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Pet, PetStatus } from "../../models/pet.types";
 import { PetStatusSelect } from "./PetStatusSelect";
@@ -57,10 +58,11 @@ export function ShelterPetCard({
       {/* Photo with Carousel preview - Vertical 4:5 aspect ratio */}
       <div className="relative aspect-[4/5] w-full bg-superficie-2 overflow-hidden">
         {activePhotoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={activePhotoUrl}
             alt={pet.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
           />
         ) : (
