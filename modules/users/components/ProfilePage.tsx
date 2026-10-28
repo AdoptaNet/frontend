@@ -252,7 +252,7 @@ export function ProfilePage() {
         <TabsContent value="role-specific" className="mt-0 focus-visible:outline-none">
           {role === "adopter" ? (
             <AdopterProfileForm
-              key={`${user.adopterProfile?.id}-${Boolean(user.adopterProfile?.housingType)}`}
+              key={user.adopterProfile?.id || "new-adopter"}
               profile={user.adopterProfile}
               onSave={updateAdopterProfile}
               isLoading={isSaving}

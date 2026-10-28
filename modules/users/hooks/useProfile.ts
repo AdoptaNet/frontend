@@ -244,17 +244,6 @@ export function useProfile() {
             adopterProfile: updatedProfile,
           });
         }
-        if (updatedProfile.isSurveyCompleted) {
-          showFeedback(
-            "success",
-            "¡Cuestionario completado al 100%! Tus recomendaciones personalizadas están activas 🎉",
-          );
-        } else {
-          showFeedback(
-            "success",
-            "Preferencias de adopción guardadas exitosamente",
-          );
-        }
         return;
       } catch (err: unknown) {
         const message =
