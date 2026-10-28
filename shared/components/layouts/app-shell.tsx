@@ -19,6 +19,9 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { authService } from "@/modules/auth/services/auth.service";
+import { messagesService } from "@/modules/messages/services/messages.service";
+import { MessageNotificationToast } from "@/modules/messages/components/MessageNotificationToast";
+import { UserAvatar } from "@/shared/components/UserAvatar";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -50,6 +53,27 @@ export function AppShell({ children }: AppShellProps) {
 
   const isShelter = user?.role === "shelter";
 
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!user) return;
+    let isSubscribed = true;
+    const fetchUnread = async () => {
+      try {
+        const res = await messagesService.getUnreadCount();
+        if (isSubscribed) setUnreadCount(res.unreadCount);
+      } catch {
+        // ignore
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+    };
+  }, [user]);
+
   // Desktop Navigation items
   const desktopNav = user
     ? isShelter
@@ -57,6 +81,7 @@ export function AppShell({ children }: AppShellProps) {
           { href: "/home", label: "Panel", icon: LayoutDashboard },
           { href: "/pets", label: "Mascotas", icon: PawPrint },
           { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/messages", label: "Mensajes", icon: MessageSquare },
           { href: "/follow-up", label: "Seguimiento", icon: ClipboardCheck },
         ]
       : [
@@ -141,6 +166,11 @@ export function AppShell({ children }: AppShellProps) {
                     className={`w-4 h-4 ${isActive ? "text-verde-700" : "text-tinta-400"}`}
                   />
                   <span>{item.label}</span>
+                  {item.href === "/messages" && unreadCount > 0 && (
+                    <span className="ml-1 bg-verde-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-4 text-center">
+                      {unreadCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -158,18 +188,12 @@ export function AppShell({ children }: AppShellProps) {
                       : "border-line bg-white hover:border-verde-500"
                   }`}
                 >
-                  <div className="w-7 h-7 rounded-full bg-verde-700 text-white flex items-center justify-center text-xs font-bold overflow-hidden">
-                    {user?.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={user.avatarUrl}
-                        alt={displayName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span>{initials || "AN"}</span>
-                    )}
-                  </div>
+                  <UserAvatar
+                    src={user.avatarUrl}
+                    name={displayName}
+                    sizeClassName="w-7 h-7"
+                    textClassName="text-[10px] font-bold text-verde-700"
+                  />
                   <span className="text-xs font-semibold text-tinta-900 hidden sm:inline pr-2 truncate max-w-[120px]">
                     {displayName}
                   </span>
@@ -213,7 +237,16 @@ export function AppShell({ children }: AppShellProps) {
       </header>
 
       {/* ---------- MAIN CONTENT WRAPPER ---------- */}
-      <main className="flex-1 pb-20 md:pb-10">{children}</main>
+      <main className="flex-1 pb-20 md:pb-10">
+        {user && (
+          <React.Suspense fallback={null}>
+            <MessageNotificationToast
+              onUnreadIncrement={() => setUnreadCount((prev) => prev + 1)}
+            />
+          </React.Suspense>
+        )}
+        {children}
+      </main>
 
       {/* ---------- BARRA DE NAVEGACIÓN INFERIOR (MÓVIL < 768px) ---------- */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-line pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Camera, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -20,6 +20,11 @@ export function AvatarUploader({
   disabled = false,
 }: AvatarUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [avatarUrl]);
 
   const getInitials = (name?: string | null): string => {
     if (!name) return "AN";
@@ -44,11 +49,13 @@ export function AvatarUploader({
     <div className="flex flex-col sm:flex-row items-center gap-5">
       <div className="relative group">
         <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-line bg-verde-50 flex items-center justify-center text-verde-700 font-semibold text-2xl select-none shadow-sm transition-all duration-200">
-          {avatarUrl ? (
+          {avatarUrl && !imageError ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={avatarUrl}
               alt={fullName || "Avatar"}
+              referrerPolicy="no-referrer"
+              onError={() => setImageError(true)}
               className="w-full h-full object-cover"
             />
           ) : (
