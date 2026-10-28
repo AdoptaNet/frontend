@@ -264,6 +264,7 @@ export default function PublicShelterPage() {
                 <img
                   src={shelter.avatarUrl}
                   alt={shelter.organizationName}
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />
               ) : (

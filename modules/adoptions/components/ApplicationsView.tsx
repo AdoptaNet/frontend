@@ -11,6 +11,7 @@ import {
   Eye,
   CheckCircle2,
   XCircle,
+  MessageSquare,
 } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useAuthStore } from '@/modules/auth/store/auth.store';
@@ -300,7 +301,23 @@ export function ApplicationsView() {
                   </div>
 
                   {/* Top Actions */}
-                  <div className="flex items-center gap-2 self-end sm:self-center">
+                  <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
+                    {(adoption.status === 'under_review' ||
+                      adoption.status === 'approved') && (
+                      <Link
+                        href={`/messages?adoption=${adoption.id}`}
+                        className={buttonVariants({
+                          variant: 'outline',
+                          size: 'sm',
+                          className:
+                            'h-8 px-3 text-xs border-verde-600 text-verde-700 bg-verde-50 hover:bg-verde-100 gap-1.5 cursor-pointer font-medium shadow-2xs',
+                        })}
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 text-verde-700" />
+                        <span>Ir al Chat</span>
+                      </Link>
+                    )}
+
                     <Button
                       type="button"
                       variant="outline"

@@ -50,4 +50,12 @@ export const API_ROUTES = {
     BASE: "/recommendations",
     INTERACTIONS: "/recommendations/interactions",
   },
+  MESSAGES: {
+    ROOMS: "/messages/rooms",
+    BY_ID: (id: string) => `/messages/rooms/${id}`,
+    BY_ADOPTION: (adoptionId: string) => `/messages/adoptions/${adoptionId}`,
+    MESSAGES: (roomId: string) => `/messages/rooms/${roomId}/messages`,
+    READ: (roomId: string) => `/messages/rooms/${roomId}/read`,
+    UNREAD_COUNT: "/messages/unread-count",
+  },
 } as const;
