@@ -2,6 +2,7 @@ import { httpClient } from '@/shared/services/http-client';
 import { API_ROUTES } from '@/shared/config/api-routes';
 import type {
   AdoptionRequest,
+  AdoptionDossierData,
   CreateAdoptionRequestPayload,
   ReviewAdoptionRequestPayload,
   AdoptionsFilterParams,
@@ -27,6 +28,10 @@ export const adoptionsService = {
 
   async getAdoptionById(id: string): Promise<AdoptionRequest> {
     return httpClient.get<AdoptionRequest>(API_ROUTES.ADOPTIONS.BY_ID(id));
+  },
+
+  async getAdoptionDossier(id: string): Promise<AdoptionDossierData> {
+    return httpClient.get<AdoptionDossierData>(API_ROUTES.ADOPTIONS.DOSSIER(id));
   },
 
   async cancelAdoption(id: string): Promise<AdoptionRequest> {

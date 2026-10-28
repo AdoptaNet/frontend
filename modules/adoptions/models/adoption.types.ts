@@ -164,3 +164,23 @@ export interface PaginatedAdoptionsResponse {
   limit: number;
   totalPages: number;
 }
+
+export interface AdoptionDossierData {
+  petId: string;
+  petName: string;
+  verdict: string;
+  compatibility: number;
+  interestProbability: number;
+  positiveFactors: string[];
+  alerts: string[];
+  negativeFactors: string[];
+  violatedRules: string[];
+  // Campos retrocompatibles
+  aFavor?: string[];
+  alertas?: string[];
+  enContra?: string[];
+  reglasVioladas?: string[];
+  veredicto?: string;
+  compatibilidad?: number;
+  pInteres?: number;
+}
