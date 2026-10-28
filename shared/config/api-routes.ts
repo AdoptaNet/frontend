@@ -42,7 +42,12 @@ export const API_ROUTES = {
     MY_REQUESTS: "/adoptions/my-requests",
     SHELTER: "/adoptions/shelter",
     BY_ID: (id: string) => `/adoptions/${id}`,
+    DOSSIER: (id: string) => `/adoptions/${id}/dossier`,
     CANCEL: (id: string) => `/adoptions/${id}/cancel`,
     REVIEW: (id: string) => `/adoptions/${id}/review`,
+  },
+  RECOMMENDATIONS: {
+    BASE: "/recommendations",
+    INTERACTIONS: "/recommendations/interactions",
   },
 } as const;

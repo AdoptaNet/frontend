@@ -48,7 +48,7 @@ export function QuestionnaireReminderCard({ user }: QuestionnaireReminderCardPro
             Preferencias activadas
           </CardTitle>
           <p className="text-xs text-tinta-600 mt-1 leading-relaxed">
-            Tu perfil está calibrado para recibir recomendaciones afines en cuanto el catálogo esté disponible.
+            Tu perfil está calibrado para recibir recomendaciones personalizadas con inteligencia artificial en tu pantalla de inicio.
           </p>
         </CardHeader>
 

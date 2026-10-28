@@ -99,7 +99,7 @@ export function AdopterProfileForm({
   useEffect(() => {
     if (redirectCountdown === null) return;
     if (redirectCountdown <= 0) {
-      router.push("/pets?survey=completed");
+      router.push("/home");
       return;
     }
     const timer = setTimeout(() => {
@@ -995,11 +995,11 @@ export function AdopterProfileForm({
               </span>
             </div>
             <p className="text-xs text-white/90 leading-relaxed">
-              Redirigiéndote al catálogo de mascotas en{" "}
+              Redirigiéndote a tu panel de recomendaciones en{" "}
               <strong className="font-mono text-amber-200 text-sm font-bold">
                 {redirectCountdown}s
               </strong>
-              ... Ya puedes postular con un solo clic.
+              ... Ya puedes explorar tus mascotas compatibles con IA.
             </p>
           </div>
         </div>
@@ -1013,11 +1013,11 @@ export function AdopterProfileForm({
           </button>
           <Button
             type="button"
-            onClick={() => router.push("/pets?survey=completed")}
+            onClick={() => router.push("/home")}
             className="h-8 px-3.5 bg-white text-verde-900 hover:bg-superficie-1 font-semibold text-xs rounded-lg gap-1.5 cursor-pointer shadow-xs"
           >
-            <Compass className="w-3.5 h-3.5 text-verde-800" />
-            <span>Ir al catálogo ahora</span>
+            <Sparkles className="w-3.5 h-3.5 text-verde-800" />
+            <span>Ver recomendaciones ahora</span>
           </Button>
         </div>
       </div>

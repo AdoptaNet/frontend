@@ -13,11 +13,16 @@ import {
   CheckCircle2,
   XCircle,
   FileText,
+  AlertTriangle,
+  ShieldAlert,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
 import { AdoptionStatusBadge } from './AdoptionStatusBadge';
-import type { AdoptionRequest } from '../models/adoption.types';
+import { adoptionsService } from '../services/adoptions.service';
+import type { AdoptionRequest, AdoptionDossierData } from '../models/adoption.types';
 import { ADOPTION_REJECTION_REASONS } from '../models/adoption.types';
 
 interface AdoptionApplicantDossierModalProps {
@@ -37,6 +42,45 @@ export function AdoptionApplicantDossierModal({
 }: AdoptionApplicantDossierModalProps) {
   const modalRef = React.useRef<HTMLDivElement>(null);
   useModal({ isOpen, onClose, modalRef });
+
+  const [dossier, setDossier] = React.useState<AdoptionDossierData | null>(null);
+  const [isLoadingDossier, setIsLoadingDossier] = React.useState(false);
+  const [dossierError, setDossierError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!isOpen || !isShelterView || !adoption?.id) {
+      setDossier(null);
+      setIsLoadingDossier(false);
+      setDossierError(null);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingDossier(true);
+    setDossierError(null);
+
+    adoptionsService
+      .getAdoptionDossier(adoption.id)
+      .then((data) => {
+        if (isMounted) {
+          setDossier(data);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setDossierError('No se pudo cargar la evaluación de IA');
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingDossier(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, isShelterView, adoption?.id]);
 
   if (!isOpen || !adoption) return null;
 
@@ -193,6 +237,166 @@ export function AdoptionApplicantDossierModal({
               <span>Compromiso de tenencia responsable aceptado formalmente</span>
             </div>
           </div>
+
+          {/* Evaluación de Compatibilidad con IA (Solo para Albergues) */}
+          {isShelterView && (
+            <div className="space-y-3.5 pt-2 border-t border-line">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-verde-700" />
+                  <h3 className="text-xs font-bold text-tinta-900 uppercase tracking-wider">
+                    Evaluación de Compatibilidad con IA
+                  </h3>
+                </div>
+                {dossier && (
+                  <span className="text-[11px] font-semibold text-tinta-700 bg-superficie-2 px-2.5 py-0.5 rounded-full border border-line">
+                    {Math.round((dossier.compatibility ?? dossier.compatibilidad ?? 0.5) * 100)}% afinidad calculada
+                  </span>
+                )}
+              </div>
+
+              {isLoadingDossier ? (
+                <div className="p-6 bg-superficie-1 rounded-xl border border-line flex flex-col items-center justify-center gap-2 text-tinta-600">
+                  <Loader2 className="w-5 h-5 animate-spin text-verde-700" />
+                  <p className="text-xs font-medium">Analizando compatibilidad con el modelo de IA...</p>
+                </div>
+              ) : dossierError ? (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>No se pudo conectar con el microservicio de IA para generar la ficha técnica.</span>
+                </div>
+              ) : dossier ? (() => {
+                const positiveFactors = dossier.positiveFactors || dossier.aFavor || [];
+                const alerts = dossier.alerts || dossier.alertas || [];
+                const negativeFactors = dossier.negativeFactors || dossier.enContra || [];
+                const violatedRules = dossier.violatedRules || dossier.reglasVioladas || [];
+                const verdict = (dossier.verdict || dossier.veredicto || 'APTO PARA ENTREVISTA').split('—')[0].trim();
+                const interestProbability = dossier.interestProbability ?? dossier.pInteres ?? 0.5;
+
+                return (
+                  <div className="space-y-3">
+                    {/* Veredicto Badge */}
+                    <div
+                      className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs font-medium ${
+                        verdict.includes('APTO')
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                          : verdict.includes('REVISAR')
+                          ? 'bg-amber-50 border-amber-200 text-amber-900'
+                          : 'bg-rose-50 border-rose-200 text-rose-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {verdict.includes('APTO') ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        ) : verdict.includes('REVISAR') ? (
+                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                        ) : (
+                          <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                        )}
+                        <span>
+                          <strong>Veredicto sugerido:</strong> {verdict}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-tinta-700 font-medium hidden sm:inline bg-white/70 px-2.5 py-1 rounded-md border border-black/5 shadow-2xs">
+                        Interés del adoptante: {Math.round(interestProbability * 100)}%
+                      </span>
+                    </div>
+
+                    {/* 1. Puntos a favor de la adopción */}
+                    <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl space-y-2">
+                      <div className="flex items-center gap-2 text-emerald-900 font-semibold text-xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Puntos a favor de la adopción</span>
+                        <span className="text-[10px] bg-emerald-200/70 text-emerald-800 px-1.5 py-0.2 rounded-full font-bold ml-auto">
+                          {positiveFactors.length}
+                        </span>
+                      </div>
+                      <ul className="space-y-1.5 text-xs text-emerald-950">
+                        {positiveFactors.length > 0 ? (
+                          positiveFactors.map((motivo, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-emerald-500 font-bold">•</span>
+                              <span>{motivo}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-emerald-800 italic text-[11px]">
+                            Sin factores a favor destacados por el modelo.
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+
+                    {/* 2. Puntos de atención para la entrevista */}
+                    <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl space-y-2">
+                      <div className="flex items-center gap-2 text-amber-900 font-semibold text-xs">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>Puntos de atención para la entrevista</span>
+                        <span className="text-[10px] bg-amber-200/70 text-amber-800 px-1.5 py-0.2 rounded-full font-bold ml-auto">
+                          {alerts.length}
+                        </span>
+                      </div>
+                      <ul className="space-y-1.5 text-xs text-amber-950">
+                        {alerts.length > 0 ? (
+                          alerts.map((alerta, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-amber-500 font-bold">•</span>
+                              <span>{alerta}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-amber-800 italic text-[11px]">
+                            No se registraron dudas ni alertas para indagar en la entrevista.
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+
+                    {/* 3. Factores de riesgo o restricciones */}
+                    <div className="p-3.5 bg-rose-50/70 border border-rose-200/80 rounded-xl space-y-2">
+                      <div className="flex items-center gap-2 text-rose-900 font-semibold text-xs">
+                        <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>Factores de riesgo o restricciones</span>
+                        <span className="text-[10px] bg-rose-200/70 text-rose-800 px-1.5 py-0.2 rounded-full font-bold ml-auto">
+                          {violatedRules.length + negativeFactors.length}
+                        </span>
+                      </div>
+                      {violatedRules.length > 0 && (
+                        <div className="space-y-1">
+                          <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wide">
+                            Reglas de bienestar no cumplidas:
+                          </span>
+                          <ul className="space-y-1 text-xs text-rose-950 font-medium">
+                            {violatedRules.map((regla, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span className="text-rose-600 font-bold">✕</span>
+                                <span>{regla}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {negativeFactors.length > 0 && (
+                        <ul className="space-y-1.5 text-xs text-rose-950">
+                          {negativeFactors.map((contra, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-rose-500 font-bold">•</span>
+                              <span>{contra}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {violatedRules.length === 0 && negativeFactors.length === 0 && (
+                        <p className="text-rose-800 italic text-[11px]">
+                          Sin factores de riesgo ni violaciones a las reglas de bienestar animal detectadas.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })() : null}
+            </div>
+          )}
 
           {/* Immutable Snapshot Sections */}
           <div className="space-y-4">
