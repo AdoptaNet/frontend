@@ -56,6 +56,8 @@ export function useLogin() {
       const redirect = searchParams.get("redirect");
       if (redirect && redirect.startsWith("/")) {
         router.push(redirect);
+      } else if (response.user.role === "admin") {
+        router.push("/admin/dashboard");
       } else {
         router.push("/home");
       }

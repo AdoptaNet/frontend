@@ -1,18 +1,36 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useProfile } from "@/modules/users/hooks/useProfile";
 import { AdopterHomeView } from "./AdopterHomeView";
 import { ShelterHomeView } from "./ShelterHomeView";
 
 export function HomePage() {
+  const router = useRouter();
   const { user, role, isInitialLoading } = useProfile();
+
+  useEffect(() => {
+    if (role === "admin") {
+      router.replace("/admin/dashboard");
+    }
+  }, [role, router]);
 
   if (isInitialLoading && !user) {
     return (
       <div className="w-full max-w-5xl mx-auto py-24 px-4 sm:px-6 flex flex-col items-center justify-center gap-4 text-center">
         <Loader2 className="w-8 h-8 animate-spin text-verde-700" />
         <p className="text-sm font-medium text-tinta-600">Cargando panel...</p>
+      </div>
+    );
+  }
+
+  if (role === "admin") {
+    return (
+      <div className="w-full max-w-5xl mx-auto py-24 px-4 sm:px-6 flex flex-col items-center justify-center gap-4 text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-verde-700" />
+        <p className="text-sm font-medium text-tinta-600">Redirigiendo al panel de administración...</p>
       </div>
     );
   }
