@@ -13,6 +13,7 @@ import { OperationalKpisGrid } from "./OperationalKpisGrid";
 import { MlTelemetrySection } from "./MlTelemetrySection";
 import { HealthStatusWidget } from "./HealthStatusWidget";
 import { AdminSheltersTable } from "./AdminSheltersTable";
+import { AdminInfoTooltip } from "./AdminInfoTooltip";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 
 export function AdminDashboard() {
@@ -113,10 +114,16 @@ export function AdminDashboard() {
               <Shield className="w-3.5 h-3.5" />
               {sectionMeta.badge}
             </span>
+            <AdminInfoTooltip
+              content="Privilegios de Administrador del sistema AdoptaNet. Acceso irrestricto a telemetría global y configuración."
+            />
             {metrics?.timestamp && (
-              <span className="text-[11px] text-tinta-400 flex items-center gap-1">
+              <span className="text-[11px] text-tinta-400 flex items-center gap-1 ml-2">
                 <Clock className="w-3 h-3" />
                 Actualizado: {new Date(metrics.timestamp).toLocaleTimeString()}
+                <AdminInfoTooltip
+                  content="Hora exacta de la última consulta analítica ejecutada contra la base de datos PostgreSQL."
+                />
               </span>
             )}
           </div>
@@ -129,14 +136,19 @@ export function AdminDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-xs font-semibold shadow-2xs transition-colors disabled:opacity-50 cursor-pointer"
+          <AdminInfoTooltip
+            content="Recalcula al instante las métricas operacionales, telemetría de IA y sondea la salud de los servicios."
+            side="left"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            <span>{refreshing ? "Actualizando..." : "Sincronizar"}</span>
-          </button>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-verde-700 hover:bg-verde-800 text-white text-xs font-semibold shadow-2xs transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+              <span>{refreshing ? "Actualizando..." : "Sincronizar"}</span>
+            </button>
+          </AdminInfoTooltip>
         </div>
       </div>
 
