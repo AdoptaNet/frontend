@@ -21,11 +21,6 @@ import {
   Building2,
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { authService } from "@/modules/auth/services/auth.service";
 import { messagesService } from "@/modules/messages/services/messages.service";
@@ -41,7 +36,7 @@ function NavLinks({
   isAdmin,
   unreadCount,
 }: {
-  desktopNav: Array<{ href: string; label: string; icon: any; tooltip?: string }>;
+  desktopNav: Array<{ href: string; label: string; icon: any }>;
   isAdmin: boolean;
   unreadCount: number;
 }) {
@@ -69,7 +64,7 @@ function NavLinks({
         const Icon = item.icon;
         const isActive = isItemActive(item.href);
 
-        const linkContent = (
+        return (
           <Link
             key={item.href}
             href={item.href}
@@ -92,19 +87,6 @@ function NavLinks({
             )}
           </Link>
         );
-
-        if (item.tooltip) {
-          return (
-            <Tooltip key={item.href}>
-              <TooltipTrigger>{linkContent}</TooltipTrigger>
-              <TooltipContent className="text-xs p-2.5 max-w-xs leading-relaxed bg-tinta-900 text-white rounded-lg shadow-md">
-                {item.tooltip}
-              </TooltipContent>
-            </Tooltip>
-          );
-        }
-
-        return linkContent;
       })}
     </nav>
   );
@@ -224,25 +206,21 @@ export function AppShell({ children }: AppShellProps) {
             href: "/admin/dashboard?tab=kpis",
             label: "KPIs de Adopción",
             icon: LayoutDashboard,
-            tooltip: "Métricas consolidadas de mascotas, efectividad de adopciones y embudo",
           },
           {
             href: "/admin/dashboard?tab=ml",
             label: "Telemetría ML",
             icon: Cpu,
-            tooltip: "Métricas de interacción, CTR, conversión y ratio híbrido vs fallback",
           },
           {
             href: "/admin/dashboard?tab=health",
             label: "Salud de Servicios",
             icon: Activity,
-            tooltip: "Sondas de conectividad y latencias para PostgreSQL, Socket.io y FastAPI ML",
           },
           {
             href: "/admin/dashboard?tab=shelters",
             label: "Albergues",
             icon: Building2,
-            tooltip: "Directorio de albergues registrados y acreditación comunitaria",
           },
         ]
       : isShelter
@@ -346,16 +324,9 @@ export function AppShell({ children }: AppShellProps) {
                 Adopta<span className="text-ambar-500">Net</span>
               </span>
               {isAdmin && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-neutral-900 text-emerald-400 border border-neutral-700 cursor-help">
-                      Admin
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs p-2 max-w-xs bg-tinta-900 text-white rounded-lg shadow-md">
-                    Sesión activa con rol de Administrador de AdoptaNet
-                  </TooltipContent>
-                </Tooltip>
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-neutral-900 text-emerald-400 border border-neutral-700">
+                  Admin
+                </span>
               )}
             </div>
           </Link>

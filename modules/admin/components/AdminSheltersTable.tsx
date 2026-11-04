@@ -47,20 +47,10 @@ export function AdminSheltersTable({ shelters, onShelterUpdated }: AdminShelters
       {/* Header y Filtros */}
       <div className="p-5 border-b border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="font-heading font-bold text-base text-tinta-900 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-purple-600" />
-              Gestión y Verificación de Albergues
-            </h3>
-            <AdminInfoTooltip
-              content={
-                <div>
-                  <strong className="block text-white mb-1">Fiscalización Institucional</strong>
-                  Permite a los administradores evaluar los albergues registrados y otorgarles la insignia oficial de confianza comunitaria.
-                </div>
-              }
-            />
-          </div>
+          <h3 className="font-heading font-bold text-base text-tinta-900 flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-purple-600" />
+            Gestión y Verificación de Albergues
+          </h3>
           <p className="text-xs text-tinta-500 mt-0.5">
             Acreditación formal para albergues registrados (insignia de confianza comunitaria).
           </p>
@@ -115,12 +105,7 @@ export function AdminSheltersTable({ shelters, onShelterUpdated }: AdminShelters
               <th className="py-3 px-5">Albergue</th>
               <th className="py-3 px-4">Contacto</th>
               <th className="py-3 px-4">Ubicación</th>
-              <th className="py-3 px-4 text-center">
-                <span className="inline-flex items-center gap-1 justify-center">
-                  <span>Mascotas</span>
-                  <AdminInfoTooltip content="Cantidad total de animales activos y publicados en adopción por esta organización." />
-                </span>
-              </th>
+              <th className="py-3 px-4 text-center">Mascotas</th>
               <th className="py-3 px-4">
                 <span className="inline-flex items-center gap-1">
                   <span>Estado Acreditación</span>
@@ -169,36 +154,27 @@ export function AdminSheltersTable({ shelters, onShelterUpdated }: AdminShelters
                     )}
                   </td>
                   <td className="py-3.5 px-5 text-right">
-                    <AdminInfoTooltip
-                      content={
+                    <button
+                      onClick={() => handleToggleVerification(shelter)}
+                      disabled={updatingId === shelter.id}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 ${
                         shelter.isVerified
-                          ? "Retira la acreditación oficial de este albergue."
-                          : "Acredita oficialmente a este albergue para que exhiba la insignia de confianza en sus mascotas."
-                      }
-                      side="left"
+                          ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+                          : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs"
+                      }`}
                     >
-                      <button
-                        onClick={() => handleToggleVerification(shelter)}
-                        disabled={updatingId === shelter.id}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 ${
-                          shelter.isVerified
-                            ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
-                            : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs"
-                        }`}
-                      >
-                        {shelter.isVerified ? (
-                          <>
-                            <XCircle className="w-3.5 h-3.5" />
-                            <span>Revocar</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            <span>Verificar</span>
-                          </>
-                        )}
-                      </button>
-                    </AdminInfoTooltip>
+                      {shelter.isVerified ? (
+                        <>
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>Revocar</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span>Verificar</span>
+                        </>
+                      )}
+                    </button>
                   </td>
                 </tr>
               ))

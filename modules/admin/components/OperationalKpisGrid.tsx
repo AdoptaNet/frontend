@@ -27,19 +27,9 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
         {/* Total Mascotas */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs transition-shadow hover:shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
-                Total Mascotas
-              </span>
-              <AdminInfoTooltip
-                content={
-                  <div>
-                    <strong className="block text-white mb-1">Catálogo Activo</strong>
-                    Número total de animales registrados por todos los albergues. Excluye fichas archivadas o dadas de baja.
-                  </div>
-                }
-              />
-            </div>
+            <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
+              Total Mascotas
+            </span>
             <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
               <PawPrint className="w-5 h-5" />
             </div>
@@ -64,19 +54,9 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
         {/* Solicitudes de Adopción */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs transition-shadow hover:shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
-                Solicitudes Totales
-              </span>
-              <AdminInfoTooltip
-                content={
-                  <div>
-                    <strong className="block text-white mb-1">Volumen de Postulaciones</strong>
-                    Histórico consolidado de formularios de adopción enviados por adoptantes verificados a los albergues.
-                  </div>
-                }
-              />
-            </div>
+            <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
+              Solicitudes Totales
+            </span>
             <div className="p-2 rounded-xl bg-blue-50 text-blue-700">
               <FileCheck className="w-5 h-5" />
             </div>
@@ -86,12 +66,7 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
               {adoptions.total}
             </span>
             <AdminInfoTooltip
-              content={
-                <div>
-                  <strong className="block text-white mb-1">Tasa de Efectividad</strong>
-                  Porcentaje de solicitudes resueltas favorablemente: (Aprobadas / [Aprobadas + Rechazadas]) × 100 = {adoptions.approvalRate}%.
-                </div>
-              }
+              content={`Tasa de Efectividad: (Aprobadas / [Aprobadas + Rechazadas]) × 100 = ${adoptions.approvalRate}%.`}
             >
               <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
                 {adoptions.approvalRate}% efectividad
@@ -106,19 +81,9 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
         {/* Seguimiento Post-Adopción */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs transition-shadow hover:shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
-                Post-Adopción
-              </span>
-              <AdminInfoTooltip
-                content={
-                  <div>
-                    <strong className="block text-white mb-1">Fiscalización y Acompañamiento</strong>
-                    Procesos obligatorios de seguimiento a 30, 90 y 180 días posteriores a la adopción para salvaguardar el bienestar del animal.
-                  </div>
-                }
-              />
-            </div>
+            <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
+              Post-Adopción
+            </span>
             <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
               <HeartHandshake className="w-5 h-5" />
             </div>
@@ -128,7 +93,7 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
               {followUps.active}
             </span>
             <AdminInfoTooltip
-              content={`Animales que culminaron con éxito sus 3 hitos temporales y cuentan con constancia formal de adopción (180 días).`}
+              content="Adopciones que culminaron exitosamente sus hitos de seguimiento (30, 90 y 180 días) con constancia formal."
             >
               <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                 {followUps.completed180d} exitosas
@@ -138,7 +103,7 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
           <p className="text-xs text-tinta-400 mt-2 flex items-center gap-1">
             <span>{followUps.returnsCount} retornos</span>
             <AdminInfoTooltip
-              content={`Tasa de retornos registrados por causas de fuerza mayor tipificadas (alergias severas, desalojos, etc.): ${followUps.returnRate}%.`}
+              content={`Porcentaje de retornos formalizados por causales de fuerza mayor tipificadas (${followUps.returnRate}%).`}
             >
               <span className="text-[11px] text-amber-800 font-semibold underline decoration-dotted">
                 ({followUps.returnRate}%)
@@ -150,19 +115,9 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
         {/* Albergues Registrados */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs transition-shadow hover:shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
-                Albergues Aliados
-              </span>
-              <AdminInfoTooltip
-                content={
-                  <div>
-                    <strong className="block text-white mb-1">Red de Albergues y Rescatistas</strong>
-                    Organizaciones y entidades formalmente inscritas en AdoptaNet con capacidad de publicar animales.
-                  </div>
-                }
-              />
-            </div>
+            <span className="text-xs font-semibold text-tinta-500 uppercase tracking-wider">
+              Albergues Aliados
+            </span>
             <div className="p-2 rounded-xl bg-purple-50 text-purple-700">
               <Building2 className="w-5 h-5" />
             </div>
@@ -171,13 +126,9 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
             <span className="text-3xl font-extrabold text-tinta-900 font-heading">
               {shelters.total}
             </span>
-            <AdminInfoTooltip
-              content={`Porcentaje de albergues con acreditación oficial verificada por los administradores: (${shelters.verified}/${shelters.total || 1}) × 100.`}
-            >
-              <span className="text-xs font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
-                {shelters.verificationRate}% verificados
-              </span>
-            </AdminInfoTooltip>
+            <span className="text-xs font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+              {shelters.verificationRate}% verificados
+            </span>
           </div>
           <p className="text-xs text-tinta-400 mt-2">
             {shelters.verified} verificados • {shelters.unverified} pendientes
@@ -194,9 +145,6 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
               <PawPrint className="w-4 h-4 text-emerald-600" />
               Distribución del Catálogo de Mascotas
             </h4>
-            <AdminInfoTooltip
-              content="Desglose en tiempo real de los estados del ciclo de vida de los animales publicados en el catálogo de AdoptaNet."
-            />
           </div>
           <p className="text-xs text-tinta-500 mb-5">
             Estado de los animales registrados por los albergues en la plataforma.
@@ -209,9 +157,6 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
                 <span className="text-tinta-700 flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   <span>Disponibles para adopción</span>
-                  <AdminInfoTooltip
-                    content="Animales con ficha pública activa que pueden recibir solicitudes de adoptantes interesados."
-                  />
                 </span>
                 <span className="font-bold text-tinta-900">
                   {pets.available} ({pets.total > 0 ? ((pets.available / pets.total) * 100).toFixed(1) : 0}%)
@@ -231,9 +176,6 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
                 <span className="text-tinta-700 flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <span>En proceso de evaluación</span>
-                  <AdminInfoTooltip
-                    content="Animales que cuentan con al menos una postulación en revisión activa o entrevista agendada con el albergue."
-                  />
                 </span>
                 <span className="font-bold text-tinta-900">
                   {pets.inProcess} ({pets.total > 0 ? ((pets.inProcess / pets.total) * 100).toFixed(1) : 0}%)
@@ -253,9 +195,6 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
                 <span className="text-tinta-700 flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
                   <span>Adoptadas formalmente</span>
-                  <AdminInfoTooltip
-                    content="Animales cuya solicitud de adopción fue aprobada definitivamente y formalizaron su nuevo hogar."
-                  />
                 </span>
                 <span className="font-bold text-tinta-900">
                   {pets.adopted} ({pets.adoptionRate}%)
@@ -278,21 +217,15 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
               <FileCheck className="w-4 h-4 text-blue-600" />
               Embudo de Postulación y Adopciones
             </h4>
-            <AdminInfoTooltip
-              content="Representación del flujo de dictamen de solicitudes: desde el envío inicial hasta la resolución final por el albergue."
-            />
           </div>
           <p className="text-xs text-tinta-500 mb-5">
             Flujo de resolución y ratio de efectividad de las postulaciones procesadas.
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="p-3 rounded-xl bg-neutral-50 border border-line text-center relative group">
+            <div className="p-3 rounded-xl bg-neutral-50 border border-line text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Clock className="w-4 h-4 text-amber-600" />
-                <AdminInfoTooltip
-                  content="Postulaciones recién enviadas por adoptantes o en fase de entrevista con el albergue."
-                />
               </div>
               <span className="text-[11px] font-medium text-tinta-500 block">Recibidas / Revisión</span>
               <span className="text-lg font-bold text-tinta-900">
@@ -300,12 +233,9 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-center relative group">
+            <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <CheckCircle className="w-4 h-4 text-emerald-600" />
-                <AdminInfoTooltip
-                  content="Postulaciones aprobadas con entrega de mascota e inicio de expediente de seguimiento."
-                />
               </div>
               <span className="text-[11px] font-medium text-emerald-700 block">Aprobadas</span>
               <span className="text-lg font-bold text-emerald-800">
@@ -313,12 +243,9 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-rose-50/50 border border-rose-100 text-center relative group">
+            <div className="p-3 rounded-xl bg-rose-50/50 border border-rose-100 text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <AlertCircle className="w-4 h-4 text-rose-600" />
-                <AdminInfoTooltip
-                  content="Postulaciones que no cumplieron las condiciones de adopción del albergue (espacio, tiempo, etc.)."
-                />
               </div>
               <span className="text-[11px] font-medium text-rose-700 block">Rechazadas</span>
               <span className="text-lg font-bold text-rose-800">
@@ -328,12 +255,7 @@ export function OperationalKpisGrid({ operational }: OperationalKpisGridProps) {
           </div>
 
           <div className="mt-4 pt-4 border-t border-line flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5 text-tinta-600 font-medium">
-              <span>Tasa de Aprobación vs. Rechazo:</span>
-              <AdminInfoTooltip
-                content="Mide qué porcentaje de candidatos evaluados resultan aprobados: Aprobadas / (Aprobadas + Rechazadas) × 100."
-              />
-            </div>
+            <span className="text-tinta-600 font-medium">Tasa de Aprobación vs. Rechazo:</span>
             <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
               {adoptions.approvalRate}%
             </span>

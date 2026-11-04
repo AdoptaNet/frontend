@@ -18,20 +18,10 @@ export function MlTelemetrySection({ telemetry }: MlTelemetrySectionProps) {
       <div className="bg-white rounded-2xl border border-line p-6 shadow-xs">
         <div className="flex items-center justify-between mb-4 pb-4 border-b border-line">
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-heading font-bold text-base text-tinta-900 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-violet-600" />
-                Telemetría del Motor de Recomendación ('Para Ti')
-              </h3>
-              <AdminInfoTooltip
-                content={
-                  <div>
-                    <strong className="block text-white mb-1">Métricas de Interacción de IA</strong>
-                    Captura telemetría de comportamiento: qué fichas fueron mostradas (impresiones), cuáles llamaron la atención (clics) y cuáles convirtieron en postulación real (adopciones).
-                  </div>
-                }
-              />
-            </div>
+            <h3 className="font-heading font-bold text-base text-tinta-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-violet-600" />
+              Telemetría del Motor de Recomendación (&apos;Para Ti&apos;)
+            </h3>
             <p className="text-xs text-tinta-500 mt-0.5">
               Métricas de interacción capturadas a través de eventos de impresión, clic y postulación formal.
             </p>
@@ -48,24 +38,14 @@ export function MlTelemetrySection({ telemetry }: MlTelemetrySectionProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Impresiones */}
           <div className="p-4 rounded-xl bg-neutral-50 border border-line transition-shadow hover:shadow-xs">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-tinta-500 font-medium">
-                Impresiones Generadas
-              </span>
-              <AdminInfoTooltip
-                content={
-                  <div>
-                    <strong className="block text-white mb-1">Impresión de Recomendación</strong>
-                    Se registra cada vez que una tarjeta de mascota recomendada entra en el campo visual del adoptante dentro de la pestaña 'Para ti'.
-                  </div>
-                }
-              />
-            </div>
+            <span className="text-xs text-tinta-500 font-medium block mb-1">
+              Impresiones Generadas
+            </span>
             <span className="text-2xl font-extrabold text-tinta-900 font-heading">
               {interactions.totalImpressions}
             </span>
             <p className="text-[11px] text-tinta-400 mt-1">
-              Visualizaciones de fichas en sección "Para ti"
+              Visualizaciones de fichas en sección &quot;Para ti&quot;
             </p>
           </div>
 
@@ -157,31 +137,17 @@ export function MlTelemetrySection({ telemetry }: MlTelemetrySectionProps) {
       <div className="bg-white rounded-2xl border border-line p-6 shadow-xs">
         <div className="flex items-center justify-between mb-4 pb-4 border-b border-line">
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-heading font-bold text-base text-tinta-900 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-blue-600" />
-                Arquitectura de Resiliencia y Degradación Elegante
-              </h3>
-              <AdminInfoTooltip
-                content={
-                  <div>
-                    <strong className="block text-white mb-1">Mecanismo de Tolerancia a Fallos</strong>
-                    Si el microservicio de inferencia en Python FastAPI no responde en 10 segundos o experimenta arranque en frío, el sistema conmuta automáticamente a un motor heurístico local sin interrumpir al usuario.
-                  </div>
-                }
-              />
-            </div>
+            <h3 className="font-heading font-bold text-base text-tinta-900 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
+              Arquitectura de Resiliencia y Degradación Elegante
+            </h3>
             <p className="text-xs text-tinta-500 mt-0.5">
               Proporción de inferencias atendidas por el microservicio ML híbrido frente al fallback heurístico de contingencia.
             </p>
           </div>
-          <AdminInfoTooltip
-            content="Total de pares (adoptante, mascota) con afinidad precomputada en la tabla recommendation_caches para acelerar el renderizado a < 200ms."
-          >
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 cursor-help">
-              {resilience.totalCached} registros en caché
-            </span>
-          </AdminInfoTooltip>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            {resilience.totalCached} registros en caché
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -191,14 +157,6 @@ export function MlTelemetrySection({ telemetry }: MlTelemetrySectionProps) {
               <span className="text-xs font-semibold text-tinta-700 flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                 <span>Modelo Híbrido ML (Inferencia Activa)</span>
-                <AdminInfoTooltip
-                  content={
-                    <div>
-                      <strong className="block text-white mb-1">Inferencia con Modelos Híbridos</strong>
-                      Cálculos ejecutados por el microservicio Python FastAPI combinando LightGBM con filtrado colaborativo SVD y representaciones vectoriales DINOv2.
-                    </div>
-                  }
-                />
               </span>
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                 {resilience.hybridRatio}%
@@ -221,8 +179,8 @@ export function MlTelemetrySection({ telemetry }: MlTelemetrySectionProps) {
                 <AdminInfoTooltip
                   content={
                     <div>
-                      <strong className="block text-white mb-1">Fallback de Contingencia</strong>
-                      Cálculos atendidos por el algoritmo heurístico de reglas duras implementado en el backend NestJS cuando el microservicio de IA está bajo mantenimiento o arranque inicial.
+                      <strong className="block text-white mb-1">Fallback Heurístico</strong>
+                      Motor de reglas en NestJS que responde en menos de 50ms si el microservicio Python experimenta frío o timeout (&gt; 10s).
                     </div>
                   }
                 />
