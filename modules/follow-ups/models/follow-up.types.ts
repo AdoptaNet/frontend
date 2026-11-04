@@ -10,7 +10,9 @@ export type MilestoneStatus =
   | 'pending'
   | 'submitted'
   | 'approved'
+  | 'completed'
   | 'rejected'
+  | 'action_required'
   | 'overdue';
 
 export type PetReturnReason =
@@ -153,7 +155,9 @@ export interface SubmitMilestonePayload {
 }
 
 export interface ReviewMilestonePayload {
-  status: 'approved' | 'rejected';
+  decision: 'approved' | 'action_required';
+  reviewNotes?: string;
+  status?: 'approved' | 'rejected' | 'action_required' | 'completed';
   shelterFeedback?: string;
 }
 

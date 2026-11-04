@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
 import { followUpService } from '../services/follow-up.service';
 import { PET_RETURN_REASONS, type PetReturnReason } from '../models/follow-up.types';
+import { formatFollowUpErrorMessage } from '../utils/follow-up-error';
 
 interface Props {
   isOpen: boolean;
@@ -60,7 +61,10 @@ export function PetReturnModal({
       onClose();
     } catch (err: any) {
       setErrorMessage(
-        err?.response?.data?.message || err?.message || 'Error al solicitar el retorno.',
+        formatFollowUpErrorMessage(
+          err,
+          'No se pudo registrar la solicitud de retorno. Por favor intenta de nuevo.',
+        ),
       );
     } finally {
       setIsSubmitting(false);

@@ -14,6 +14,7 @@ import {
   ExternalLink,
   MessageSquare,
   Award,
+  Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
@@ -167,12 +168,24 @@ export function FollowUpRecordCard({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {record.milestones.map((m) => {
+            const isDemoMode = process.env.NEXT_PUBLIC_FOLLOW_UP_DEMO_MODE === 'true';
+            const sortedMilestones = [...record.milestones].sort((a, b) => a.daysTarget - b.daysTarget);
+            const currentIndex = sortedMilestones.findIndex((item) => item.id === m.id);
+            const previousMilestone = currentIndex > 0 ? sortedMilestones[currentIndex - 1] : null;
+            const isPreviousApproved =
+              !previousMilestone ||
+              previousMilestone.status === 'completed' ||
+              previousMilestone.status === 'approved';
+            const isLockedBySequence = isAdopter && !isDemoMode && !isPreviousApproved;
+
             const isSubmitted = m.status === 'submitted';
-            const isApproved = m.status === 'approved';
+            const isApproved = m.status === 'approved' || m.status === 'completed';
             const isOverdue = m.status === 'overdue';
+            const isActionRequired = m.status === 'rejected' || m.status === 'action_required';
             const canUpload =
               isAdopter &&
-              (m.status === 'pending' || m.status === 'overdue' || m.status === 'rejected') &&
+              !isLockedBySequence &&
+              (m.status === 'pending' || isOverdue || isActionRequired) &&
               record.status === 'in_progress';
             const canReview = isShelterOrAdmin && isSubmitted;
 
@@ -251,8 +264,15 @@ export function FollowUpRecordCard({
                       className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs h-8 gap-1.5 shadow-sm"
                     >
                       <Camera className="w-3.5 h-3.5" />
-                      Subir Evidencias
+                      {isActionRequired ? 'Subir Nuevas Evidencias' : 'Subir Evidencias'}
                     </Button>
+                  )}
+
+                  {isLockedBySequence && (
+                    <div className="w-full text-center py-1.5 px-2 bg-stone-100 rounded-lg text-[11px] text-stone-500 font-medium flex items-center justify-center gap-1.5 border border-stone-200/60">
+                      <Lock className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
+                      <span>Requiere hito de {previousMilestone?.daysTarget}d aprobado</span>
+                    </div>
                   )}
 
                   {canReview && (
@@ -266,7 +286,13 @@ export function FollowUpRecordCard({
                     </Button>
                   )}
 
-                  {!canUpload && !canReview && isApproved && (
+                  {!canUpload && !canReview && !isLockedBySequence && isSubmitted && isAdopter && (
+                    <span className="text-xs font-medium text-blue-700 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" /> En evaluación por el albergue
+                    </span>
+                  )}
+
+                  {!canUpload && !canReview && !isLockedBySequence && isApproved && (
                     <span className="text-xs font-medium text-emerald-700 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Aprobado satisfactoriamente
                     </span>

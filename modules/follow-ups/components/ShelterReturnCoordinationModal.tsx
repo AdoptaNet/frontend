@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
 import { followUpService } from '../services/follow-up.service';
 import type { PetReturnItem } from '../models/follow-up.types';
+import { formatFollowUpErrorMessage } from '../utils/follow-up-error';
 
 interface Props {
   isOpen: boolean;
@@ -61,7 +62,10 @@ export function ShelterReturnCoordinationModal({
       onClose();
     } catch (err: any) {
       setErrorMessage(
-        err?.response?.data?.message || err?.message || 'Error al coordinar fecha de retorno.',
+        formatFollowUpErrorMessage(
+          err,
+          'No se pudo coordinar la fecha de retorno. Por favor verifica la fecha e intenta de nuevo.',
+        ),
       );
     } finally {
       setIsSubmitting(false);
@@ -82,7 +86,10 @@ export function ShelterReturnCoordinationModal({
       onClose();
     } catch (err: any) {
       setErrorMessage(
-        err?.response?.data?.message || err?.message || 'Error al registrar la recepción.',
+        formatFollowUpErrorMessage(
+          err,
+          'No se pudo registrar la recepción o conclusión del retorno. Por favor intenta de nuevo.',
+        ),
       );
     } finally {
       setIsSubmitting(false);

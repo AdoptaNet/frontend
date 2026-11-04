@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
 import { followUpService } from '../services/follow-up.service';
 import type { FollowUpMilestoneItem } from '../models/follow-up.types';
+import { formatFollowUpErrorMessage } from '../utils/follow-up-error';
 
 interface Props {
   isOpen: boolean;
@@ -92,7 +93,10 @@ export function MilestoneEvidenceUploadModal({
       onClose();
     } catch (err: any) {
       setErrorMessage(
-        err?.response?.data?.message || err?.message || 'Error al enviar las evidencias.',
+        formatFollowUpErrorMessage(
+          err,
+          'No fue posible enviar las evidencias. Por favor verifica las imágenes e intenta de nuevo.',
+        ),
       );
     } finally {
       setIsSubmitting(false);

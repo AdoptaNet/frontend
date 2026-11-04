@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
 import { followUpService } from '../services/follow-up.service';
 import type { FollowUpMilestoneItem } from '../models/follow-up.types';
+import { formatFollowUpErrorMessage } from '../utils/follow-up-error';
 
 interface Props {
   isOpen: boolean;
@@ -41,16 +42,24 @@ export function MilestoneReviewModal({
     setIsSubmitting(true);
     setErrorMessage(null);
 
+    const resolvedDecision = decision === 'approved' ? 'approved' : 'action_required';
+    const notes = shelterFeedback.trim();
+
     try {
       await followUpService.reviewMilestone(recordId, milestone.id, {
-        status: decision,
-        shelterFeedback: shelterFeedback.trim() || undefined,
+        decision: resolvedDecision,
+        reviewNotes: notes || undefined,
+        status: resolvedDecision,
+        shelterFeedback: notes || undefined,
       });
       onSuccess();
       onClose();
     } catch (err: any) {
       setErrorMessage(
-        err?.response?.data?.message || err?.message || 'Error al dictaminar el hito.',
+        formatFollowUpErrorMessage(
+          err,
+          'No fue posible registrar el dictamen del hito. Por favor intenta nuevamente.',
+        ),
       );
     } finally {
       setIsSubmitting(false);

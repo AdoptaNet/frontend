@@ -24,6 +24,7 @@ export function MilestoneStatusBadge({ status }: Props) {
         </Badge>
       );
     case 'approved':
+    case 'completed':
       return (
         <Badge variant="outline" className="border-emerald-500 bg-emerald-50 text-emerald-800 gap-1 text-xs font-medium">
           <CheckCircle className="w-3 h-3 text-emerald-600" />
@@ -31,10 +32,11 @@ export function MilestoneStatusBadge({ status }: Props) {
         </Badge>
       );
     case 'rejected':
+    case 'action_required':
       return (
         <Badge variant="outline" className="border-rose-400 bg-rose-50 text-rose-800 gap-1 text-xs font-medium">
           <XCircle className="w-3 h-3 text-rose-600" />
-          Observado / Rechazado
+          Requiere Ajustes
         </Badge>
       );
     case 'overdue':
