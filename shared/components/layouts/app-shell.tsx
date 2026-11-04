@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Home,
   Search,
@@ -15,6 +15,10 @@ import {
   LogOut,
   LogIn,
   UserPlus,
+  ShieldCheck,
+  Cpu,
+  Activity,
+  Building2,
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
@@ -25,6 +29,125 @@ import { UserAvatar } from "@/shared/components/UserAvatar";
 
 interface AppShellProps {
   children: React.ReactNode;
+}
+
+function NavLinks({
+  desktopNav,
+  isAdmin,
+  unreadCount,
+}: {
+  desktopNav: Array<{ href: string; label: string; icon: any }>;
+  isAdmin: boolean;
+  unreadCount: number;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const isItemActive = (href: string) => {
+    if (isAdmin) {
+      if (href.includes("?tab=")) {
+        const tab = href.split("?tab=")[1];
+        const activeTab = searchParams.get("tab") || "kpis";
+        return pathname.startsWith("/admin") && activeTab === tab;
+      }
+      return pathname === href;
+    }
+    return href === "/"
+      ? pathname === "/"
+      : pathname === href ||
+          (href !== "/home" && pathname.startsWith(`${href}/`));
+  };
+
+  return (
+    <nav className="hidden md:flex items-center gap-1">
+      {desktopNav.map((item) => {
+        const Icon = item.icon;
+        const isActive = isItemActive(item.href);
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+              isActive
+                ? "bg-verde-50 text-verde-700 font-semibold shadow-2xs"
+                : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
+            }`}
+          >
+            <Icon
+              className={`w-4 h-4 ${
+                isActive ? "text-verde-700" : "text-tinta-400"
+              }`}
+            />
+            <span>{item.label}</span>
+            {item.href === "/messages" && unreadCount > 0 && (
+              <span className="ml-1 bg-verde-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-4 text-center">
+                {unreadCount}
+              </span>
+            )}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+function MobileNavLinks({
+  mobileNav,
+  isAdmin,
+}: {
+  mobileNav: Array<{ href: string; label: string; icon: any }>;
+  isAdmin: boolean;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const isItemActive = (href: string) => {
+    if (isAdmin) {
+      if (href.includes("?tab=")) {
+        const tab = href.split("?tab=")[1];
+        const activeTab = searchParams.get("tab") || "kpis";
+        return pathname.startsWith("/admin") && activeTab === tab;
+      }
+      return pathname === href;
+    }
+    return href === "/"
+      ? pathname === "/"
+      : pathname === href ||
+          (href !== "/home" && pathname.startsWith(href));
+  };
+
+  return (
+    <div className="grid grid-cols-4 h-16 items-center px-1">
+      {mobileNav.map((item) => {
+        const Icon = item.icon;
+        const isActive = isItemActive(item.href);
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex flex-col items-center justify-center h-full min-h-[48px] py-1 transition-all ${
+              isActive
+                ? "text-verde-700 font-semibold"
+                : "text-tinta-400 hover:text-tinta-600"
+            }`}
+          >
+            <div
+              className={`p-1 rounded-full transition-colors ${
+                isActive ? "bg-verde-50" : "bg-transparent"
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+            </div>
+            <span className="text-[11px] leading-tight mt-0.5 tracking-tight">
+              {item.label}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -51,12 +174,13 @@ export function AppShell({ children }: AppShellProps) {
     }
   };
 
+  const isAdmin = user?.role === "admin";
   const isShelter = user?.role === "shelter";
 
   const [unreadCount, setUnreadCount] = React.useState(0);
 
   React.useEffect(() => {
-    if (!user) return;
+    if (!user || isAdmin) return;
     let isSubscribed = true;
     const fetchUnread = async () => {
       try {
@@ -72,11 +196,34 @@ export function AppShell({ children }: AppShellProps) {
       isSubscribed = false;
       clearInterval(interval);
     };
-  }, [user]);
+  }, [user, isAdmin]);
 
   // Desktop Navigation items
   const desktopNav = user
-    ? isShelter
+    ? isAdmin
+      ? [
+          {
+            href: "/admin/dashboard?tab=kpis",
+            label: "KPIs de Adopción",
+            icon: LayoutDashboard,
+          },
+          {
+            href: "/admin/dashboard?tab=ml",
+            label: "Telemetría ML",
+            icon: Cpu,
+          },
+          {
+            href: "/admin/dashboard?tab=health",
+            label: "Salud de Servicios",
+            icon: Activity,
+          },
+          {
+            href: "/admin/dashboard?tab=shelters",
+            label: "Albergues",
+            icon: Building2,
+          },
+        ]
+      : isShelter
       ? [
           { href: "/home", label: "Panel", icon: LayoutDashboard },
           { href: "/pets", label: "Mascotas", icon: PawPrint },
@@ -97,7 +244,30 @@ export function AppShell({ children }: AppShellProps) {
 
   // Mobile Bottom Navigation items (4 destinations with labels always visible)
   const mobileNav = user
-    ? isShelter
+    ? isAdmin
+      ? [
+          {
+            href: "/admin/dashboard?tab=kpis",
+            label: "KPIs",
+            icon: LayoutDashboard,
+          },
+          {
+            href: "/admin/dashboard?tab=ml",
+            label: "ML",
+            icon: Cpu,
+          },
+          {
+            href: "/admin/dashboard?tab=health",
+            label: "Salud",
+            icon: Activity,
+          },
+          {
+            href: "/admin/dashboard?tab=shelters",
+            label: "Albergues",
+            icon: Building2,
+          },
+        ]
+      : isShelter
       ? [
           { href: "/home", label: "Panel", icon: LayoutDashboard },
           { href: "/pets", label: "Mascotas", icon: PawPrint },
@@ -117,64 +287,60 @@ export function AppShell({ children }: AppShellProps) {
         { href: "/register", label: "Registro", icon: UserPlus },
       ];
 
-  const displayName = user?.fullName || (isShelter ? "Albergue" : "Usuario");
-  const initials = displayName
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
+  const displayName =
+    user?.fullName ||
+    (isAdmin ? "Administrador" : isShelter ? "Albergue" : "Usuario");
 
-  const brandHref = user ? "/home" : "/";
+  const brandHref = user ? (isAdmin ? "/admin/dashboard" : "/home") : "/";
 
   return (
     <div className="min-h-screen flex flex-col bg-fondo text-tinta-900">
       {/* ---------- HEADER DE ESCRITORIO (>= 768px) ---------- */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line shadow-xs">
+      <header
+        className={`sticky top-0 z-40 backdrop-blur-md border-b shadow-xs transition-colors ${
+          isAdmin
+            ? "bg-white/95 border-neutral-200"
+            : "bg-white/95 border-line"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Brand Logo */}
           <Link href={brandHref} className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-verde-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-              <PawPrint className="w-5 h-5 fill-current" />
+            <div
+              className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 ${
+                isAdmin
+                  ? "bg-neutral-900 text-emerald-400"
+                  : "bg-verde-700 text-white"
+              }`}
+            >
+              {isAdmin ? (
+                <ShieldCheck className="w-5 h-5 fill-current" />
+              ) : (
+                <PawPrint className="w-5 h-5 fill-current" />
+              )}
             </div>
-            <span className="font-heading font-extrabold text-xl tracking-tight text-verde-700">
-              Adopta<span className="text-ambar-500">Net</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-heading font-extrabold text-xl tracking-tight text-verde-700">
+                Adopta<span className="text-ambar-500">Net</span>
+              </span>
+              {isAdmin && (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-neutral-900 text-emerald-400 border border-neutral-700">
+                  Admin
+                </span>
+              )}
+            </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
-            {desktopNav.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname === item.href ||
-                    (item.href !== "/home" && pathname.startsWith(`${item.href}/`));
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                    isActive
-                      ? "bg-verde-50 text-verde-700 font-semibold shadow-2xs"
-                      : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
-                  }`}
-                >
-                  <Icon
-                    className={`w-4 h-4 ${isActive ? "text-verde-700" : "text-tinta-400"}`}
-                  />
-                  <span>{item.label}</span>
-                  {item.href === "/messages" && unreadCount > 0 && (
-                    <span className="ml-1 bg-verde-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-4 text-center">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+          <Suspense
+            fallback={<div className="hidden md:flex h-8 w-64 animate-pulse" />}
+          >
+            <NavLinks
+              desktopNav={desktopNav}
+              isAdmin={isAdmin}
+              unreadCount={unreadCount}
+            />
+          </Suspense>
 
           {/* Right Action: User Menu or Auth Buttons */}
           <div className="flex items-center gap-2.5">
@@ -197,6 +363,11 @@ export function AppShell({ children }: AppShellProps) {
                   <span className="text-xs font-semibold text-tinta-900 hidden sm:inline pr-2 truncate max-w-[120px]">
                     {displayName}
                   </span>
+                  {isAdmin && (
+                    <span className="hidden sm:inline-block mr-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-neutral-100 text-neutral-700">
+                      Panel
+                    </span>
+                  )}
                 </Link>
 
                 <button
@@ -238,7 +409,7 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* ---------- MAIN CONTENT WRAPPER ---------- */}
       <main className="flex-1 pb-20 md:pb-10">
-        {user && (
+        {user && !isAdmin && (
           <React.Suspense fallback={null}>
             <MessageNotificationToast
               onUnreadIncrement={() => setUnreadCount((prev) => prev + 1)}
@@ -250,38 +421,11 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* ---------- BARRA DE NAVEGACIÓN INFERIOR (MÓVIL < 768px) ---------- */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-line pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg">
-        <div className="grid grid-cols-4 h-16 items-center px-1">
-          {mobileNav.map((item) => {
-            const Icon = item.icon;
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname === item.href ||
-                  (item.href !== "/home" && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center justify-center h-full min-h-[48px] py-1 transition-all ${
-                  isActive
-                    ? "text-verde-700 font-semibold"
-                    : "text-tinta-400 hover:text-tinta-600"
-                }`}
-              >
-                <div
-                  className={`p-1 rounded-full transition-colors ${
-                    isActive ? "bg-verde-50" : "bg-transparent"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] leading-tight mt-0.5 tracking-tight">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        <Suspense
+          fallback={<div className="h-16 w-full animate-pulse bg-white" />}
+        >
+          <MobileNavLinks mobileNav={mobileNav} isAdmin={isAdmin} />
+        </Suspense>
       </nav>
     </div>
   );

@@ -50,6 +50,12 @@ export const API_ROUTES = {
     BASE: "/recommendations",
     INTERACTIONS: "/recommendations/interactions",
   },
+  ADMIN: {
+    METRICS: "/admin/metrics",
+    HEALTH: "/admin/health",
+    SHELTERS: "/admin/shelters",
+    VERIFY_SHELTER: (id: string) => `/admin/shelters/${id}/verify`,
+  },
   MESSAGES: {
     ROOMS: "/messages/rooms",
     BY_ID: (id: string) => `/messages/rooms/${id}`,
