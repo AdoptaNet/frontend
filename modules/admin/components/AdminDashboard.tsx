@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Cpu,
@@ -24,7 +25,26 @@ import { useAuthStore } from "@/modules/auth/store/auth.store";
 
 export function AdminDashboard() {
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<"kpis" | "ml" | "health" | "shelters">("kpis");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as "kpis" | "ml" | "health" | "shelters" | null;
+
+  const [activeTab, setActiveTab] = useState<"kpis" | "ml" | "health" | "shelters">(
+    tabParam && ["kpis", "ml", "health", "shelters"].includes(tabParam)
+      ? tabParam
+      : "kpis"
+  );
+
+  useEffect(() => {
+    if (tabParam && ["kpis", "ml", "health", "shelters"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  const handleTabChange = (tab: "kpis" | "ml" | "health" | "shelters") => {
+    setActiveTab(tab);
+    router.replace(`/admin/dashboard?tab=${tab}`, { scroll: false });
+  };
 
   const [metrics, setMetrics] = useState<AdminMetricsResponse | null>(null);
   const [health, setHealth] = useState<SystemHealthResponse | null>(null);
@@ -118,7 +138,7 @@ export function AdminDashboard() {
       {/* Tabs de Navegación del Dashboard */}
       <div className="flex items-center gap-2 border-b border-line pb-2 overflow-x-auto">
         <button
-          onClick={() => setActiveTab("kpis")}
+          onClick={() => handleTabChange("kpis")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
             activeTab === "kpis"
               ? "bg-verde-50 text-verde-800 border border-verde-200"
@@ -130,7 +150,7 @@ export function AdminDashboard() {
         </button>
 
         <button
-          onClick={() => setActiveTab("ml")}
+          onClick={() => handleTabChange("ml")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
             activeTab === "ml"
               ? "bg-violet-50 text-violet-800 border border-violet-200"
@@ -142,7 +162,7 @@ export function AdminDashboard() {
         </button>
 
         <button
-          onClick={() => setActiveTab("health")}
+          onClick={() => handleTabChange("health")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
             activeTab === "health"
               ? "bg-blue-50 text-blue-800 border border-blue-200"
@@ -154,7 +174,7 @@ export function AdminDashboard() {
         </button>
 
         <button
-          onClick={() => setActiveTab("shelters")}
+          onClick={() => handleTabChange("shelters")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
             activeTab === "shelters"
               ? "bg-purple-50 text-purple-800 border border-purple-200"

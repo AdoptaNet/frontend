@@ -35,6 +35,8 @@ function CallbackHandler() {
 
         if (isNewUser || user.roleSelected === false) {
           router.replace("/onboarding/role");
+        } else if (user.role === "admin") {
+          router.replace("/admin/dashboard");
         } else {
           router.replace("/home");
         }
