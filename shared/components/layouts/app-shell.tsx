@@ -51,6 +51,7 @@ export function AppShell({ children }: AppShellProps) {
     }
   };
 
+  const isAdmin = user?.role === "admin";
   const isShelter = user?.role === "shelter";
 
   const [unreadCount, setUnreadCount] = React.useState(0);
@@ -76,7 +77,14 @@ export function AppShell({ children }: AppShellProps) {
 
   // Desktop Navigation items
   const desktopNav = user
-    ? isShelter
+    ? isAdmin
+      ? [
+          { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { href: "/pets", label: "Mascotas", icon: PawPrint },
+          { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/messages", label: "Mensajes", icon: MessageSquare },
+        ]
+      : isShelter
       ? [
           { href: "/home", label: "Panel", icon: LayoutDashboard },
           { href: "/pets", label: "Mascotas", icon: PawPrint },
@@ -97,7 +105,14 @@ export function AppShell({ children }: AppShellProps) {
 
   // Mobile Bottom Navigation items (4 destinations with labels always visible)
   const mobileNav = user
-    ? isShelter
+    ? isAdmin
+      ? [
+          { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { href: "/pets", label: "Mascotas", icon: PawPrint },
+          { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/profile", label: "Perfil", icon: User },
+        ]
+      : isShelter
       ? [
           { href: "/home", label: "Panel", icon: LayoutDashboard },
           { href: "/pets", label: "Mascotas", icon: PawPrint },
@@ -117,7 +132,7 @@ export function AppShell({ children }: AppShellProps) {
         { href: "/register", label: "Registro", icon: UserPlus },
       ];
 
-  const displayName = user?.fullName || (isShelter ? "Albergue" : "Usuario");
+  const displayName = user?.fullName || (isAdmin ? "Administrador" : isShelter ? "Albergue" : "Usuario");
   const initials = displayName
     .trim()
     .split(/\s+/)
@@ -126,7 +141,7 @@ export function AppShell({ children }: AppShellProps) {
     .join("")
     .toUpperCase();
 
-  const brandHref = user ? "/home" : "/";
+  const brandHref = user ? (isAdmin ? "/admin/dashboard" : "/home") : "/";
 
   return (
     <div className="min-h-screen flex flex-col bg-fondo text-tinta-900">
