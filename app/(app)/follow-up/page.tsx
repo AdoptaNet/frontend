@@ -169,11 +169,11 @@ export default function FollowUpPage() {
               <ClipboardCheck className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-stone-900 tracking-tight">
-                Programa de Seguimiento Post-Adopción (EP-07)
+              <h1 className="text-2xl font-bold text-stone-900 tracking-tight font-heading">
+                Seguimiento de Mascotas Adoptadas
               </h1>
               <p className="text-xs text-stone-500">
-                Monitoreo continuo a los 30, 90 y 180 días, certificación de adopción definitiva y protocolo de retorno responsable.
+                Acompañamos la adaptación y bienestar de cada animal en su nuevo hogar con chequeos periódicos a los 30, 90 y 180 días.
               </p>
             </div>
           </div>
@@ -183,10 +183,11 @@ export default function FollowUpPage() {
           variant="outline"
           onClick={fetchRecords}
           disabled={isLoading}
-          className="gap-2 text-xs h-9"
+          title="Consultar los últimos reportes y estados sin recargar la página"
+          className="gap-2 text-xs h-9 cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          Actualizar
+          Actualizar datos
         </Button>
       </div>
 

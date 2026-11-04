@@ -96,7 +96,7 @@ export function DemoTimeTravelToolbar({ records, onActionComplete }: Props) {
               </span>
             </div>
             <h4 className="text-sm font-semibold text-white mt-0.5">
-              Simulador de Viaje en el Tiempo (Pruebas Inmediatas de US-20 & US-21)
+              Simulador de Fechas y Notificaciones (Pruebas de Seguimiento)
             </h4>
           </div>
         </div>

@@ -82,7 +82,7 @@ export function PetReturnModal({
             </div>
             <div>
               <h3 className="text-lg font-bold text-stone-900">
-                Protocolo de Retorno de Mascota (US-21)
+                Protocolo de Retorno Responsable
               </h3>
               <p className="text-xs text-stone-500">
                 Mascota: <strong className="text-stone-700">{petName}</strong> | Albergue: <strong className="text-stone-700">{shelterName}</strong>

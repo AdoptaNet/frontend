@@ -162,7 +162,7 @@ export function FollowUpRecordCard({
       {/* Milestones Progress Timeline */}
       <div className="p-5 space-y-4">
         <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-          Programa de Hitos Temporales (30, 90 y 180 Días)
+          Etapas de Adaptación (30, 90 y 180 Días)
         </h4>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
