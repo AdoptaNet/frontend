@@ -107,24 +107,27 @@ export function MilestoneReviewModal({
             </span>
             {milestone.evidences && milestone.evidences.length > 0 ? (
               <div className="grid grid-cols-3 gap-2.5">
-                {milestone.evidences.map((ev) => (
-                  <a
-                    key={ev.id}
-                    href={ev.photoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block aspect-square rounded-lg overflow-hidden border border-stone-200 group relative bg-stone-100"
-                  >
-                    <img
-                      src={ev.photoUrl}
-                      alt="Evidencia"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium">
-                      Ver grande
-                    </div>
-                  </a>
-                ))}
+                {milestone.evidences.map((ev) => {
+                  const imgUrl = ev.mediaUrl || ev.photoUrl;
+                  return (
+                    <a
+                      key={ev.id}
+                      href={imgUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block aspect-square rounded-lg overflow-hidden border border-stone-200 group relative bg-stone-100"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt="Evidencia"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium">
+                        Ver grande
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-xs text-stone-400 italic">No se adjuntaron fotos.</p>

@@ -91,12 +91,17 @@ export const followUpService = {
     );
   },
 
-  async uploadPhoto(file: File): Promise<{ secureUrl: string; publicId: string }> {
+  async uploadPhoto(file: File): Promise<{ url: string; secureUrl: string; publicId: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    return httpClient.post<{ secureUrl: string; publicId: string }>(
+    const res = await httpClient.post<{ url: string; publicId: string; secureUrl?: string }>(
       API_ROUTES.MEDIA.UPLOAD,
       formData,
     );
+    return {
+      url: res.url,
+      secureUrl: res.secureUrl || res.url,
+      publicId: res.publicId,
+    };
   },
 };

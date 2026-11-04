@@ -47,7 +47,9 @@ export function MilestoneEvidenceUploadModal({
         followUpService.uploadPhoto(file),
       );
       const results = await Promise.all(uploadPromises);
-      const newUrls = results.map((r) => r.secureUrl);
+      const newUrls = results
+        .map((r) => r.url || r.secureUrl)
+        .filter((url): url is string => Boolean(url));
       setPhotoUrls((prev) => [...prev, ...newUrls]);
     } catch (err: any) {
       setErrorMessage(
@@ -80,7 +82,11 @@ export function MilestoneEvidenceUploadModal({
     try {
       await followUpService.submitMilestoneEvidence(recordId, milestone.id, {
         adaptationNotes,
-        evidences: photoUrls.map((url) => ({ photoUrl: url })),
+        evidences: photoUrls.map((url) => ({
+          evidenceType: 'pet_photo',
+          mediaUrl: url,
+          photoUrl: url,
+        })),
       });
       onSuccess();
       onClose();

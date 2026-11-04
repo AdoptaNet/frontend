@@ -213,7 +213,7 @@ export function FollowUpRecordCard({
                         {m.evidences.map((ev) => (
                           <img
                             key={ev.id}
-                            src={ev.photoUrl}
+                            src={ev.mediaUrl || ev.photoUrl}
                             alt="Evidencia"
                             className="w-10 h-10 rounded-md object-cover border border-stone-200 flex-shrink-0"
                           />

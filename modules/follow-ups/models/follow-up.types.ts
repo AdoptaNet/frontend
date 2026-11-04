@@ -63,9 +63,13 @@ export type PetReturnStatus =
 
 export interface FollowUpEvidenceItem {
   id: string;
-  photoUrl: string;
+  mediaUrl?: string;
+  photoUrl?: string;
+  evidenceType?: string;
+  caption?: string | null;
   notes?: string | null;
-  uploadedAt: string;
+  uploadedAt?: string;
+  createdAt?: string;
 }
 
 export interface FollowUpMilestoneItem {
@@ -138,9 +142,13 @@ export interface FollowUpRecordItem {
 
 export interface SubmitMilestonePayload {
   adaptationNotes: string;
+  healthStatusReported?: string;
   evidences: {
-    photoUrl: string;
+    evidenceType?: string;
+    mediaUrl: string;
+    photoUrl?: string;
     notes?: string;
+    caption?: string;
   }[];
 }
 
