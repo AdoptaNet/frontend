@@ -1,16 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import {
-  LayoutDashboard,
-  Cpu,
-  Activity,
-  Building2,
-  RefreshCw,
-  Shield,
-  Clock,
-} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { RefreshCw, Shield, Clock } from "lucide-react";
 import { adminService } from "../services/admin.service";
 import type {
   AdminMetricsResponse,
@@ -25,7 +17,6 @@ import { useAuthStore } from "@/modules/auth/store/auth.store";
 
 export function AdminDashboard() {
   const { user } = useAuthStore();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab") as "kpis" | "ml" | "health" | "shelters" | null;
 
@@ -38,13 +29,10 @@ export function AdminDashboard() {
   useEffect(() => {
     if (tabParam && ["kpis", "ml", "health", "shelters"].includes(tabParam)) {
       setActiveTab(tabParam);
+    } else if (!tabParam) {
+      setActiveTab("kpis");
     }
   }, [tabParam]);
-
-  const handleTabChange = (tab: "kpis" | "ml" | "health" | "shelters") => {
-    setActiveTab(tab);
-    router.replace(`/admin/dashboard?tab=${tab}`, { scroll: false });
-  };
 
   const [metrics, setMetrics] = useState<AdminMetricsResponse | null>(null);
   const [health, setHealth] = useState<SystemHealthResponse | null>(null);
@@ -83,6 +71,29 @@ export function AdminDashboard() {
     fetchDashboardData();
   };
 
+  const sectionMeta = {
+    kpis: {
+      badge: "KPIs y Métricas Operacionales",
+      title: "Centro de Mando de Adopciones",
+      description: `Supervisión general del catálogo de animales, embudo de solicitudes y efectividad global de la plataforma. Administrador: ${user?.fullName || "Administrador"}.`,
+    },
+    ml: {
+      badge: "Inteligencia Artificial y ML",
+      title: "Telemetría del Motor de Recomendación ('Para Ti')",
+      description: "Análisis de clics (CTR), conversión a adopción y ratio de resiliencia del recomendador híbrido frente al fallback de contingencia.",
+    },
+    health: {
+      badge: "Monitoreo de Infraestructura",
+      title: "Salud y Disponibilidad de Servicios",
+      description: "Sondas de conectividad en tiempo real y latencias de PostgreSQL, capa Socket.io y microservicio FastAPI ML.",
+    },
+    shelters: {
+      badge: "Gestión y Acreditación",
+      title: `Directorio de Albergues Registrados (${shelters?.total ?? 0})`,
+      description: "Fiscalización comunitaria, verificación de identidad institucional y supervisión de albergues aliados.",
+    },
+  }[activeTab];
+
   if (loading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
@@ -100,7 +111,7 @@ export function AdminDashboard() {
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-verde-50 text-verde-700 border border-verde-200">
               <Shield className="w-3.5 h-3.5" />
-              Panel de Administración
+              {sectionMeta.badge}
             </span>
             {metrics?.timestamp && (
               <span className="text-[11px] text-tinta-400 flex items-center gap-1">
@@ -110,10 +121,10 @@ export function AdminDashboard() {
             )}
           </div>
           <h1 className="text-2xl font-extrabold text-tinta-900 font-heading">
-            Centro de Mando y Analítica Global
+            {sectionMeta.title}
           </h1>
           <p className="text-xs text-tinta-500 mt-1">
-            Bienvenido, <strong className="text-tinta-700">{user?.fullName || "Administrador"}</strong>. Supervisión de KPIs de adopción, telemetría de Machine Learning y estado del sistema.
+            {sectionMeta.description}
           </p>
         </div>
 
@@ -135,58 +146,7 @@ export function AdminDashboard() {
         </div>
       )}
 
-      {/* Tabs de Navegación del Dashboard */}
-      <div className="flex items-center gap-2 border-b border-line pb-2 overflow-x-auto">
-        <button
-          onClick={() => handleTabChange("kpis")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-            activeTab === "kpis"
-              ? "bg-verde-50 text-verde-800 border border-verde-200"
-              : "text-tinta-500 hover:text-tinta-900 hover:bg-white"
-          }`}
-        >
-          <LayoutDashboard className="w-4 h-4" />
-          <span>KPIs de Adopción</span>
-        </button>
-
-        <button
-          onClick={() => handleTabChange("ml")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-            activeTab === "ml"
-              ? "bg-violet-50 text-violet-800 border border-violet-200"
-              : "text-tinta-500 hover:text-tinta-900 hover:bg-white"
-          }`}
-        >
-          <Cpu className="w-4 h-4" />
-          <span>Telemetría ML</span>
-        </button>
-
-        <button
-          onClick={() => handleTabChange("health")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-            activeTab === "health"
-              ? "bg-blue-50 text-blue-800 border border-blue-200"
-              : "text-tinta-500 hover:text-tinta-900 hover:bg-white"
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          <span>Salud de Servicios</span>
-        </button>
-
-        <button
-          onClick={() => handleTabChange("shelters")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-            activeTab === "shelters"
-              ? "bg-purple-50 text-purple-800 border border-purple-200"
-              : "text-tinta-500 hover:text-tinta-900 hover:bg-white"
-          }`}
-        >
-          <Building2 className="w-4 h-4" />
-          <span>Albergues ({shelters?.total ?? 0})</span>
-        </button>
-      </div>
-
-      {/* Contenido según la pestaña activa */}
+      {/* Contenido controlado exclusivamente por la sección activa del navbar */}
       {activeTab === "kpis" && metrics && (
         <OperationalKpisGrid operational={metrics.operational} />
       )}
