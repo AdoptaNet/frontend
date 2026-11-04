@@ -12,9 +12,7 @@ interface Props {
 }
 
 export function DemoTimeTravelToolbar({ records, onActionComplete }: Props) {
-  const isDemo =
-    process.env.NEXT_PUBLIC_FOLLOW_UP_DEMO_MODE === 'true' ||
-    process.env.NODE_ENV !== 'production';
+  const isDemo = process.env.NEXT_PUBLIC_FOLLOW_UP_DEMO_MODE === 'true';
 
   const [isOpen, setIsOpen] = useState(true);
   const [selectedRecordId, setSelectedRecordId] = useState<string>(
