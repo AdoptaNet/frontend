@@ -11,7 +11,6 @@ import {
   RotateCcw,
   AlertCircle,
   Loader2,
-  RefreshCw,
   Heart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -178,17 +177,6 @@ export default function FollowUpPage() {
             </div>
           </div>
         </div>
-
-        <Button
-          variant="outline"
-          onClick={fetchRecords}
-          disabled={isLoading}
-          title="Consultar los últimos reportes y estados sin recargar la página"
-          className="gap-2 text-xs h-9 cursor-pointer"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          Actualizar datos
-        </Button>
       </div>
 
       {/* Demo Time Travel Toolbar (Evaluator mode) */}
