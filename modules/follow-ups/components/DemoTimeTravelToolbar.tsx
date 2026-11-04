@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FastForward, Clock, Play, Sparkles, ChevronDown, ChevronUp, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { followUpService } from '../services/follow-up.service';
@@ -23,6 +23,12 @@ export function DemoTimeTravelToolbar({ records, onActionComplete }: Props) {
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (records.length > 0 && (!selectedRecordId || !records.some((r) => r.id === selectedRecordId))) {
+      setSelectedRecordId(records[0].id);
+    }
+  }, [records, selectedRecordId]);
 
   if (!isDemo) return null;
 
