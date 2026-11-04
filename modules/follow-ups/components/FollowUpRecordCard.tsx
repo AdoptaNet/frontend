@@ -178,6 +178,10 @@ export function FollowUpRecordCard({
               previousMilestone.status === 'approved';
             const isLockedBySequence = isAdopter && !isDemoMode && !isPreviousApproved;
 
+            // Ventana estricta: habilitado 7 días antes de la fecha límite
+            const openDate = new Date(new Date(m.dueDate).getTime() - 7 * 24 * 60 * 60 * 1000);
+            const isBeforeWindow = isAdopter && !isDemoMode && !isLockedBySequence && new Date() < openDate;
+
             const isSubmitted = m.status === 'submitted';
             const isApproved = m.status === 'approved' || m.status === 'completed';
             const isOverdue = m.status === 'overdue';
@@ -185,6 +189,7 @@ export function FollowUpRecordCard({
             const canUpload =
               isAdopter &&
               !isLockedBySequence &&
+              !isBeforeWindow &&
               (m.status === 'pending' || isOverdue || isActionRequired) &&
               record.status === 'in_progress';
             const canReview = isShelterOrAdmin && isSubmitted;
@@ -211,8 +216,15 @@ export function FollowUpRecordCard({
                     <MilestoneStatusBadge status={m.status} />
                   </div>
 
-                  <div className="text-xs text-stone-500 mb-3">
-                    Vencimiento: <strong className="text-stone-700">{new Date(m.dueDate).toLocaleDateString()}</strong>
+                  <div className="text-xs text-stone-500 mb-3 space-y-0.5">
+                    <div>
+                      Vencimiento: <strong className="text-stone-700">{new Date(m.dueDate).toLocaleDateString()}</strong>
+                    </div>
+                    {isBeforeWindow && (
+                      <div className="text-[11px] text-amber-700 font-medium">
+                        Apertura: <span>{openDate.toLocaleDateString()} (7 días antes)</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Evidences summary */}
@@ -275,6 +287,16 @@ export function FollowUpRecordCard({
                     </div>
                   )}
 
+                  {isBeforeWindow && (
+                    <div
+                      className="w-full text-center py-1.5 px-2 bg-amber-50/70 rounded-lg text-[11px] text-amber-800 font-medium flex items-center justify-center gap-1.5 border border-amber-200/70"
+                      title={`Disponible 7 días antes de la fecha límite (${new Date(m.dueDate).toLocaleDateString()})`}
+                    >
+                      <Lock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                      <span>Disponible a partir del {openDate.toLocaleDateString()}</span>
+                    </div>
+                  )}
+
                   {canReview && (
                     <Button
                       size="sm"
@@ -286,13 +308,13 @@ export function FollowUpRecordCard({
                     </Button>
                   )}
 
-                  {!canUpload && !canReview && !isLockedBySequence && isSubmitted && isAdopter && (
+                  {!canUpload && !canReview && !isLockedBySequence && !isBeforeWindow && isSubmitted && isAdopter && (
                     <span className="text-xs font-medium text-blue-700 flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" /> En evaluación por el albergue
                     </span>
                   )}
 
-                  {!canUpload && !canReview && !isLockedBySequence && isApproved && (
+                  {!canUpload && !canReview && !isLockedBySequence && !isBeforeWindow && isApproved && (
                     <span className="text-xs font-medium text-emerald-700 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Aprobado satisfactoriamente
                     </span>
