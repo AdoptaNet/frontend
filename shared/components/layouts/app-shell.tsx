@@ -118,7 +118,7 @@ function MobileNavLinks({
   };
 
   return (
-    <div className="grid grid-cols-4 h-16 items-center px-1">
+    <div className="grid grid-flow-col auto-cols-fr h-16 items-center px-1">
       {mobileNav.map((item) => {
         const Icon = item.icon;
         const isActive = isItemActive(item.href);
@@ -236,13 +236,14 @@ export function AppShell({ children }: AppShellProps) {
           { href: "/pets", label: "Explorar", icon: Search },
           { href: "/applications", label: "Solicitudes", icon: FileText },
           { href: "/messages", label: "Mensajes", icon: MessageSquare },
+          { href: "/follow-up", label: "Seguimiento", icon: ClipboardCheck },
         ]
     : [
         { href: "/", label: "Inicio", icon: Home },
         { href: "/pets", label: "Explorar Mascotas", icon: Search },
       ];
 
-  // Mobile Bottom Navigation items (4 destinations with labels always visible)
+  // Mobile Bottom Navigation items
   const mobileNav = user
     ? isAdmin
       ? [
@@ -272,12 +273,14 @@ export function AppShell({ children }: AppShellProps) {
           { href: "/home", label: "Panel", icon: LayoutDashboard },
           { href: "/pets", label: "Mascotas", icon: PawPrint },
           { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/follow-up", label: "Seguimiento", icon: ClipboardCheck },
           { href: "/profile", label: "Perfil", icon: User },
         ]
       : [
           { href: "/home", label: "Para ti", icon: Home },
           { href: "/pets", label: "Explorar", icon: Search },
           { href: "/applications", label: "Solicitudes", icon: FileText },
+          { href: "/follow-up", label: "Seguimiento", icon: ClipboardCheck },
           { href: "/profile", label: "Perfil", icon: User },
         ]
     : [

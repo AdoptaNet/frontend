@@ -64,4 +64,20 @@ export const API_ROUTES = {
     READ: (roomId: string) => `/messages/rooms/${roomId}/read`,
     UNREAD_COUNT: "/messages/unread-count",
   },
+  FOLLOW_UPS: {
+    BASE: "/follow-ups",
+    BY_ID: (id: string) => `/follow-ups/${id}`,
+    SUBMIT_EVIDENCE: (id: string, milestoneId: string) =>
+      `/follow-ups/${id}/milestones/${milestoneId}/evidences`,
+    REVIEW_MILESTONE: (id: string, milestoneId: string) =>
+      `/follow-ups/${id}/milestones/${milestoneId}/review`,
+    REQUEST_RETURN: (id: string) => `/follow-ups/${id}/returns`,
+    SIMULATE_TIME: (id: string, milestoneId: string) =>
+      `/follow-ups/${id}/milestones/${milestoneId}/simulate-time`,
+    TRIGGER_CRON: "/follow-ups/cron/trigger",
+  },
+  PET_RETURNS: {
+    COORDINATE: (id: string) => `/pet-returns/${id}/coordinate`,
+    COMPLETE: (id: string) => `/pet-returns/${id}/complete`,
+  },
 } as const;
