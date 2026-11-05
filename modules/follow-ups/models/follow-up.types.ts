@@ -54,6 +54,51 @@ export const PET_RETURN_REASONS: { value: PetReturnReason; label: string; descri
   },
 ];
 
+export const PET_RETURN_STATUS_LABELS: Record<string, string> = {
+  requested: 'Solicitud en Evaluación',
+  under_coordination: 'En Coordinación Logística',
+  returned: 'Retorno Completado',
+  rejected: 'Solicitud Desestimada',
+  cancelled: 'Cancelado',
+};
+
+export function getPetReturnStatusLabel(status?: string | null): string {
+  if (!status) return 'En Trámite';
+  return PET_RETURN_STATUS_LABELS[status] || status;
+}
+
+export const PET_RETURN_REASON_LABELS: Record<string, string> = {
+  severe_allergy: 'Alergia severa sobrevenida',
+  behavioral_issue: 'Desafíos conductuales no superados',
+  behavioral_challenges: 'Desafíos conductuales no superados',
+  landlord_issue: 'Restricción de vivienda o arrendador',
+  housing_restriction: 'Restricción de vivienda o arrendador',
+  unforeseen_emergency: 'Emergencia de salud o fuerza mayor',
+  financial_hardship: 'Emergencia o dificultad de fuerza mayor',
+  personal_emergency: 'Emergencia de salud o fuerza mayor',
+  other: 'Otra causa justificada',
+};
+
+export function getPetReturnReasonLabel(reason?: string | null): string {
+  if (!reason) return 'Causa de fuerza mayor';
+  return PET_RETURN_REASON_LABELS[reason] || reason;
+}
+
+export function parseReturnExplanationAndPhone(explanation?: string | null, fallbackPhone?: string | null): {
+  cleanExplanation: string;
+  phone: string | null;
+} {
+  if (!explanation) {
+    return { cleanExplanation: '', phone: fallbackPhone || null };
+  }
+
+  const phoneMatch = explanation.match(/\[(?:Contacto|Teléfono) de emergencia:\s*([^\]]+)\]/i);
+  const phone = phoneMatch ? phoneMatch[1].trim() : (fallbackPhone || null);
+  const cleanExplanation = phoneMatch ? explanation.replace(phoneMatch[0], '').trim() : explanation.trim();
+
+  return { cleanExplanation, phone };
+}
+
 export type PetReturnStatus =
   | 'requested'
   | 'under_coordination'

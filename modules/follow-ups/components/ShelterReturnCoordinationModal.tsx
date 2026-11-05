@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Calendar, CheckCircle2, XCircle, RotateCcw, AlertTriangle, Loader2, Sparkles } from 'lucide-react';
+import { X, Calendar, CheckCircle2, XCircle, RotateCcw, AlertTriangle, Loader2, Sparkles, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
 import { followUpService } from '../services/follow-up.service';
-import type { PetReturnItem } from '../models/follow-up.types';
+import {
+  type PetReturnItem,
+  getPetReturnReasonLabel,
+  parseReturnExplanationAndPhone,
+} from '../models/follow-up.types';
 import { formatFollowUpErrorMessage } from '../utils/follow-up-error';
 
 interface Props {
@@ -128,22 +132,37 @@ export function ShelterReturnCoordinationModal({
               </div>
             )}
 
-            <div className="p-3.5 bg-stone-50 border border-stone-200 rounded-xl space-y-1">
-              <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
-                Motivo reportado por el adoptante
-              </span>
-              <p className="text-xs font-semibold text-stone-800">
-                {petReturn.reason}
-              </p>
-              <p className="text-xs text-stone-600 italic">
-                &ldquo;{petReturn.explanation}&rdquo;
-              </p>
-              {petReturn.emergencyContactPhone && (
-                <p className="text-xs text-stone-500 pt-1">
-                  Teléfono de contacto: <strong className="text-stone-700">{petReturn.emergencyContactPhone}</strong>
-                </p>
-              )}
-            </div>
+            {(() => {
+              const { cleanExplanation, phone } = parseReturnExplanationAndPhone(
+                petReturn.explanation,
+                petReturn.emergencyContactPhone,
+              );
+
+              return (
+                <div className="p-3.5 bg-stone-50 border border-stone-200 rounded-xl space-y-2">
+                  <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
+                    Motivo reportado por el adoptante
+                  </span>
+                  <p className="text-xs font-semibold text-rose-950 bg-rose-100/70 border border-rose-200 px-2.5 py-1 rounded-lg w-fit">
+                    {getPetReturnReasonLabel(petReturn.reason)}
+                  </p>
+                  {cleanExplanation && (
+                    <p className="text-xs text-stone-600 italic leading-relaxed">
+                      &ldquo;{cleanExplanation}&rdquo;
+                    </p>
+                  )}
+                  {phone && (
+                    <div className="flex items-center gap-1.5 text-xs text-stone-700 bg-white border border-stone-200 px-2.5 py-1.5 rounded-lg w-fit mt-1">
+                      <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="text-stone-500">Teléfono celular de contacto:</span>
+                      <a href={`tel:${phone}`} className="font-bold text-stone-900 underline hover:text-emerald-700">
+                        {phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             <div>
               <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">

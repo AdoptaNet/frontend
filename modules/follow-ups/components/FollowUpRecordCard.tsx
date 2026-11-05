@@ -15,14 +15,18 @@ import {
   MessageSquare,
   Award,
   Lock,
+  Phone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FollowUpStatusBadge } from './FollowUpStatusBadge';
 import { MilestoneStatusBadge } from './MilestoneStatusBadge';
 import { AdoptionCertificateCard } from './AdoptionCertificateCard';
-import type {
-  FollowUpRecordItem,
-  FollowUpMilestoneItem,
+import {
+  type FollowUpRecordItem,
+  type FollowUpMilestoneItem,
+  getPetReturnStatusLabel,
+  getPetReturnReasonLabel,
+  parseReturnExplanationAndPhone,
 } from '../models/follow-up.types';
 
 interface Props {
@@ -114,44 +118,72 @@ export function FollowUpRecordCard({
       </div>
 
       {/* Return alert banner if return protocol is initiated */}
-      {activeReturn && (
-        <div className="mx-5 my-4 p-4 rounded-xl border border-rose-200 bg-rose-50/70 text-rose-950 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-rose-100 text-rose-700 rounded-lg mt-0.5">
-              <RotateCcw className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold text-rose-900">
-                  Solicitud de Retorno en Proceso ({activeReturn.status})
-                </h4>
-                <span className="text-xs bg-rose-200/80 text-rose-800 px-2 py-0.5 rounded-full font-medium">
-                  Causa: {activeReturn.reason}
-                </span>
-              </div>
-              <p className="text-xs text-rose-700 mt-1 max-w-2xl">
-                &ldquo;{activeReturn.explanation}&rdquo;
-              </p>
-              {activeReturn.scheduledReturnDate && (
-                <p className="text-xs text-rose-800 font-semibold mt-1">
-                  📅 Fecha de entrega coordinada: {new Date(activeReturn.scheduledReturnDate).toLocaleString()}
-                </p>
-              )}
-            </div>
-          </div>
+      {activeReturn && (() => {
+        const { cleanExplanation, phone } = parseReturnExplanationAndPhone(
+          activeReturn.explanation,
+          activeReturn.emergencyContactPhone,
+        );
 
-          {isShelterOrAdmin && activeReturn.status !== 'returned' && (
-            <Button
-              size="sm"
-              onClick={() => onOpenCoordinateReturn(record)}
-              className="bg-rose-600 hover:bg-rose-700 text-white text-xs gap-1.5 flex-shrink-0"
-            >
-              {activeReturn.status === 'requested' ? 'Coordinar Logística' : 'Confirmar Recepción'}
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Button>
-          )}
-        </div>
-      )}
+        return (
+          <div className="mx-5 my-4 p-4 rounded-xl border border-rose-200 bg-rose-50/70 text-rose-950 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-rose-100 text-rose-700 rounded-lg mt-0.5 shrink-0">
+                <RotateCcw className="w-4 h-4" />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="text-sm font-bold text-rose-900">
+                    Protocolo de Retorno Responsable
+                  </h4>
+                  <span className="text-xs bg-rose-200/90 text-rose-900 px-2.5 py-0.5 rounded-full font-semibold border border-rose-300">
+                    {getPetReturnStatusLabel(activeReturn.status)}
+                  </span>
+                  <span className="text-xs bg-white/90 text-stone-700 px-2.5 py-0.5 rounded-full font-medium border border-rose-200">
+                    Motivo: <strong className="text-rose-900">{getPetReturnReasonLabel(activeReturn.reason)}</strong>
+                  </span>
+                </div>
+
+                {cleanExplanation && (
+                  <p className="text-xs text-rose-800 leading-relaxed max-w-2xl">
+                    &ldquo;{cleanExplanation}&rdquo;
+                  </p>
+                )}
+
+                {phone && (
+                  <div className="flex items-center gap-1.5 text-xs text-rose-900 bg-white/80 border border-rose-200 px-2.5 py-1 rounded-lg w-fit">
+                    <Phone className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <span className="text-stone-600">Contacto de emergencia:</span>
+                    <a
+                      href={`tel:${phone}`}
+                      className="font-bold text-rose-900 underline hover:text-rose-950"
+                    >
+                      {phone}
+                    </a>
+                  </div>
+                )}
+
+                {activeReturn.scheduledReturnDate && (
+                  <p className="text-xs text-rose-800 font-semibold mt-1 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <span>Fecha de entrega acordada: <strong>{new Date(activeReturn.scheduledReturnDate).toLocaleString('es-PE')}</strong></span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {isShelterOrAdmin && activeReturn.status !== 'returned' && (
+              <Button
+                size="sm"
+                onClick={() => onOpenCoordinateReturn(record)}
+                className="bg-rose-600 hover:bg-rose-700 text-white text-xs gap-1.5 flex-shrink-0 shadow-sm"
+              >
+                {activeReturn.status === 'requested' ? 'Coordinar Logística' : 'Confirmar Recepción'}
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Graduation Certificate card if completed */}
       {record.status === 'completed' && (
