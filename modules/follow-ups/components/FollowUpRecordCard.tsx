@@ -95,7 +95,7 @@ export function FollowUpRecordCard({
         <div className="flex flex-wrap items-center gap-4 text-xs text-stone-600">
           <div className="flex items-center gap-1.5">
             <UserIcon className="w-3.5 h-3.5 text-stone-400" />
-            <span>Adoptante: <strong className="text-stone-800">{record.adopter.fullName || record.adopter.name || record.adopter.email}</strong></span>
+            <span>Adoptante: <strong className="text-stone-800">{record.adopter.fullName || record.adopter.email}</strong></span>
           </div>
           <div className="flex items-center gap-1.5">
             <Home className="w-3.5 h-3.5 text-stone-400" />
@@ -270,7 +270,7 @@ export function FollowUpRecordCard({
                         {m.evidences.map((ev) => (
                           <img
                             key={ev.id}
-                            src={ev.mediaUrl || ev.photoUrl}
+                            src={ev.mediaUrl}
                             alt="Evidencia"
                             className="w-10 h-10 rounded-md object-cover border border-stone-200 flex-shrink-0"
                           />
@@ -289,12 +289,12 @@ export function FollowUpRecordCard({
                   )}
 
                   {/* Feedback if any */}
-                  {m.shelterFeedback && (
+                  {m.reviewNotes && (
                     <div className="p-2 rounded bg-white/80 border border-stone-200 text-[11px] text-stone-700 mb-3">
                       <span className="font-semibold text-stone-800 block mb-0.5">
                         Observación del Albergue:
                       </span>
-                      {m.shelterFeedback}
+                      {m.reviewNotes}
                     </div>
                   )}
                 </div>

@@ -18,12 +18,8 @@ export type MilestoneStatus =
 export type PetReturnReason =
   | 'severe_allergy'
   | 'behavioral_issue'
-  | 'behavioral_challenges'
   | 'landlord_issue'
-  | 'housing_restriction'
   | 'unforeseen_emergency'
-  | 'financial_hardship'
-  | 'personal_emergency'
   | 'other';
 
 export const PET_RETURN_REASONS: { value: PetReturnReason; label: string; description: string }[] = [
@@ -108,13 +104,10 @@ export type PetReturnStatus =
 
 export interface FollowUpEvidenceItem {
   id: string;
-  mediaUrl?: string;
-  photoUrl?: string;
-  evidenceType?: string;
+  evidenceType: string;
+  mediaUrl: string;
   caption?: string | null;
-  notes?: string | null;
-  uploadedAt?: string;
-  createdAt?: string;
+  createdAt: string;
 }
 
 export interface FollowUpMilestoneItem {
@@ -124,10 +117,11 @@ export interface FollowUpMilestoneItem {
   dueDate: string;
   status: MilestoneStatus;
   adaptationNotes?: string | null;
+  healthStatusReported?: string | null;
   submittedAt?: string | null;
-  shelterFeedback?: string | null;
   reviewedAt?: string | null;
-  reviewedById?: string | null;
+  reviewerId?: string | null;
+  reviewNotes?: string | null;
   reminderSentAt?: string | null;
   overdueNotifiedAt?: string | null;
   evidences: FollowUpEvidenceItem[];
@@ -139,10 +133,11 @@ export interface PetReturnItem {
   petId: string;
   adopterId: string;
   shelterId: string;
-  status: PetReturnStatus;
   reason: PetReturnReason;
   explanation: string;
   emergencyContactPhone?: string | null;
+  supportingDocumentUrl?: string | null;
+  status: PetReturnStatus;
   requestedAt: string;
   coordinationNotes?: string | null;
   scheduledReturnDate?: string | null;
@@ -158,10 +153,16 @@ export interface FollowUpPetSummary {
   primaryPhotoUrl?: string | null;
 }
 
-export interface FollowUpPartySummary {
+export interface FollowUpAdopterSummary {
   id: string;
-  fullName?: string;
-  name?: string;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+}
+
+export interface FollowUpShelterSummary {
+  id: string;
+  name: string;
   email: string;
   phone?: string | null;
 }
@@ -172,9 +173,9 @@ export interface FollowUpRecordItem {
   petId: string;
   pet: FollowUpPetSummary;
   adopterId: string;
-  adopter: FollowUpPartySummary;
+  adopter: FollowUpAdopterSummary;
   shelterId: string;
-  shelter: FollowUpPartySummary;
+  shelter: FollowUpShelterSummary;
   status: FollowUpProcessStatus;
   startDate: string;
   completionDate?: string | null;
@@ -185,29 +186,28 @@ export interface FollowUpRecordItem {
   returns: PetReturnItem[];
 }
 
+export interface SubmitMilestoneEvidenceItem {
+  evidenceType: string;
+  mediaUrl: string;
+  caption?: string;
+}
+
 export interface SubmitMilestonePayload {
   adaptationNotes: string;
   healthStatusReported?: string;
-  evidences: {
-    evidenceType?: string;
-    mediaUrl: string;
-    photoUrl?: string;
-    notes?: string;
-    caption?: string;
-  }[];
+  evidences: SubmitMilestoneEvidenceItem[];
 }
 
 export interface ReviewMilestonePayload {
   decision: 'approved' | 'action_required';
   reviewNotes?: string;
-  status?: 'approved' | 'rejected' | 'action_required' | 'completed';
-  shelterFeedback?: string;
 }
 
 export interface RequestPetReturnPayload {
   reason: PetReturnReason;
   explanation: string;
-  emergencyContactPhone?: string;
+  emergencyContactPhone: string;
+  supportingDocumentUrl?: string;
 }
 
 export interface CoordinatePetReturnPayload {

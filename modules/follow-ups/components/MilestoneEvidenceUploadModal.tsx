@@ -86,7 +86,6 @@ export function MilestoneEvidenceUploadModal({
         evidences: photoUrls.map((url) => ({
           evidenceType: 'pet_photo',
           mediaUrl: url,
-          photoUrl: url,
         })),
       });
       onSuccess();

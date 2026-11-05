@@ -49,8 +49,6 @@ export function MilestoneReviewModal({
       await followUpService.reviewMilestone(recordId, milestone.id, {
         decision: resolvedDecision,
         reviewNotes: notes || undefined,
-        status: resolvedDecision,
-        shelterFeedback: notes || undefined,
       });
       onSuccess();
       onClose();
@@ -117,7 +115,7 @@ export function MilestoneReviewModal({
             {milestone.evidences && milestone.evidences.length > 0 ? (
               <div className="grid grid-cols-3 gap-2.5">
                 {milestone.evidences.map((ev) => {
-                  const imgUrl = ev.mediaUrl || ev.photoUrl;
+                  const imgUrl = ev.mediaUrl;
                   return (
                     <a
                       key={ev.id}

@@ -113,7 +113,6 @@ export default function FollowUpPage() {
         !q ||
         r.pet.name.toLowerCase().includes(q) ||
         r.adopter.fullName?.toLowerCase().includes(q) ||
-        r.adopter.name?.toLowerCase().includes(q) ||
         r.shelter.name?.toLowerCase().includes(q) ||
         r.certificateCode?.toLowerCase().includes(q);
 
@@ -332,7 +331,7 @@ export default function FollowUpPage() {
                   recordId,
                   milestone,
                   petName: record.pet.name,
-                  adopterName: record.adopter.fullName || record.adopter.name || record.adopter.email,
+                  adopterName: record.adopter.fullName || record.adopter.email,
                 });
               }}
               onOpenRequestReturn={(rec) => {
@@ -389,7 +388,7 @@ export default function FollowUpPage() {
           onClose={() => setCoordinateReturnModalState({ isOpen: false, record: null })}
           petReturn={coordinateReturnModalState.record.activeReturn || null}
           petName={coordinateReturnModalState.record.pet.name}
-          adopterName={coordinateReturnModalState.record.adopter.fullName || coordinateReturnModalState.record.adopter.name || 'Adoptante'}
+          adopterName={coordinateReturnModalState.record.adopter.fullName || 'Adoptante'}
           onSuccess={fetchRecords}
         />
       )}

@@ -3,13 +3,13 @@ export function formatFollowUpErrorMessage(err: any, fallback: string): string {
 
   if (Array.isArray(rawMsg)) {
     const text = rawMsg.join(' ');
-    if (text.includes('decision') || text.includes('status')) {
+    if (text.includes('decision')) {
       return 'Por favor selecciona una decisión válida para el hito (Aprobar o Requerir Ajustes).';
     }
     if (text.includes('reason')) {
       return 'Por favor selecciona un motivo válido para la solicitud de retorno.';
     }
-    if (text.includes('evidence') || text.includes('mediaUrl') || text.includes('photoUrl')) {
+    if (text.includes('evidence') || text.includes('mediaUrl')) {
       return 'Debes adjuntar al menos una fotografía válida como evidencia del hito.';
     }
     if (text.includes('adaptationNotes') || text.includes('reviewNotes') || text.includes('explanation')) {

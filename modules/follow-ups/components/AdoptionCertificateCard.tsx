@@ -44,7 +44,7 @@ export function AdoptionCertificateCard({ record }: Props) {
             </h3>
 
             <p className="text-sm text-stone-600 mt-1 max-w-xl">
-              Se certifica que <strong className="text-stone-900 font-semibold">{record.adopter.fullName || record.adopter.name || 'El Adoptante'}</strong> ha culminado satisfactoriamente los 180 días de adaptación y bienestar con <strong className="text-stone-900 font-semibold">{record.pet.name}</strong>, consolidando formalmente la adopción de por vida con el respaldo de <strong className="text-stone-900 font-semibold">{record.shelter.name}</strong>.
+              Se certifica que <strong className="text-stone-900 font-semibold">{record.adopter.fullName || 'El Adoptante'}</strong> ha culminado satisfactoriamente los 180 días de adaptación y bienestar con <strong className="text-stone-900 font-semibold">{record.pet.name}</strong>, consolidando formalmente la adopción de por vida con el respaldo de <strong className="text-stone-900 font-semibold">{record.shelter.name}</strong>.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-stone-600 font-medium">
