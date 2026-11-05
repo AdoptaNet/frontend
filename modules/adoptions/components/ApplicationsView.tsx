@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   XCircle,
   MessageSquare,
+  ClipboardCheck,
 } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useAuthStore } from '@/modules/auth/store/auth.store';
@@ -315,6 +316,21 @@ export function ApplicationsView() {
                       >
                         <MessageSquare className="w-3.5 h-3.5 text-verde-700" />
                         <span>Ir al Chat</span>
+                      </Link>
+                    )}
+
+                    {adoption.status === 'approved' && (
+                      <Link
+                        href="/follow-up"
+                        className={buttonVariants({
+                          variant: 'outline',
+                          size: 'sm',
+                          className:
+                            'h-8 px-3 text-xs border-amber-500 text-amber-800 bg-amber-50 hover:bg-amber-100 gap-1.5 cursor-pointer font-medium shadow-2xs',
+                        })}
+                      >
+                        <ClipboardCheck className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Ver Seguimiento</span>
                       </Link>
                     )}
 
