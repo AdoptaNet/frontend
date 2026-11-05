@@ -17,8 +17,11 @@ export type MilestoneStatus =
 
 export type PetReturnReason =
   | 'severe_allergy'
+  | 'behavioral_issue'
   | 'behavioral_challenges'
+  | 'landlord_issue'
   | 'housing_restriction'
+  | 'unforeseen_emergency'
   | 'financial_hardship'
   | 'personal_emergency'
   | 'other';
@@ -30,24 +33,19 @@ export const PET_RETURN_REASONS: { value: PetReturnReason; label: string; descri
     description: 'Alergia médica comprobada e incapacitante en un conviviente.',
   },
   {
-    value: 'behavioral_challenges',
+    value: 'behavioral_issue',
     label: 'Desafíos conductuales no superados',
     description: 'Problemas de agresividad o adaptación no solventados tras acompañamiento.',
   },
   {
-    value: 'housing_restriction',
+    value: 'landlord_issue',
     label: 'Cambio habitacional o restricción de vivienda',
     description: 'Mudanza sobrevenida con prohibición estricta de mascotas por el arrendador.',
   },
   {
-    value: 'financial_hardship',
-    label: 'Dificultad económica sobrevenida',
-    description: 'Incapacidad financiera repentina para cubrir alimentación y cuidados veterinarios.',
-  },
-  {
-    value: 'personal_emergency',
-    label: 'Emergencia personal / salud familiar',
-    description: 'Enfermedad grave o situación vital que impide el cuidado digno del animal.',
+    value: 'unforeseen_emergency',
+    label: 'Emergencia de salud o fuerza mayor',
+    description: 'Enfermedad grave o situación sobrevenida que impide el cuidado digno del animal.',
   },
   {
     value: 'other',

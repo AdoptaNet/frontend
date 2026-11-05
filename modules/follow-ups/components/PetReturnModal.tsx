@@ -25,7 +25,7 @@ export function PetReturnModal({
   shelterName,
   onSuccess,
 }: Props) {
-  const [reason, setReason] = useState<PetReturnReason>('behavioral_challenges');
+  const [reason, setReason] = useState<PetReturnReason>('behavioral_issue');
   const [explanation, setExplanation] = useState('');
   const [emergencyContactPhone, setEmergencyContactPhone] = useState('');
   const [confirmedProtocol, setConfirmedProtocol] = useState(false);
