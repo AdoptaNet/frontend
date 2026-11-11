@@ -3,6 +3,7 @@ import { API_ROUTES } from '@/shared/config/api-routes';
 import type {
   AdoptionRequest,
   AdoptionDossierData,
+  AdopterHistoryData,
   CreateAdoptionRequestPayload,
   ReviewAdoptionRequestPayload,
   AdoptionsFilterParams,
@@ -32,6 +33,14 @@ export const adoptionsService = {
 
   async getAdoptionDossier(id: string): Promise<AdoptionDossierData> {
     return httpClient.get<AdoptionDossierData>(API_ROUTES.ADOPTIONS.DOSSIER(id));
+  },
+
+  async getApplicantHistory(id: string): Promise<AdopterHistoryData> {
+    return httpClient.get<AdopterHistoryData>(API_ROUTES.ADOPTIONS.APPLICANT_HISTORY(id));
+  },
+
+  async getMyHistory(): Promise<AdopterHistoryData> {
+    return httpClient.get<AdopterHistoryData>(API_ROUTES.ADOPTIONS.MY_HISTORY);
   },
 
   async cancelAdoption(id: string): Promise<AdoptionRequest> {

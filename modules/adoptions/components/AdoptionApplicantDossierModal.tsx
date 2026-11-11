@@ -17,12 +17,19 @@ import {
   ShieldAlert,
   Sparkles,
   Loader2,
+  Building2,
+  MapPin,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
 import { AdoptionStatusBadge } from './AdoptionStatusBadge';
+import { AdopterHistorySection } from './AdopterHistorySection';
 import { adoptionsService } from '../services/adoptions.service';
-import type { AdoptionRequest, AdoptionDossierData } from '../models/adoption.types';
+import type {
+  AdoptionRequest,
+  AdoptionDossierData,
+  AdopterHistoryData,
+} from '../models/adoption.types';
 import { ADOPTION_REJECTION_REASONS } from '../models/adoption.types';
 
 interface AdoptionApplicantDossierModalProps {
@@ -47,17 +54,27 @@ export function AdoptionApplicantDossierModal({
   const [isLoadingDossier, setIsLoadingDossier] = React.useState(false);
   const [dossierError, setDossierError] = React.useState<string | null>(null);
 
+  const [applicantHistory, setApplicantHistory] =
+    React.useState<AdopterHistoryData | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = React.useState(false);
+  const [historyError, setHistoryError] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     if (!isOpen || !isShelterView || !adoption?.id) {
       setDossier(null);
       setIsLoadingDossier(false);
       setDossierError(null);
+      setApplicantHistory(null);
+      setIsLoadingHistory(false);
+      setHistoryError(null);
       return;
     }
 
     let isMounted = true;
     setIsLoadingDossier(true);
     setDossierError(null);
+    setIsLoadingHistory(true);
+    setHistoryError(null);
 
     adoptionsService
       .getAdoptionDossier(adoption.id)
@@ -66,7 +83,7 @@ export function AdoptionApplicantDossierModal({
           setDossier(data);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (isMounted) {
           setDossierError('No se pudo cargar la evaluación de IA');
         }
@@ -74,6 +91,28 @@ export function AdoptionApplicantDossierModal({
       .finally(() => {
         if (isMounted) {
           setIsLoadingDossier(false);
+        }
+      });
+
+    adoptionsService
+      .getApplicantHistory(adoption.id)
+      .then((data) => {
+        if (isMounted) {
+          setApplicantHistory(data);
+        }
+      })
+      .catch((err: unknown) => {
+        if (isMounted) {
+          setHistoryError(
+            err instanceof Error
+              ? err.message
+              : 'No se pudo cargar el historial del adoptante',
+          );
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingHistory(false);
         }
       });
 
@@ -114,22 +153,45 @@ export function AdoptionApplicantDossierModal({
         <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-line bg-superficie-1">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-verde-50 border border-verde-200 text-verde-700 flex items-center justify-center font-bold font-heading text-lg">
-              {adoption.adopter?.fullName ? adoption.adopter.fullName.charAt(0).toUpperCase() : 'A'}
+              {isShelterView
+                ? (adoption.adopter?.fullName ? adoption.adopter.fullName.charAt(0).toUpperCase() : 'A')
+                : ((adoption.shelter?.organizationName || adoption.shelter?.fullName || 'A').charAt(0).toUpperCase())}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-tinta-900 font-heading">
-                  Expediente de {adoption.adopter?.fullName || 'Adoptante'}
+                  {isShelterView
+                    ? `Expediente de ${adoption.adopter?.fullName || 'Adoptante'}`
+                    : `Tu Postulación para ${adoption.pet?.name || 'Mascota'}`}
                 </h2>
                 <AdoptionStatusBadge status={adoption.status} />
               </div>
               <p className="text-xs text-tinta-600">
-                Postulación para <strong>{adoption.pet?.name || 'Mascota'}</strong> • Enviada el{' '}
-                {new Date(adoption.createdAt).toLocaleDateString('es-PE', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}
+                {isShelterView ? (
+                  <>
+                    Postulación para <strong>{adoption.pet?.name || 'Mascota'}</strong> • Enviada el{' '}
+                    {new Date(adoption.createdAt).toLocaleDateString('es-PE', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </>
+                ) : (
+                  <>
+                    Gestionada por{' '}
+                    <strong>
+                      {adoption.shelter?.organizationName ||
+                        adoption.shelter?.fullName ||
+                        'Albergue'}
+                    </strong>{' '}
+                    • Enviada el{' '}
+                    {new Date(adoption.createdAt).toLocaleDateString('es-PE', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -193,34 +255,93 @@ export function AdoptionApplicantDossierModal({
             </div>
           )}
 
-          {/* Contact Details */}
+          {/* Contact Details (Albergue Responsable para adoptante / Datos del Postulante para albergue) */}
           <div className="p-4 bg-superficie-1 rounded-xl border border-line">
             <h3 className="text-xs font-bold text-tinta-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-verde-700" />
-              <span>Datos del Postulante</span>
+              {isShelterView ? (
+                <>
+                  <User className="w-3.5 h-3.5 text-verde-700" />
+                  <span>Datos del Postulante</span>
+                </>
+              ) : (
+                <>
+                  <Building2 className="w-3.5 h-3.5 text-verde-700" />
+                  <span>Albergue Responsable</span>
+                </>
+              )}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="flex items-center gap-2 text-tinta-700">
-                <Mail className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
-                <span className="truncate">{adoption.adopter?.email || 'No especificado'}</span>
-              </div>
-              {adoption.adopter?.phoneNumber && (
+
+            {isShelterView ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="flex items-center gap-2 text-tinta-700">
-                  <Phone className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
-                  <span>{adoption.adopter.phoneNumber}</span>
+                  <Mail className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
+                  <span className="truncate">{adoption.adopter?.email || 'No especificado'}</span>
                 </div>
-              )}
-              {demographics.district && (
-                <div className="text-tinta-700">
-                  <strong>Ubicación:</strong> {demographics.district}, {demographics.city || 'Lima'}
+                {adoption.adopter?.phoneNumber && (
+                  <div className="flex items-center gap-2 text-tinta-700">
+                    <Phone className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
+                    <span>{adoption.adopter.phoneNumber}</span>
+                  </div>
+                )}
+                {demographics.district && (
+                  <div className="text-tinta-700 flex items-center gap-2">
+                    <MapPin className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
+                    <span>
+                      {demographics.district}, {demographics.city || 'Lima'}
+                    </span>
+                  </div>
+                )}
+                {demographics.occupation && (
+                  <div className="text-tinta-700">
+                    <strong>Ocupación:</strong> {demographics.occupation}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="text-tinta-800 font-medium">
+                    <span className="text-tinta-500 block text-[11px]">Organización</span>
+                    <span>
+                      {adoption.shelter?.organizationName ||
+                        adoption.shelter?.fullName ||
+                        'Albergue'}
+                    </span>
+                  </div>
+                  {adoption.shelter?.email && (
+                    <div className="flex items-center gap-2 text-tinta-700">
+                      <Mail className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
+                      <span className="truncate">{adoption.shelter.email}</span>
+                    </div>
+                  )}
+                  {adoption.shelter?.phoneNumber && (
+                    <div className="flex items-center gap-2 text-tinta-700">
+                      <Phone className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
+                      <span>{adoption.shelter.phoneNumber}</span>
+                    </div>
+                  )}
+                  {adoption.shelter?.city && (
+                    <div className="flex items-center gap-2 text-tinta-700">
+                      <MapPin className="w-3.5 h-3.5 text-tinta-500 shrink-0" />
+                      <span>{adoption.shelter.city}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-              {demographics.occupation && (
-                <div className="text-tinta-700">
-                  <strong>Ocupación:</strong> {demographics.occupation}
-                </div>
-              )}
-            </div>
+
+                {/* Subcard with applicant's own registered contact info */}
+                {adoption.adopter && (
+                  <div className="pt-2.5 border-t border-line/60 flex flex-wrap items-center justify-between gap-2 text-[11px] text-tinta-600">
+                    <span>
+                      Postulación registrada por ti: <strong className="text-tinta-800">{adoption.adopter.fullName || 'Tus datos'}</strong>
+                    </span>
+                    <span className="text-tinta-500">
+                      {adoption.adopter.email}
+                      {adoption.adopter.phoneNumber ? ` • ${adoption.adopter.phoneNumber}` : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Motivation Letter */}
@@ -237,6 +358,15 @@ export function AdoptionApplicantDossierModal({
               <span>Compromiso de tenencia responsable aceptado formalmente</span>
             </div>
           </div>
+
+          {/* Historial y Confiabilidad en AdoptaNet (Solo para Albergues) */}
+          {isShelterView && (
+            <AdopterHistorySection
+              history={applicantHistory}
+              isLoading={isLoadingHistory}
+              error={historyError}
+            />
+          )}
 
           {/* Evaluación de Compatibilidad con IA (Solo para Albergues) */}
           {isShelterView && (

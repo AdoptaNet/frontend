@@ -41,9 +41,11 @@ export const API_ROUTES = {
   ADOPTIONS: {
     BASE: "/adoptions",
     MY_REQUESTS: "/adoptions/my-requests",
+    MY_HISTORY: "/adoptions/my-history",
     SHELTER: "/adoptions/shelter",
     BY_ID: (id: string) => `/adoptions/${id}`,
     DOSSIER: (id: string) => `/adoptions/${id}/dossier`,
+    APPLICANT_HISTORY: (id: string) => `/adoptions/${id}/applicant-history`,
     CANCEL: (id: string) => `/adoptions/${id}/cancel`,
     REVIEW: (id: string) => `/adoptions/${id}/review`,
   },
