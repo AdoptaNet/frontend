@@ -89,6 +89,8 @@ export interface AdminShelterItem {
   address?: string;
   city?: string;
   isVerified: boolean;
+  verificationRequested?: boolean;
+  verificationRequestedAt?: string | null;
   petCount: number;
   createdAt: string;
 }

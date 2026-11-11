@@ -1,22 +1,26 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ShieldCheck,
   AlertCircle,
   CheckCircle2,
-  Mail,
-  ExternalLink,
+  Clock,
+  Loader2,
   X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/shared/hooks/useModal';
+import { usersService } from '../services/users.service';
 
 interface VerificationInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
   organizationName?: string | null;
   isVerified?: boolean;
+  isRequested?: boolean;
+  isOwner?: boolean;
+  onSuccess?: () => void;
 }
 
 export function VerificationInfoModal({
@@ -24,21 +28,50 @@ export function VerificationInfoModal({
   onClose,
   organizationName,
   isVerified = false,
+  isRequested = false,
+  isOwner = true,
+  onSuccess,
 }: VerificationInfoModalProps) {
   const modalRef = React.useRef<HTMLDivElement>(null);
   useModal({ isOpen, onClose, modalRef });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [hasRequestedLocally, setHasRequestedLocally] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setErrorMessage(null);
+      setHasRequestedLocally(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const displayName = organizationName?.trim() || 'tu albergue';
+  const pendingReview = isRequested || hasRequestedLocally;
 
-  const mailtoSubject = encodeURIComponent(
-    `Solicitud de Verificación Oficial - ${displayName}`,
-  );
-  const mailtoBody = encodeURIComponent(
-    `Estimado equipo de administración de AdoptaNet,\n\nSolicitamos la acreditación oficial y distintivo de verificación para:\n- Nombre del albergue: ${displayName}\n- Enlace a redes sociales o web: \n- Documento de identidad / RUC (opcional): \n- Breve resumen de nuestra labor de rescate: \n\nAdjuntamos evidencias fotográficas o información adicional para su revisión.\n\nAtentamente,`,
-  );
-  const mailtoLink = `mailto:soporte@adopta.pe?subject=${mailtoSubject}&body=${mailtoBody}`;
+  const handleRequestVerification = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage(null);
+      await usersService.requestShelterVerification();
+      setHasRequestedLocally(true);
+      onSuccess?.();
+    } catch (err: unknown) {
+      const errorWithResponse = err as {
+        response?: { data?: { message?: string | string[] } };
+        message?: string;
+      };
+      const msg =
+        errorWithResponse?.response?.data?.message ||
+        errorWithResponse?.message ||
+        'Error al enviar la solicitud de verificación. Verifica tus datos de contacto e inténtalo de nuevo.';
+      setErrorMessage(Array.isArray(msg) ? msg.join(', ') : msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
@@ -62,7 +95,9 @@ export function VerificationInfoModal({
               className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
                 isVerified
                   ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-amber-100 text-amber-700'
+                  : pendingReview
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-amber-100 text-amber-700'
               }`}
             >
               <ShieldCheck className="w-6 h-6" />
@@ -74,12 +109,16 @@ export function VerificationInfoModal({
               >
                 {isVerified
                   ? 'Albergue Verificado por AdoptaNet'
-                  : 'Acreditación Oficial de Albergues'}
+                  : pendingReview
+                    ? 'Solicitud en Revisión'
+                    : 'Acreditación Oficial de Albergues'}
               </h3>
               <p className="text-xs text-tinta-600">
                 {isVerified
                   ? 'Tu organización cuenta con respaldo oficial'
-                  : 'Distintivo de confianza y transparencia'}
+                  : pendingReview
+                    ? 'El equipo de administración está evaluando tu solicitud'
+                    : 'Distintivo de confianza y transparencia'}
               </p>
             </div>
           </div>
@@ -111,6 +150,18 @@ export function VerificationInfoModal({
                 es respaldado por una organización seria y validada.
               </p>
             </div>
+          ) : pendingReview ? (
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-xs text-amber-800">
+                <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Estado actual: Solicitud en revisión</span>
+              </div>
+              <p className="text-xs leading-relaxed text-amber-800">
+                La solicitud de acreditación para <strong>{displayName}</strong> se encuentra
+                en evaluación administrativa. Corroboraremos tus datos institucionales y
+                recibirás una respuesta por correo electrónico a la brevedad.
+              </p>
+            </div>
           ) : (
             <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
               <div className="flex items-center gap-2 font-semibold text-xs">
@@ -120,9 +171,16 @@ export function VerificationInfoModal({
               <p className="text-xs leading-relaxed text-amber-800">
                 Para prevenir criaderos ilegales, estafas y resguardar la seguridad de los animales,
                 la verificación <strong>no es automática ni de libre auto-asignación</strong>. Es un dictamen
-                administrativo otorgado exclusivamente por el equipo de AdoptaNet tras corroborar la
+                administrativo otorgado por el equipo de AdoptaNet tras corroborar la
                 autenticidad de cada refugio o rescatista.
               </p>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <span>{errorMessage}</span>
             </div>
           )}
 
@@ -142,7 +200,7 @@ export function VerificationInfoModal({
                     Completar datos institucionales
                   </span>
                   <span className="text-tinta-600">
-                    Asegúrate de registrar tu teléfono de contacto, ciudad, departamento y ubicar el pin de tu sede en el mapa interactivo.
+                    Asegúrate de registrar el nombre de tu organización, teléfono de contacto y ciudad o sede de rescate.
                   </span>
                 </div>
               </div>
@@ -153,10 +211,10 @@ export function VerificationInfoModal({
                 </div>
                 <div className="text-xs space-y-0.5">
                   <span className="font-semibold text-tinta-900 block">
-                    Enviar solicitud formal
+                    Enviar solicitud directa
                   </span>
                   <span className="text-tinta-600">
-                    Escríbenos a <strong className="text-tinta-900">soporte@adopta.pe</strong> enviando comprobantes o enlaces a redes sociales activas donde se evidencia tu labor de rescate.
+                    Presiona el botón de solicitud para que tu perfil aparezca en la bandeja de revisión del equipo de administración.
                   </span>
                 </div>
               </div>
@@ -189,17 +247,32 @@ export function VerificationInfoModal({
             Cerrar
           </Button>
 
-          {!isVerified && (
-            <a
-              href={mailtoLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 h-9 rounded-md bg-verde-700 hover:bg-verde-hover text-white text-xs font-semibold shadow-xs transition-colors"
-            >
-              <Mail className="w-3.5 h-3.5" />
-              <span>Solicitar Acreditación</span>
-              <ExternalLink className="w-3 h-3 ml-0.5 opacity-80" />
-            </a>
+          {!isVerified && isOwner && (
+            pendingReview ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-900 text-xs font-semibold">
+                <Clock className="w-3.5 h-3.5 text-amber-700" />
+                <span>Solicitud en Revisión</span>
+              </span>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleRequestVerification}
+                disabled={isLoading}
+                className="inline-flex items-center gap-1.5 px-4 h-9 rounded-md bg-verde-700 hover:bg-verde-hover text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Enviando solicitud...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Solicitar Verificación Oficial</span>
+                  </>
+                )}
+              </Button>
+            )
           )}
         </div>
       </div>

@@ -36,6 +36,7 @@ export const API_ROUTES = {
     BY_ID: (id: string) => `/shelters/${id}`,
     VERIFY: (id: string) => `/shelters/${id}/verify`,
     ADMIN_VERIFY: (id: string) => `/admin/shelters/${id}/verify`,
+    REQUEST_VERIFICATION: "/shelters/me/request-verification",
   },
   ADOPTIONS: {
     BASE: "/adoptions",
