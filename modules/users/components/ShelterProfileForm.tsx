@@ -14,6 +14,7 @@ import {
   Navigation,
   AlertCircle,
   CheckCircle2,
+  Clock,
 } from "lucide-react";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -336,6 +337,7 @@ export function ShelterProfileForm({
   };
 
   const isVerified = profile?.isVerified ?? false;
+  const [isRequested, setIsRequested] = useState(Boolean(profile?.verificationRequested));
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   return (
@@ -367,6 +369,11 @@ export function ShelterProfileForm({
                           <ShieldCheck className="w-3.5 h-3.5" />
                           Verificado por AdoptaNet
                         </>
+                      ) : isRequested ? (
+                        <>
+                          <Clock className="w-3.5 h-3.5" />
+                          Verificación en revisión ⏳
+                        </>
                       ) : (
                         <>
                           <AlertTriangle className="w-3.5 h-3.5" />
@@ -379,7 +386,9 @@ export function ShelterProfileForm({
                 <TooltipContent className="max-w-xs text-xs p-3">
                   {isVerified
                     ? "Tu albergue cuenta con acreditación oficial de AdoptaNet tras corroborar tu trayectoria y labor."
-                    : "La acreditación es otorgada administrativamente por AdoptaNet tras corroborar tus datos y antecedentes. Haz clic en '¿Cómo verificarse?' para ver los requisitos."}
+                    : isRequested
+                      ? "Tu solicitud está siendo evaluada por el equipo de administración. Recibirás una respuesta por correo."
+                      : "La acreditación es otorgada administrativamente por AdoptaNet tras corroborar tus datos. Haz clic en 'Solicitar Verificación' para iniciar."}
                 </TooltipContent>
               </Tooltip>
 
@@ -388,10 +397,23 @@ export function ShelterProfileForm({
                   type="button"
                   size="sm"
                   onClick={() => setIsInfoModalOpen(true)}
-                  className="text-xs h-8 px-3 gap-1.5 bg-amber-500 hover:bg-amber-600 text-verde-900 font-bold shadow-2xs cursor-pointer border border-amber-600/20"
+                  className={`text-xs h-8 px-3 gap-1.5 font-bold shadow-2xs cursor-pointer border ${
+                    isRequested
+                      ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                      : "bg-amber-500 hover:bg-amber-600 text-verde-900 border-amber-600/20"
+                  }`}
                 >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Solicitar Verificación Oficial</span>
+                  {isRequested ? (
+                    <>
+                      <Clock className="w-3.5 h-3.5 text-amber-700" />
+                      <span>En Revisión ⏳</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>Solicitar Verificación Oficial</span>
+                    </>
+                  )}
                 </Button>
               )}
             </div>
@@ -724,20 +746,35 @@ export function ShelterProfileForm({
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-amber-950 font-heading">
-                    Insignia Oficial de Albergue Verificado
+                    {isRequested ? "Solicitud de Verificación en Revisión ⏳" : "Insignia Oficial de Albergue Verificado"}
                   </h4>
                   <p className="text-xs text-amber-900 mt-0.5 leading-relaxed">
-                    Acredita tu personería y labor de rescate para generar mayor confianza en la comunidad y dar mayor alcance a tus animales.
+                    {isRequested
+                      ? "Tu solicitud está siendo evaluada por el equipo de administración. Recibirás un correo cuando sea dictaminada."
+                      : "Acredita tu personería y labor de rescate para generar mayor confianza en la comunidad y dar mayor alcance a tus animales."}
                   </p>
                 </div>
               </div>
               <Button
                 type="button"
                 onClick={() => setIsInfoModalOpen(true)}
-                className="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-verde-900 shrink-0 cursor-pointer h-9 px-4 gap-1.5 shadow-2xs"
+                className={`text-xs font-bold shrink-0 cursor-pointer h-9 px-4 gap-1.5 shadow-2xs ${
+                  isRequested
+                    ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
+                    : "bg-amber-500 hover:bg-amber-600 text-verde-900"
+                }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Solicitar Verificación</span>
+                {isRequested ? (
+                  <>
+                    <Clock className="w-3.5 h-3.5 text-amber-700" />
+                    <span>Ver Estado</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Solicitar Verificación</span>
+                  </>
+                )}
               </Button>
             </div>
           )}
@@ -788,6 +825,8 @@ export function ShelterProfileForm({
       onClose={() => setIsInfoModalOpen(false)}
       organizationName={formData.organizationName || profile?.organizationName}
       isVerified={isVerified}
+      isRequested={isRequested}
+      onSuccess={() => setIsRequested(true)}
     />
   </>
   );

@@ -115,6 +115,8 @@ export interface AdoptionUserSummary {
   email: string;
   avatarUrl?: string | null;
   phoneNumber?: string | null;
+  organizationName?: string | null;
+  city?: string | null;
 }
 
 export interface AdoptionRequest {
@@ -131,6 +133,7 @@ export interface AdoptionRequest {
   reviewNotes?: string | null;
   pet?: AdoptionPetSummary;
   adopter?: AdoptionUserSummary;
+  shelter?: AdoptionUserSummary;
   approvedAt?: string | null;
   rejectedAt?: string | null;
   createdAt: string;
@@ -183,4 +186,52 @@ export interface AdoptionDossierData {
   veredicto?: string;
   compatibilidad?: number;
   pInteres?: number;
+}
+
+export interface AdopterHistorySummary {
+  totalApplications: number;
+  approvedAdoptions: number;
+  activeApplications: number;
+  rejectedApplications: number;
+  cancelledApplications: number;
+  completedFollowUps: number;
+  inProgressFollowUps: number;
+  certificatesCount: number;
+  totalReturns: number;
+}
+
+export interface AdopterHistoryPreviousPet {
+  adoptionId: string;
+  petId: string;
+  petName: string;
+  species: string;
+  breed: string;
+  photoUrl: string | null;
+  shelterName: string;
+  adoptedAt: string | null;
+  followUpStatus: string | null;
+  certificateCode: string | null;
+}
+
+export interface AdopterHistoryReturn {
+  id: string;
+  petId: string;
+  petName: string;
+  reason: string;
+  reasonLabel: string;
+  explanation: string | null;
+  status: string;
+  createdAt: string;
+  shelterName: string | null;
+}
+
+export interface AdopterHistoryData {
+  adopterId: string;
+  adopterName: string | null;
+  trustLevel: 'first_time' | 'experienced' | 'certified' | 'with_returns';
+  badgeLabel: string;
+  badgeDescription: string;
+  summary: AdopterHistorySummary;
+  previousAdoptions: AdopterHistoryPreviousPet[];
+  returns: AdopterHistoryReturn[];
 }

@@ -189,11 +189,11 @@ export default function PublicShelterPage() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-line shadow-2xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link
-            href="/pets"
+            href={isAdmin ? "/admin" : "/pets"}
             className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-tinta-600 hover:text-verde-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Volver al catálogo</span>
+            <span>{isAdmin ? "Volver al panel admin" : "Volver al catálogo"}</span>
           </Link>
 
           <div className="flex items-center gap-2">
@@ -494,6 +494,7 @@ export default function PublicShelterPage() {
         onClose={() => setIsInfoModalOpen(false)}
         organizationName={shelter.organizationName}
         isVerified={shelter.isVerified}
+        isOwner={isOwner}
       />
     </div>
   );

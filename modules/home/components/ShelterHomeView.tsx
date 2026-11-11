@@ -41,6 +41,13 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
   const profile = user?.shelterProfile;
   const shelterName = profile?.organizationName || user?.fullName || "Albergue";
   const isVerified = Boolean(profile?.isVerified);
+  const [isRequested, setIsRequested] = useState(Boolean(profile?.verificationRequested));
+
+  useEffect(() => {
+    if (profile?.verificationRequested !== undefined) {
+      setIsRequested(Boolean(profile.verificationRequested));
+    }
+  }, [profile?.verificationRequested]);
 
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [totalPets, setTotalPets] = useState<number | null>(null);
@@ -432,19 +439,34 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
               <div className="flex items-center gap-2 text-amber-900">
                 <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0" />
                 <h4 className="font-heading font-bold text-sm">
-                  Insignia Oficial de Verificación
+                  {isRequested ? "Verificación en Revisión ⏳" : "Insignia Oficial de Verificación"}
                 </h4>
               </div>
               <p className="text-xs text-amber-800 leading-relaxed">
-                Los albergues verificados obtienen la insignia verde de confianza en sus animales y mayor visibilidad en el catálogo comunitario.
+                {isRequested
+                  ? "Tu solicitud de verificación oficial ha sido enviada al equipo de administración. Recibirás un correo cuando sea revisada."
+                  : "Los albergues verificados obtienen la insignia verde de confianza en sus animales y mayor visibilidad en el catálogo comunitario."}
               </p>
               <Button
                 type="button"
                 onClick={() => setIsVerificationModalOpen(true)}
-                className="w-full h-9 bg-amber-500 hover:bg-amber-600 text-verde-900 text-xs font-bold gap-1.5 cursor-pointer shadow-2xs"
+                className={`w-full h-9 text-xs font-bold gap-1.5 cursor-pointer shadow-2xs ${
+                  isRequested
+                    ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
+                    : "bg-amber-500 hover:bg-amber-600 text-verde-900"
+                }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>¿Cómo verificarse?</span>
+                {isRequested ? (
+                  <>
+                    <Clock className="w-3.5 h-3.5 text-amber-700" />
+                    <span>Ver estado de solicitud</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Solicitar Verificación Oficial</span>
+                  </>
+                )}
               </Button>
             </Card>
           )}
@@ -457,6 +479,8 @@ export function ShelterHomeView({ user }: ShelterHomeViewProps) {
         onClose={() => setIsVerificationModalOpen(false)}
         organizationName={shelterName}
         isVerified={isVerified}
+        isRequested={isRequested}
+        onSuccess={() => setIsRequested(true)}
       />
     </div>
   );

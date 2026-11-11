@@ -16,12 +16,14 @@ export interface ShelterProfile {
   latitude: number | null;
   longitude: number | null;
   isVerified: boolean;
+  verificationRequested?: boolean;
+  verificationRequestedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export type UpdateShelterProfileDto = Partial<
-  Omit<ShelterProfile, 'id' | 'userId' | 'isVerified' | 'createdAt' | 'updatedAt'>
+  Omit<ShelterProfile, 'id' | 'userId' | 'isVerified' | 'verificationRequested' | 'verificationRequestedAt' | 'createdAt' | 'updatedAt'>
 >;
 
 export interface PublicShelter {

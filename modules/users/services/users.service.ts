@@ -67,6 +67,12 @@ export const usersService = {
     return httpClient.get<PublicShelter>(API_ROUTES.SHELTERS.BY_ID(id));
   },
 
+  async requestShelterVerification(): Promise<ShelterProfile> {
+    return httpClient.post<ShelterProfile>(
+      API_ROUTES.SHELTERS.REQUEST_VERIFICATION,
+    );
+  },
+
   async verifyShelter(
     id: string,
     isVerified: boolean,

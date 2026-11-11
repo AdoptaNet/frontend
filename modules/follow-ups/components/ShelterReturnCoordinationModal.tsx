@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, Calendar, CheckCircle2, XCircle, RotateCcw, AlertTriangle, Loader2, Sparkles, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useModal } from '@/shared/hooks/useModal';
 import { followUpService } from '../services/follow-up.service';
 import {
@@ -11,6 +12,7 @@ import {
   parseReturnExplanationAndPhone,
 } from '../models/follow-up.types';
 import { formatFollowUpErrorMessage } from '../utils/follow-up-error';
+import dayjs, { formatDate } from '@/shared/utils/date';
 
 interface Props {
   isOpen: boolean;
@@ -50,7 +52,7 @@ export function ShelterReturnCoordinationModal({
   const handleCoordinate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!scheduledReturnDate) {
-      setErrorMessage('Por favor selecciona una fecha y hora acordada para la entrega.');
+      setErrorMessage('Por favor selecciona una fecha acordada para la entrega.');
       return;
     }
 
@@ -58,13 +60,15 @@ export function ShelterReturnCoordinationModal({
     setErrorMessage(null);
 
     try {
+      // Send date at midday (12:00) so timezone conversions preserve the exact selected date
+      const isoDate = dayjs(scheduledReturnDate).hour(12).minute(0).second(0).toISOString();
       await followUpService.coordinatePetReturn(petReturn.id, {
-        scheduledReturnDate: new Date(scheduledReturnDate).toISOString(),
+        scheduledReturnDate: isoDate,
         coordinationNotes: coordinationNotes.trim() || undefined,
       });
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMessage(
         formatFollowUpErrorMessage(
           err,
@@ -88,7 +92,7 @@ export function ShelterReturnCoordinationModal({
       });
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMessage(
         formatFollowUpErrorMessage(
           err,
@@ -165,14 +169,17 @@ export function ShelterReturnCoordinationModal({
             })()}
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-                Fecha y Hora Acordada de Recepción en Albergue *
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                <span>Fecha Acordada de Recepción en Albergue *</span>
+                <span className="text-[11px] font-normal text-stone-400 lowercase">
+                  (Día de entrega física)
+                </span>
               </label>
-              <input
-                type="datetime-local"
+              <DatePicker
                 value={scheduledReturnDate}
-                onChange={(e) => setScheduledReturnDate(e.target.value)}
-                className="w-full text-sm rounded-xl border border-stone-300 p-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                onChange={(dateStr) => setScheduledReturnDate(dateStr)}
+                minDate={new Date()}
+                placeholder="Seleccionar fecha acordada de recepción..."
               />
             </div>
 
@@ -227,6 +234,18 @@ export function ShelterReturnCoordinationModal({
                 Al confirmar la recepción física, el estado de <strong className="font-semibold">{petName}</strong> cambiará inmediatamente a <strong>DISPONIBLE</strong> en el catálogo público para que nuevas familias puedan solicitar su adopción.
               </div>
             </div>
+
+            {petReturn.scheduledReturnDate && (
+              <div className="flex items-center gap-2.5 p-3 bg-amber-50/80 border border-amber-200 text-amber-950 rounded-xl text-xs">
+                <Calendar className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  Fecha de entrega coordinada:{" "}
+                  <strong className="capitalize">
+                    {formatDate(petReturn.scheduledReturnDate, "dddd, D [de] MMMM [de] YYYY")}
+                  </strong>
+                </span>
+              </div>
+            )}
 
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-stone-700 block mb-2">

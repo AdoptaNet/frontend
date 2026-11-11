@@ -14,6 +14,7 @@ import {
   Loader2,
   ExternalLink,
   LogOut,
+  Award,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -21,6 +22,7 @@ import { PersonalDataForm } from "./PersonalDataForm";
 import { SecurityForm } from "./SecurityForm";
 import { AdopterProfileForm } from "./AdopterProfileForm";
 import { ShelterProfileForm } from "./ShelterProfileForm";
+import { AdopterHistoryTab } from "./AdopterHistoryTab";
 import { useProfile } from "../hooks/useProfile";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { authService } from "@/modules/auth/services/auth.service";
@@ -46,7 +48,7 @@ export function ProfilePage() {
   const tabParam = searchParams.get("tab");
 
   const [activeTab, setActiveTab] = useState<string>(() => {
-    return tabParam && ["personal", "security", "role-specific"].includes(tabParam)
+    return tabParam && ["personal", "security", "role-specific", "history"].includes(tabParam)
       ? tabParam
       : "personal";
   });
@@ -54,7 +56,7 @@ export function ProfilePage() {
 
   if (tabParam !== prevTabParam) {
     setPrevTabParam(tabParam);
-    if (tabParam && ["personal", "security", "role-specific"].includes(tabParam)) {
+    if (tabParam && ["personal", "security", "role-specific", "history"].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }
@@ -72,6 +74,7 @@ export function ProfilePage() {
   const isPersonalActive = activeTab === "personal";
   const isSecurityActive = activeTab === "security";
   const isRoleActive = activeTab === "role-specific";
+  const isHistoryActive = activeTab === "history";
 
   if (isInitialLoading && !user) {
     return (
@@ -193,24 +196,38 @@ export function ProfilePage() {
               </TabsTrigger>
 
               {role === "adopter" ? (
-                <TabsTrigger
-                  value="role-specific"
-                  className={`flex items-center gap-2 !h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                    isRoleActive
-                      ? "!bg-verde-700 !text-white hover:!bg-verde-hover hover:!text-white shadow-xs"
-                      : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
-                  }`}
-                >
-                  <Sparkles className={`w-4 h-4 ${isRoleActive ? "text-white" : "text-ambar-500"}`} />
-                  <span>Preferencias de adopción</span>
-                  {!user.adopterProfile?.isSurveyCompleted &&
-                    !user.adopterProfile?.housingType && (
-                      <span
-                        className="w-2 h-2 rounded-full bg-ambar-500 shrink-0"
-                        title="Cuestionario pendiente"
-                      />
-                    )}
-                </TabsTrigger>
+                <>
+                  <TabsTrigger
+                    value="role-specific"
+                    className={`flex items-center gap-2 !h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                      isRoleActive
+                        ? "!bg-verde-700 !text-white hover:!bg-verde-hover hover:!text-white shadow-xs"
+                        : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
+                    }`}
+                  >
+                    <Sparkles className={`w-4 h-4 ${isRoleActive ? "text-white" : "text-ambar-500"}`} />
+                    <span>Preferencias de adopción</span>
+                    {!user.adopterProfile?.isSurveyCompleted &&
+                      !user.adopterProfile?.housingType && (
+                        <span
+                          className="w-2 h-2 rounded-full bg-ambar-500 shrink-0"
+                          title="Cuestionario pendiente"
+                        />
+                      )}
+                  </TabsTrigger>
+
+                  <TabsTrigger
+                    value="history"
+                    className={`flex items-center gap-2 !h-10 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                      isHistoryActive
+                        ? "!bg-verde-700 !text-white hover:!bg-verde-hover hover:!text-white shadow-xs"
+                        : "text-tinta-600 hover:text-tinta-900 hover:bg-superficie-2"
+                    }`}
+                  >
+                    <Award className={`w-4 h-4 ${isHistoryActive ? "text-white" : "text-emerald-600"}`} />
+                    <span>Historial y Confiabilidad</span>
+                  </TabsTrigger>
+                </>
               ) : (
                 <TabsTrigger
                   value="role-specific"
@@ -266,6 +283,13 @@ export function ProfilePage() {
             />
           )}
         </TabsContent>
+
+        {/* Tab 4: Historial y Confiabilidad (Adoptante) */}
+        {role === "adopter" && (
+          <TabsContent value="history" className="mt-0 focus-visible:outline-none">
+            <AdopterHistoryTab />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

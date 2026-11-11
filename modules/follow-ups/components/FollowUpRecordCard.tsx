@@ -28,6 +28,7 @@ import {
   getPetReturnReasonLabel,
   parseReturnExplanationAndPhone,
 } from '../models/follow-up.types';
+import { formatDate } from '@/shared/utils/date';
 
 interface Props {
   record: FollowUpRecordItem;
@@ -165,7 +166,7 @@ export function FollowUpRecordCard({
                 {activeReturn.scheduledReturnDate && (
                   <p className="text-xs text-rose-800 font-semibold mt-1 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    <span>Fecha de entrega acordada: <strong>{new Date(activeReturn.scheduledReturnDate).toLocaleString('es-PE')}</strong></span>
+                    <span>Fecha de entrega acordada: <strong className="capitalize">{formatDate(activeReturn.scheduledReturnDate, "dddd, D [de] MMMM [de] YYYY")}</strong></span>
                   </p>
                 )}
               </div>
